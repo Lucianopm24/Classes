@@ -1,997 +1,607 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wobe Classes</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg:        #0d0d0f;
-      --surface:   #131316;
-      --surface2:  #1a1a1e;
-      --border:    #26262c;
-      --border2:   #303038;
-      --text:      #e8e8ec;
-      --muted:     #7a7a8a;
-      --accent:    #3cf09c;
-      --accent-dim:#1a7a4e;
-      --accent-bg: #0d2e1f;
-      --danger:    #f05a5a;
-      --danger-bg: #2a1010;
-      --warn:      #f0b83c;
-      --warn-bg:   #2a1f0a;
-      --radius:    10px;
-      --sidebar-w: 230px;
-      --transition: 200ms cubic-bezier(.4,0,.2,1);
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+
+from jose import jwt
+
+import uuid
+import time
+
+from lib.mongodb import (
+    users,
+    subjects,
+    students,
+    grades,
+    homework,
+    messages,
+    mail_settings
+)
+
+from lib.auth import (
+    hash_password,
+    verify_password,
+    create_token
+)
+
+from lib.auth_user import get_user
+
+from lib.config import (
+    JWT_SECRET,
+    MAIL_DOMAIN,
+    DEFAULT_PASSING_GRADE,
+    APP_NAME
+)
+
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+ALGORITHM = "HS256"
+
+# =========================
+# ROOT
+# =========================
+
+@app.get("/")
+def root():
+
+    return {
+        "app": APP_NAME,
+        "status": "online"
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; overflow-x: hidden; }
-    .mono { font-family: 'IBM Plex Mono', monospace; }
-    .hidden { display: none !important; }
 
-    /* VIEWS */
-    .view { opacity: 0; pointer-events: none; transition: opacity var(--transition); position: absolute; inset: 0; }
-    .view.active { opacity: 1; pointer-events: all; position: relative; }
+@app.get("/api/health")
+def health():
 
-    /* AUTH */
-    .auth-wrap { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
-    .auth-brand { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between; padding: 48px; position: relative; overflow: hidden; }
-    .auth-brand::before { content: ''; position: absolute; width: 340px; height: 340px; border-radius: 50%; background: radial-gradient(circle, rgba(60,240,156,.1) 0%, transparent 70%); bottom: -80px; right: -80px; pointer-events: none; }
-    .brand-logo { display: flex; align-items: center; gap: 10px; }
-    .brand-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .brand-icon svg { width: 18px; height: 18px; }
-    .brand-name { font-size: 18px; font-weight: 700; letter-spacing: -.3px; }
-    .brand-tagline { font-size: 28px; font-weight: 700; line-height: 1.3; letter-spacing: -.5px; }
-    .brand-tagline span { color: var(--accent); }
-    .brand-features { display: flex; flex-direction: column; gap: 14px; }
-    .brand-feature { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
-    .brand-feature::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-    .auth-panel { display: flex; align-items: center; justify-content: center; padding: 48px 32px; }
-    .auth-card { width: 100%; max-width: 380px; }
-    .auth-card h1 { font-size: 24px; font-weight: 700; letter-spacing: -.4px; margin-bottom: 6px; }
-    .auth-card .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
-    .auth-footer { margin-top: 24px; text-align: center; font-size: 13px; color: var(--muted); }
-    .auth-footer a { color: var(--accent); text-decoration: none; font-weight: 600; cursor: pointer; }
-
-    /* FORM */
-    .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
-    .field input, .field select, .field textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px; padding: 10px 13px; outline: none; transition: border-color var(--transition), box-shadow var(--transition); }
-    .field select { cursor: pointer; }
-    .field textarea { resize: vertical; min-height: 80px; }
-    .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
-    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(60,240,156,.09); }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    /* BUTTONS */
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; border-radius: var(--radius); border: none; cursor: pointer; transition: all var(--transition); padding: 9px 16px; letter-spacing: .1px; white-space: nowrap; }
-    .btn:disabled { opacity: .45; cursor: not-allowed; }
-    .btn-primary { background: var(--accent); color: #0d0d0f; }
-    .btn-primary:hover:not(:disabled) { background: #5df5a8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(60,240,156,.22); }
-    .btn-primary-full { width: 100%; margin-top: 6px; padding: 11px 16px; font-size: 14px; }
-    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-    .btn-ghost:hover:not(:disabled) { background: var(--surface2); border-color: var(--border2); }
-    .btn-danger-ghost { background: transparent; color: var(--danger); border: 1px solid transparent; }
-    .btn-danger-ghost:hover:not(:disabled) { background: var(--danger-bg); border-color: var(--danger); }
-
-    /* ALERTS */
-    .alert { border-radius: var(--radius); padding: 11px 14px; font-size: 13px; margin-bottom: 14px; animation: slideIn .2s ease; }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
-    .alert-error   { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(240,90,90,.25); }
-    .alert-success { background: var(--accent-bg); color: var(--accent); border: 1px solid rgba(60,240,156,.25); }
-    .alert-warn    { background: var(--warn-bg);   color: var(--warn);   border: 1px solid rgba(240,184,60,.25); }
-
-    /* SPINNER */
-    .spinner { width: 14px; height: 14px; border: 2px solid rgba(0,0,0,.25); border-top-color: #0d0d0f; border-radius: 50%; animation: spin .65s linear infinite; flex-shrink: 0; }
-    .spinner-light { border-color: rgba(255,255,255,.15); border-top-color: var(--accent); }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* SKELETON */
-    .skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    .sk-line { height: 13px; margin-bottom: 10px; }
-
-    /* TAGS */
-    .tag { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 99px; font-family: 'IBM Plex Mono', monospace; letter-spacing: .2px; display: inline-block; }
-    .tag-green  { background: var(--accent-bg); color: var(--accent);  border: 1px solid var(--accent-dim); }
-    .tag-muted  { background: var(--surface2);  color: var(--muted);   border: 1px solid var(--border); }
-    .tag-warn   { background: var(--warn-bg);   color: var(--warn);    border: 1px solid rgba(240,184,60,.3); }
-    .tag-danger { background: var(--danger-bg); color: var(--danger);  border: 1px solid rgba(240,90,90,.3); }
-
-    /* DASHBOARD */
-    .dash-layout { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; }
-
-    /* SIDEBAR */
-    .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-    .sb-header { padding: 0 18px 20px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
-    .sb-logo { display: flex; align-items: center; gap: 9px; }
-    .sb-logo .brand-name { font-size: 15px; }
-    .sb-section { padding: 0 10px; margin-bottom: 4px; }
-    .sb-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 0 8px; margin-bottom: 3px; margin-top: 10px; display: block; }
-    .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; transition: all var(--transition); user-select: none; }
-    .nav-item svg { flex-shrink: 0; opacity: .7; }
-    .nav-item:hover { background: var(--surface2); color: var(--text); }
-    .nav-item:hover svg { opacity: 1; }
-    .nav-item.active { background: var(--accent-bg); color: var(--accent); }
-    .nav-item.active svg { opacity: 1; }
-    .nav-item.locked { opacity: .3; cursor: not-allowed; pointer-events: none; }
-    .nav-badge { margin-left: auto; background: var(--surface); color: var(--muted); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 99px; font-family: 'IBM Plex Mono', monospace; border: 1px solid var(--border); }
-    .nav-item.active .nav-badge { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-dim); }
-    .sb-footer { margin-top: auto; padding: 14px 10px 0; border-top: 1px solid var(--border); }
-    .user-pill { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 8px; background: var(--surface2); margin-bottom: 8px; }
-    .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-bg); border: 1.5px solid var(--accent-dim); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--accent); flex-shrink: 0; text-transform: uppercase; }
-    .user-info { flex: 1; min-width: 0; }
-    .user-info .uname { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .user-info .urole { font-size: 11px; color: var(--muted); }
-
-    /* MAIN */
-    .main-content { background: var(--bg); display: flex; flex-direction: column; min-height: 100vh; }
-    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10; }
-    .topbar-left { display: flex; align-items: center; gap: 10px; }
-    .topbar-title { font-size: 15px; font-weight: 700; letter-spacing: -.2px; }
-    .topbar-actions { display: flex; gap: 8px; }
-    .page-body { padding: 28px; flex: 1; }
-
-    /* PAGE HEADER */
-    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
-    .page-header-left .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; font-family: 'IBM Plex Mono', monospace; }
-    .page-header-left h2 { font-size: 22px; font-weight: 800; letter-spacing: -.4px; }
-    .page-header-left p { color: var(--muted); font-size: 13px; margin-top: 3px; }
-
-    /* CARDS */
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
-    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
-    .card-title { font-size: 13px; font-weight: 700; }
-    .card-body { padding: 20px; }
-
-    /* STATS */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
-    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; transition: border-color var(--transition); }
-    .stat-card:hover { border-color: var(--border2); }
-    .stat-label { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-    .stat-value { font-size: 28px; font-weight: 800; letter-spacing: -1px; font-family: 'IBM Plex Mono', monospace; }
-    .stat-value.green { color: var(--accent); }
-    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
-
-    /* TABLE */
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--muted); padding: 0 16px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-    tbody td { padding: 13px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tbody tr:last-child td { border-bottom: none; }
-    tbody tr:hover td { background: rgba(255,255,255,.02); }
-    .td-actions { display: flex; gap: 6px; justify-content: flex-end; }
-
-    /* EMPTY */
-    .empty { text-align: center; padding: 48px 20px; color: var(--muted); font-size: 13px; }
-    .empty-icon { font-size: 32px; margin-bottom: 10px; opacity: .4; display: block; }
-
-    /* MODAL */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .15s ease; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 440px; animation: slideUp .18s ease; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border); }
-    .modal-title { font-size: 15px; font-weight: 700; letter-spacing: -.2px; }
-    .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; line-height: 1; padding: 2px 6px; border-radius: 6px; transition: all var(--transition); }
-    .modal-close:hover { background: var(--surface2); color: var(--text); }
-    .modal-body { padding: 20px; }
-    .modal-footer { display: flex; gap: 8px; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid var(--border); }
-
-    /* GRADE */
-    .grade-val { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; }
-    .grade-pass { color: var(--accent); }
-    .grade-fail { color: var(--danger); }
-
-    /* ACCESS DENIED */
-    .access-denied { text-align: center; padding: 64px 20px; }
-    .access-denied .icon { font-size: 36px; margin-bottom: 14px; opacity: .45; display: block; }
-    .access-denied h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
-    .access-denied p { color: var(--muted); font-size: 13px; }
-
-    /* MOBILE OVERLAY */
-    #mob-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 99; }
-    #mob-overlay.open { display: block; }
-
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-      .auth-wrap { grid-template-columns: 1fr; }
-      .auth-brand { display: none; }
-      .auth-panel { padding: 40px 20px; }
-      .dash-layout { grid-template-columns: 1fr; }
-      .sidebar { display: none; position: fixed; inset: 0; z-index: 100; width: 240px; height: 100vh; }
-      .sidebar.open { display: flex; }
-      .page-body { padding: 20px 16px; }
-      .topbar { padding: 14px 16px; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .field-row { grid-template-columns: 1fr; }
-      #mob-menu-btn { display: flex !important; }
+    return {
+        "status": "online"
     }
-  </style>
-</head>
-<body>
 
-<!-- ══ LOGIN ══ -->
-<div id="view-login" class="view">
-  <div class="auth-wrap">
-    <div class="auth-brand">
-      <div class="brand-logo">
-        <div class="brand-icon"><svg viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="1.5" fill="#0d0d0f"/><rect x="10" y="2" width="6" height="6" rx="1.5" fill="#0d0d0f"/><rect x="2" y="10" width="6" height="6" rx="1.5" fill="#0d0d0f"/><rect x="10" y="10" width="6" height="6" rx="1.5" fill="#0d0d0f" opacity=".4"/></svg></div>
-        <span class="brand-name">Wobe Classes</span>
-      </div>
-      <div><p class="brand-tagline">Aprende.<br/><span>Enseña.</span><br/>Crece.</p></div>
-      <div class="brand-features">
-        <div class="brand-feature">Gestión de materias, tareas y calificaciones</div>
-        <div class="brand-feature">Panel de control por roles (admin / estudiante)</div>
-        <div class="brand-feature">Backend propio · FastAPI + MongoDB</div>
-      </div>
-    </div>
-    <div class="auth-panel">
-      <div class="auth-card">
-        <h1>Inicia sesión</h1>
-        <p class="subtitle">Bienvenido de nuevo.</p>
-        <div id="login-alert" class="hidden"></div>
-        <div class="field"><label>Usuario</label><input id="login-username" type="text" placeholder="tu_usuario" autocomplete="username"/></div>
-        <div class="field"><label>Contraseña</label><input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
-        <button class="btn btn-primary btn-primary-full" id="login-btn" onclick="handleLogin()">Entrar</button>
-        <div class="auth-footer">¿No tienes cuenta? <a onclick="showView('register')">Regístrate</a></div>
-      </div>
-    </div>
-  </div>
-</div>
+# =========================
+# AUTH
+# =========================
 
-<!-- ══ REGISTER ══ -->
-<div id="view-register" class="view hidden">
-  <div class="auth-wrap">
-    <div class="auth-brand">
-      <div class="brand-logo">
-        <div class="brand-icon"><svg viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="1.5" fill="#0d0d0f"/><rect x="10" y="2" width="6" height="6" rx="1.5" fill="#0d0d0f"/><rect x="2" y="10" width="6" height="6" rx="1.5" fill="#0d0d0f"/><rect x="10" y="10" width="6" height="6" rx="1.5" fill="#0d0d0f" opacity=".4"/></svg></div>
-        <span class="brand-name">Wobe Classes</span>
-      </div>
-      <div><p class="brand-tagline">Tu plataforma.<br/><span>Tu ritmo.</span></p></div>
-      <div class="brand-features">
-        <div class="brand-feature">Crea tu perfil en menos de un minuto</div>
-        <div class="brand-feature">El usuario "luciano" obtiene rol admin automáticamente</div>
-        <div class="brand-feature">Acceso inmediato al dashboard</div>
-      </div>
-    </div>
-    <div class="auth-panel">
-      <div class="auth-card">
-        <h1>Crea tu cuenta</h1>
-        <p class="subtitle">Sin tarjeta de crédito. Sin configuración.</p>
-        <div id="register-alert" class="hidden"></div>
-        <div class="field"><label>Usuario</label><input id="reg-username" type="text" placeholder="elige_un_nombre" autocomplete="username"/></div>
-        <div class="field"><label>Contraseña</label><input id="reg-password" type="password" placeholder="••••••••" autocomplete="new-password"/></div>
-        <button class="btn btn-primary btn-primary-full" id="register-btn" onclick="handleRegister()">Crear cuenta</button>
-        <div class="auth-footer">¿Ya tienes cuenta? <a onclick="showView('login')">Inicia sesión</a></div>
-      </div>
-    </div>
-  </div>
-</div>
+@app.post("/api/register")
+async def register(request: Request):
 
-<!-- ══ DASHBOARD ══ -->
-<div id="view-dashboard" class="view hidden">
-  <div id="mob-overlay" onclick="closeSidebar()"></div>
-  <div class="dash-layout">
+    data = await request.json()
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sb-header">
-        <div class="sb-logo">
-          <div class="brand-icon" style="width:30px;height:30px"><svg viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="6" height="6" rx="1.5" fill="#0d0d0f"/><rect x="10" y="2" width="6" height="6" rx="1.5" fill="#0d0d0f"/><rect x="2" y="10" width="6" height="6" rx="1.5" fill="#0d0d0f"/><rect x="10" y="10" width="6" height="6" rx="1.5" fill="#0d0d0f" opacity=".4"/></svg></div>
-          <span class="brand-name">Wobe Classes</span>
-        </div>
-      </div>
-      <div class="sb-section">
-        <span class="sb-label">General</span>
-        <div class="nav-item active" id="nav-home" onclick="navTo('home')">
-          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-          Inicio
-        </div>
-        <div class="nav-item" id="nav-subjects" onclick="navTo('subjects')">
-          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-          Materias
-          <span class="nav-badge" id="badge-subjects">—</span>
-        </div>
-        <div class="nav-item" id="nav-homework" onclick="navTo('homework')">
-          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-          Tareas
-          <span class="nav-badge" id="badge-homework">—</span>
-        </div>
-        <div class="nav-item" id="nav-students" onclick="navTo('students')">
-          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          Estudiantes
-          <span class="nav-badge" id="badge-students">—</span>
-        </div>
-        <div class="nav-item" id="nav-grades" onclick="navTo('grades')">
-          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          Calificaciones
-        </div>
-      </div>
-      <div class="sb-footer">
-        <div class="user-pill">
-          <div class="user-avatar" id="sb-avatar">?</div>
-          <div class="user-info">
-            <div class="uname" id="sb-username">…</div>
-            <div class="urole" id="sb-role">…</div>
-          </div>
-        </div>
-        <button class="btn btn-danger-ghost" style="width:100%;font-size:13px" onclick="handleLogout()">
-          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-          Cerrar sesión
-        </button>
-      </div>
-    </aside>
+    username = data.get("username")
+    password = data.get("password")
 
-    <!-- MAIN -->
-    <main class="main-content">
-      <div class="topbar">
-        <div class="topbar-left">
-          <button class="btn btn-ghost" id="mob-menu-btn" onclick="toggleSidebar()" style="display:none;padding:7px">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-          </button>
-          <span class="topbar-title" id="topbar-title">Dashboard</span>
-        </div>
-        <div class="topbar-actions" id="topbar-actions"></div>
-      </div>
+    if not username or not password:
 
-      <div class="page-body">
+        return {
+            "success": False,
+            "error": "Missing fields"
+        }
 
-        <!-- HOME -->
-        <div id="page-home">
-          <div class="page-header">
-            <div class="page-header-left">
-              <div class="eyebrow">— Panel principal</div>
-              <h2>Hola, <span style="color:var(--accent)" id="welcome-name">…</span> 👋</h2>
-              <p id="welcome-sub">Cargando información…</p>
-            </div>
-          </div>
-          <div class="stats-grid" id="home-stats">
-            <div class="stat-card"><div class="skeleton sk-line" style="width:55%;height:10px"></div><div class="skeleton sk-line" style="width:35%;height:26px;margin-top:8px"></div></div>
-            <div class="stat-card"><div class="skeleton sk-line" style="width:55%;height:10px"></div><div class="skeleton sk-line" style="width:35%;height:26px;margin-top:8px"></div></div>
-            <div class="stat-card"><div class="skeleton sk-line" style="width:55%;height:10px"></div><div class="skeleton sk-line" style="width:35%;height:26px;margin-top:8px"></div></div>
-            <div class="stat-card"><div class="skeleton sk-line" style="width:55%;height:10px"></div><div class="skeleton sk-line" style="width:35%;height:26px;margin-top:8px"></div></div>
-          </div>
-          <div id="home-alert" class="hidden"></div>
-        </div>
+    existing = users.find_one({
+        "username": username
+    })
 
-        <!-- SUBJECTS -->
-        <div id="page-subjects" class="hidden">
-          <div class="page-header">
-            <div class="page-header-left">
-              <div class="eyebrow">— Materias</div>
-              <h2>Materias</h2>
-              <p>Todas las materias registradas en el sistema.</p>
-            </div>
-          </div>
-          <div id="subjects-alert" class="hidden"></div>
-          <div class="card">
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Nombre</th><th>Profesor</th><th>Nota mínima</th></tr></thead>
-                <tbody id="subjects-tbody"><tr><td colspan="3"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+    if existing:
 
-        <!-- HOMEWORK -->
-        <div id="page-homework" class="hidden">
-          <div class="page-header">
-            <div class="page-header-left">
-              <div class="eyebrow">— Tareas</div>
-              <h2>Tareas</h2>
-              <p>Todas las tareas asignadas.</p>
-            </div>
-          </div>
-          <div id="homework-alert" class="hidden"></div>
-          <div class="card">
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Título</th><th>Materia</th><th>Vence</th><th>Creado por</th></tr></thead>
-                <tbody id="homework-tbody"><tr><td colspan="4"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        return {
+            "success": False,
+            "error": "Username already exists"
+        }
 
-        <!-- STUDENTS -->
-        <div id="page-students" class="hidden">
-          <div class="page-header">
-            <div class="page-header-left">
-              <div class="eyebrow">— Estudiantes</div>
-              <h2>Estudiantes</h2>
-              <p>Estudiantes inscritos en el sistema.</p>
-            </div>
-          </div>
-          <div id="students-alert" class="hidden"></div>
-          <div class="card" id="students-card">
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Usuario</th><th>Grado</th><th></th></tr></thead>
-                <tbody id="students-tbody"><tr><td colspan="3"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+    role = "student"
 
-        <!-- GRADES -->
-        <div id="page-grades" class="hidden">
-          <div class="page-header">
-            <div class="page-header-left">
-              <div class="eyebrow">— Calificaciones</div>
-              <h2>Calificaciones</h2>
-              <p>Consulta notas por estudiante y materia.</p>
-            </div>
-          </div>
-          <div id="grades-alert" class="hidden"></div>
-          <div class="card" style="margin-bottom:16px">
-            <div class="card-body" style="padding:16px 20px">
-              <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
-                <div class="field" style="margin:0;flex:1;min-width:130px"><label>Estudiante</label><input id="grade-filter-student" type="text" placeholder="username"/></div>
-                <div class="field" style="margin:0;flex:1;min-width:130px"><label>Materia</label><input id="grade-filter-subject" type="text" placeholder="nombre materia"/></div>
-                <button class="btn btn-ghost" onclick="loadGrades()">Consultar</button>
-              </div>
-            </div>
-          </div>
-          <div class="card" id="grades-result" style="display:none">
-            <div class="card-header">
-              <span class="card-title" id="grades-result-title">Resultados</span>
-              <span id="grades-result-avg"></span>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Título</th><th>Puntaje</th><th>Peso</th><th>Ponderado</th></tr></thead>
-                <tbody id="grades-tbody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+    if username.lower() == "luciano":
+        role = "admin"
 
-      </div>
-    </main>
-  </div>
-</div>
-
-<!-- ══ MODAL: Materia ══ -->
-<div id="modal-subject" class="modal-overlay hidden">
-  <div class="modal">
-    <div class="modal-header"><span class="modal-title">Nueva materia</span><button class="modal-close" onclick="closeModal('modal-subject')">×</button></div>
-    <div class="modal-body">
-      <div id="modal-subject-alert" class="hidden"></div>
-      <div class="field"><label>Nombre</label><input id="ms-name" type="text" placeholder="ej. Matemáticas"/></div>
-      <div class="field"><label>Nota mínima para aprobar</label><input id="ms-passing" type="number" value="3.0" step="0.1" min="0" max="10"/></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-subject')">Cancelar</button>
-      <button class="btn btn-primary" id="ms-btn" onclick="createSubject()">Crear materia</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ MODAL: Tarea ══ -->
-<div id="modal-homework" class="modal-overlay hidden">
-  <div class="modal">
-    <div class="modal-header"><span class="modal-title">Nueva tarea</span><button class="modal-close" onclick="closeModal('modal-homework')">×</button></div>
-    <div class="modal-body">
-      <div id="modal-homework-alert" class="hidden"></div>
-      <div class="field"><label>Título</label><input id="mh-title" type="text" placeholder="Título de la tarea"/></div>
-      <div class="field"><label>Descripción</label><textarea id="mh-desc" placeholder="Descripción (opcional)"></textarea></div>
-      <div class="field-row">
-        <div class="field"><label>Materia</label><input id="mh-subject" type="text" placeholder="Nombre de la materia"/></div>
-        <div class="field"><label>Fecha límite</label><input id="mh-due" type="date"/></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-homework')">Cancelar</button>
-      <button class="btn btn-primary" id="mh-btn" onclick="createHomework()">Crear tarea</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ MODAL: Estudiante ══ -->
-<div id="modal-student" class="modal-overlay hidden">
-  <div class="modal">
-    <div class="modal-header"><span class="modal-title">Inscribir estudiante</span><button class="modal-close" onclick="closeModal('modal-student')">×</button></div>
-    <div class="modal-body">
-      <div id="modal-student-alert" class="hidden"></div>
-      <div class="field-row">
-        <div class="field"><label>Username</label><input id="mst-username" type="text" placeholder="usuario"/></div>
-        <div class="field"><label>Grado</label><input id="mst-grade" type="text" placeholder="ej. 10°"/></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-student')">Cancelar</button>
-      <button class="btn btn-primary" id="mst-btn" onclick="enrollStudent()">Inscribir</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ MODAL: Nota ══ -->
-<div id="modal-grade" class="modal-overlay hidden">
-  <div class="modal">
-    <div class="modal-header"><span class="modal-title">Agregar calificación</span><button class="modal-close" onclick="closeModal('modal-grade')">×</button></div>
-    <div class="modal-body">
-      <div id="modal-grade-alert" class="hidden"></div>
-      <div class="field-row">
-        <div class="field"><label>Estudiante</label><input id="mg-student" type="text" placeholder="username"/></div>
-        <div class="field"><label>Materia</label><input id="mg-subject" type="text" placeholder="nombre materia"/></div>
-      </div>
-      <div class="field"><label>Título</label><input id="mg-title" type="text" placeholder="ej. Parcial 1"/></div>
-      <div class="field-row">
-        <div class="field"><label>Puntaje (0–10)</label><input id="mg-score" type="number" step="0.1" min="0" max="10" placeholder="7.5"/></div>
-        <div class="field"><label>Peso (0–1)</label><input id="mg-weight" type="number" step="0.05" min="0" max="1" value="0.25"/></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-grade')">Cancelar</button>
-      <button class="btn btn-primary" id="mg-btn" onclick="addGrade()">Agregar</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ══════════════════════════════════════════════
-//  CONFIG
-// ══════════════════════════════════════════════
-const API_BASE  = 'https://classes-backend.vercel.app';
-const TOKEN_KEY = 'wobe_token';
-const USER_KEY  = 'wobe_user';
-
-// ══════════════════════════════════════════════
-//  UTILS
-// ══════════════════════════════════════════════
-const $         = id => document.getElementById(id);
-const getToken  = ()  => localStorage.getItem(TOKEN_KEY);
-const setToken  = t   => localStorage.setItem(TOKEN_KEY, t);
-const clearToken = () => localStorage.removeItem(TOKEN_KEY);
-const getUser   = ()  => { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch { return null; } };
-const setUser   = u   => localStorage.setItem(USER_KEY, JSON.stringify(u));
-const clearUser = ()  => localStorage.removeItem(USER_KEY);
-const isAdmin   = ()  => getUser()?.role === 'admin';
-
-function authHeaders() {
-  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` };
-}
-
-function showAlert(id, type, msg) {
-  const el = $(id); if (!el) return;
-  el.className = `alert alert-${type}`;
-  el.textContent = msg;
-  el.classList.remove('hidden');
-}
-function hideAlert(id) { $(id)?.classList.add('hidden'); }
-
-function setLoading(id, on, label = '') {
-  const el = $(id); if (!el) return;
-  el.disabled = on;
-  el.innerHTML = on ? `<span class="spinner"></span> Guardando…` : label;
-}
-
-function formatDate(str) {
-  if (!str) return '—';
-  try { return new Date(str).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' }); }
-  catch { return str; }
-}
-
-// ══════════════════════════════════════════════
-//  VIEWS
-// ══════════════════════════════════════════════
-function showView(name) {
-  ['login','register','dashboard'].forEach(v => {
-    const el = $(`view-${v}`);
-    el.classList.add('hidden');
-    el.classList.remove('active');
-  });
-  const target = $(`view-${name}`);
-  target.classList.remove('hidden');
-  requestAnimationFrame(() => target.classList.add('active'));
-  if (name === 'dashboard') initDashboard();
-}
-
-// ══════════════════════════════════════════════
-//  AUTH
-// ══════════════════════════════════════════════
-async function handleLogin() {
-  hideAlert('login-alert');
-  const username = $('login-username').value.trim();
-  const password = $('login-password').value;
-  if (!username || !password) { showAlert('login-alert','error','Completa todos los campos.'); return; }
-  setLoading('login-btn', true, 'Entrar');
-  try {
-    const res  = await fetch(`${API_BASE}/api/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password }) });
-    const data = await res.json();
-    if (!data.success) { showAlert('login-alert','error', data.error || 'Credenciales inválidas.'); return; }
-    setToken(data.token); setUser(data.user);
-    showView('dashboard');
-  } catch { showAlert('login-alert','error','Error de conexión.'); }
-  finally { setLoading('login-btn', false, 'Entrar'); }
-}
-
-async function handleRegister() {
-  hideAlert('register-alert');
-  const username = $('reg-username').value.trim();
-  const password = $('reg-password').value;
-  if (!username || !password) { showAlert('register-alert','error','Completa todos los campos.'); return; }
-  if (password.length < 6)    { showAlert('register-alert','error','Mínimo 6 caracteres.'); return; }
-  setLoading('register-btn', true, 'Crear cuenta');
-  try {
-    const res  = await fetch(`${API_BASE}/api/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password }) });
-    const data = await res.json();
-    if (!data.success) { showAlert('register-alert','error', data.error || 'No se pudo crear la cuenta.'); return; }
-    showAlert('register-alert','success','¡Cuenta creada! Redirigiendo…');
-    $('reg-username').value = ''; $('reg-password').value = '';
-    setTimeout(() => showView('login'), 1400);
-  } catch { showAlert('register-alert','error','Error de conexión.'); }
-  finally { setLoading('register-btn', false, 'Crear cuenta'); }
-}
-
-function handleLogout() { clearToken(); clearUser(); showView('login'); }
-
-// ══════════════════════════════════════════════
-//  DASHBOARD INIT
-// ══════════════════════════════════════════════
-async function initDashboard() {
-  const cached = getUser();
-  if (cached) renderSidebar(cached);
-  try {
-    const res  = await fetch(`${API_BASE}/api/me`, { headers: authHeaders() });
-    const data = await res.json();
-    if (!data.success) { clearToken(); clearUser(); showView('login'); return; }
-    setUser(data.user); renderSidebar(data.user);
-  } catch { /* keep cached */ }
-  navTo('home');
-}
-
-function renderSidebar(user) {
-  const username = user.username || 'Usuario';
-  const role     = user.role || 'student';
-  $('sb-avatar').textContent   = username.charAt(0).toUpperCase();
-  $('sb-username').textContent = username;
-  $('sb-role').textContent     = role === 'admin' ? '⚡ Admin' : 'Estudiante';
-
-  // Lock students section for non-admins
-  const studNav = $('nav-students');
-  if (studNav && role !== 'admin') {
-    studNav.classList.add('locked');
-    studNav.title = 'Solo administradores';
-  }
-}
-
-// ══════════════════════════════════════════════
-//  NAVIGATION
-// ══════════════════════════════════════════════
-const PAGES = ['home','subjects','homework','students','grades'];
-
-function navTo(page) {
-  if (!isAdmin() && page === 'students') return;
-  PAGES.forEach(p => {
-    $(`page-${p}`)?.classList.add('hidden');
-    $(`nav-${p}`)?.classList.remove('active');
-  });
-  $(`page-${page}`)?.classList.remove('hidden');
-  $(`nav-${page}`)?.classList.add('active');
-  const titles = { home:'Dashboard', subjects:'Materias', homework:'Tareas', students:'Estudiantes', grades:'Calificaciones' };
-  $('topbar-title').textContent = titles[page] || page;
-  closeSidebar();
-  if (page === 'home')     loadHome();
-  if (page === 'subjects') loadSubjects();
-  if (page === 'homework') loadHomework();
-  if (page === 'students') loadStudents();
-  if (page === 'grades')   setupGrades();
-}
-
-// ══════════════════════════════════════════════
-//  HOME
-// ══════════════════════════════════════════════
-async function loadHome() {
-  $('topbar-actions').innerHTML = '';
-  hideAlert('home-alert');
-  const user = getUser();
-  if (user) {
-    $('welcome-name').textContent = user.username;
-    $('welcome-sub').textContent  = `Rol: ${user.role} · Sesión activa`;
-  }
-  try {
-    const [subRes, hwRes, stRes] = await Promise.all([
-      fetch(`${API_BASE}/api/classes/subjects`),
-      fetch(`${API_BASE}/api/classes/homework`),
-      fetch(`${API_BASE}/api/classes/students`)
-    ]);
-    const [subs, hws, sts] = await Promise.all([subRes.json(), hwRes.json(), stRes.json()]);
-    $('badge-subjects').textContent = subs.length;
-    $('badge-homework').textContent = hws.length;
-    $('badge-students').textContent = sts.length;
-    $('home-stats').innerHTML = `
-      <div class="stat-card">
-        <div class="stat-label">Materias</div>
-        <div class="stat-value green">${subs.length}</div>
-        <div class="stat-sub">registradas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Tareas</div>
-        <div class="stat-value">${hws.length}</div>
-        <div class="stat-sub">asignadas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Estudiantes</div>
-        <div class="stat-value">${sts.length}</div>
-        <div class="stat-sub">inscritos</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Tu rol</div>
-        <div class="stat-value" style="font-size:16px;color:${isAdmin()?'var(--accent)':'var(--text)'}">${user?.role||'—'}</div>
-        <div class="stat-sub">${isAdmin()?'Acceso completo':'Acceso estándar'}</div>
-      </div>`;
-  } catch {
-    showAlert('home-alert','error','No se pudieron cargar los datos.');
-  }
-}
-
-// ══════════════════════════════════════════════
-//  SUBJECTS
-// ══════════════════════════════════════════════
-let subjectsList = [];
-
-async function loadSubjects() {
-  $('topbar-actions').innerHTML = isAdmin()
-    ? `<button class="btn btn-primary" onclick="openModal('modal-subject')">+ Nueva materia</button>` : '';
-  $('subjects-tbody').innerHTML = `<tr><td colspan="3"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr>`;
-  hideAlert('subjects-alert');
-  try {
-    const res = await fetch(`${API_BASE}/api/classes/subjects`);
-    subjectsList = await res.json();
-    $('badge-subjects').textContent = subjectsList.length;
-    if (!subjectsList.length) {
-      $('subjects-tbody').innerHTML = `<tr><td colspan="3"><div class="empty"><span class="empty-icon">📚</span>No hay materias aún.${isAdmin() ? ' Crea la primera.' : ''}</div></td></tr>`;
-      return;
+    user = {
+        "id": str(uuid.uuid4()),
+        "username": username,
+        "password": hash_password(password),
+        "role": role
     }
-    $('subjects-tbody').innerHTML = subjectsList.map(s => `
-      <tr>
-        <td><strong>${s.name || '—'}</strong></td>
-        <td><span class="tag tag-muted">${s.teacher || '—'}</span></td>
-        <td><span class="mono" style="font-size:13px">${s.passing_grade ?? '—'}</span></td>
-      </tr>`).join('');
-  } catch { showAlert('subjects-alert','error','Error al cargar materias.'); }
-}
 
-async function createSubject() {
-  hideAlert('modal-subject-alert');
-  const name    = $('ms-name').value.trim();
-  const passing = parseFloat($('ms-passing').value);
-  if (!name) { showAlert('modal-subject-alert','error','El nombre es obligatorio.'); return; }
-  setLoading('ms-btn', true, 'Crear materia');
-  try {
-    const res  = await fetch(`${API_BASE}/api/classes/create-subject`, { method:'POST', headers: authHeaders(), body: JSON.stringify({ name, passing_grade: passing }) });
-    const data = await res.json();
-    if (!data.success) { showAlert('modal-subject-alert','error', data.error || 'No se pudo crear.'); return; }
-    closeModal('modal-subject');
-    $('ms-name').value = ''; $('ms-passing').value = '3.0';
-    loadSubjects();
-  } catch { showAlert('modal-subject-alert','error','Error de conexión.'); }
-  finally { setLoading('ms-btn', false, 'Crear materia'); }
-}
+    users.insert_one(user)
 
-// ══════════════════════════════════════════════
-//  HOMEWORK
-// ══════════════════════════════════════════════
-let homeworkList = [];
-
-async function loadHomework() {
-  $('topbar-actions').innerHTML = isAdmin()
-    ? `<button class="btn btn-primary" onclick="openModal('modal-homework')">+ Nueva tarea</button>` : '';
-  $('homework-tbody').innerHTML = `<tr><td colspan="4"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr>`;
-  hideAlert('homework-alert');
-  try {
-    const res = await fetch(`${API_BASE}/api/classes/homework`);
-    homeworkList = await res.json();
-    $('badge-homework').textContent = homeworkList.length;
-    if (!homeworkList.length) {
-      $('homework-tbody').innerHTML = `<tr><td colspan="4"><div class="empty"><span class="empty-icon">📝</span>No hay tareas aún.</div></td></tr>`;
-      return;
+    return {
+        "success": True
     }
-    const now = Date.now();
-    $('homework-tbody').innerHTML = homeworkList.map(h => {
-      const due     = h.due_date ? new Date(h.due_date) : null;
-      const overdue = due && due.getTime() < now;
-      return `<tr>
-        <td>
-          <div style="font-weight:600">${h.title || '—'}</div>
-          ${h.description ? `<div style="color:var(--muted);font-size:12px;margin-top:2px">${h.description}</div>` : ''}
-        </td>
-        <td><span class="tag tag-muted">${h.subject || '—'}</span></td>
-        <td><span class="${overdue ? 'tag tag-danger' : 'mono'}" style="font-size:12px">${formatDate(h.due_date)}</span></td>
-        <td style="color:var(--muted);font-size:12px">${h.created_by || '—'}</td>
-      </tr>`;
-    }).join('');
-  } catch { showAlert('homework-alert','error','Error al cargar tareas.'); }
-}
 
-async function createHomework() {
-  hideAlert('modal-homework-alert');
-  const title   = $('mh-title').value.trim();
-  const desc    = $('mh-desc').value.trim();
-  const subject = $('mh-subject').value.trim();
-  const due     = $('mh-due').value;
-  if (!title || !subject) { showAlert('modal-homework-alert','error','Título y materia son obligatorios.'); return; }
-  setLoading('mh-btn', true, 'Crear tarea');
-  try {
-    const res  = await fetch(`${API_BASE}/api/classes/create-homework`, { method:'POST', headers: authHeaders(), body: JSON.stringify({ title, description: desc, subject, due_date: due || null }) });
-    const data = await res.json();
-    if (!data.success) { showAlert('modal-homework-alert','error', data.error || 'Error al crear.'); return; }
-    closeModal('modal-homework');
-    $('mh-title').value = ''; $('mh-desc').value = ''; $('mh-subject').value = ''; $('mh-due').value = '';
-    loadHomework();
-  } catch { showAlert('modal-homework-alert','error','Error de conexión.'); }
-  finally { setLoading('mh-btn', false, 'Crear tarea'); }
-}
+@app.post("/api/login")
+async def login(request: Request):
 
-// ══════════════════════════════════════════════
-//  STUDENTS
-// ══════════════════════════════════════════════
-let studentsList = [];
+    data = await request.json()
 
-async function loadStudents() {
-  if (!isAdmin()) {
-    $('students-card').innerHTML = `<div class="access-denied"><span class="icon">🔒</span><h3>Acceso restringido</h3><p>Solo los administradores pueden ver esta sección.</p></div>`;
-    $('topbar-actions').innerHTML = '';
-    return;
-  }
-  $('topbar-actions').innerHTML = `<button class="btn btn-primary" onclick="openModal('modal-student')">+ Inscribir estudiante</button>`;
-  $('students-tbody').innerHTML = `<tr><td colspan="3"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr>`;
-  hideAlert('students-alert');
-  try {
-    const res = await fetch(`${API_BASE}/api/classes/students`);
-    studentsList = await res.json();
-    $('badge-students').textContent = studentsList.length;
-    if (!studentsList.length) {
-      $('students-tbody').innerHTML = `<tr><td colspan="3"><div class="empty"><span class="empty-icon">👥</span>No hay estudiantes inscritos.</div></td></tr>`;
-      return;
+    username = data.get("username")
+    password = data.get("password")
+
+    user = users.find_one({
+        "username": username
+    })
+
+    if not user:
+
+        return {
+            "success": False,
+            "error": "Invalid credentials"
+        }
+
+    valid = verify_password(
+        password,
+        user["password"]
+    )
+
+    if not valid:
+
+        return {
+            "success": False,
+            "error": "Invalid credentials"
+        }
+
+    token = create_token(user)
+
+    return {
+        "success": True,
+        "token": token,
+        "user": {
+            "username": user["username"],
+            "role": user["role"]
+        }
     }
-    $('students-tbody').innerHTML = studentsList.map(s => `
-      <tr>
-        <td><strong>${s.username || '—'}</strong></td>
-        <td><span class="tag tag-muted">${s.grade || '—'}</span></td>
-        <td>
-          <div class="td-actions">
-            <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="goToGrades('${s.username}')">Ver notas</button>
-          </div>
-        </td>
-      </tr>`).join('');
-  } catch { showAlert('students-alert','error','Error al cargar estudiantes.'); }
-}
 
-async function enrollStudent() {
-  hideAlert('modal-student-alert');
-  const username = $('mst-username').value.trim();
-  const grade    = $('mst-grade').value.trim();
-  if (!username || !grade) { showAlert('modal-student-alert','error','Todos los campos son obligatorios.'); return; }
-  setLoading('mst-btn', true, 'Inscribir');
-  try {
-    const res  = await fetch(`${API_BASE}/api/classes/enroll-student`, { method:'POST', headers: authHeaders(), body: JSON.stringify({ username, grade }) });
-    const data = await res.json();
-    if (!data.success) { showAlert('modal-student-alert','error', data.error || 'Error.'); return; }
-    closeModal('modal-student');
-    $('mst-username').value = ''; $('mst-grade').value = '';
-    loadStudents();
-  } catch { showAlert('modal-student-alert','error','Error de conexión.'); }
-  finally { setLoading('mst-btn', false, 'Inscribir'); }
-}
+@app.get("/api/me")
+def me(request: Request):
 
-function goToGrades(username) {
-  navTo('grades');
-  setTimeout(() => { $('grade-filter-student').value = username; $('grade-filter-student').focus(); }, 150);
-}
+    auth = request.headers.get("authorization")
 
-// ══════════════════════════════════════════════
-//  GRADES
-// ══════════════════════════════════════════════
-function setupGrades() {
-  $('topbar-actions').innerHTML = isAdmin()
-    ? `<button class="btn btn-primary" onclick="openModal('modal-grade')">+ Agregar nota</button>` : '';
-  $('grades-result').style.display = 'none';
-  hideAlert('grades-alert');
-}
+    if not auth:
 
-async function loadGrades() {
-  const student = $('grade-filter-student').value.trim();
-  const subject = $('grade-filter-subject').value.trim();
-  if (!student || !subject) { showAlert('grades-alert','error','Escribe el estudiante y la materia.'); return; }
-  hideAlert('grades-alert');
-  $('grades-result').style.display = 'none';
-  try {
-    const res  = await fetch(`${API_BASE}/api/classes/grades?student=${encodeURIComponent(student)}&subject=${encodeURIComponent(subject)}`);
-    const data = await res.json();
-    $('grades-result').style.display = 'block';
-    $('grades-result-title').textContent = `${student} · ${subject}`;
-    const avg    = data.average ?? 0;
-    const passed = data.passed;
-    $('grades-result-avg').innerHTML = `
-      <span class="grade-val ${passed?'grade-pass':'grade-fail'}" style="font-size:14px;font-weight:700">Promedio: ${avg.toFixed(2)}</span>
-      <span class="tag ${passed?'tag-green':'tag-danger'}" style="margin-left:8px">${passed?'Aprobado':'Reprobado'}</span>`;
-    if (!data.grades?.length) {
-      $('grades-tbody').innerHTML = `<tr><td colspan="4"><div class="empty"><span class="empty-icon">📊</span>Sin calificaciones registradas.</div></td></tr>`;
-      return;
+        return {
+            "success": False,
+            "error": "Missing token"
+        }
+
+    token = auth.replace("Bearer ", "")
+
+    user = get_user(token)
+
+    if not user:
+
+        return {
+            "success": False,
+            "error": "Invalid token"
+        }
+
+    return {
+        "success": True,
+        "user": user
     }
-    $('grades-tbody').innerHTML = data.grades.map(g => `
-      <tr>
-        <td>${g.title || '—'}</td>
-        <td><span class="grade-val ${g.score >= 3 ? 'grade-pass':'grade-fail'}">${g.score ?? '—'}</span></td>
-        <td><span class="mono" style="font-size:12px">${g.weight ?? '—'}</span></td>
-        <td><span class="mono" style="font-size:12px">${((g.score||0)*(g.weight||0)).toFixed(2)}</span></td>
-      </tr>`).join('');
-  } catch { showAlert('grades-alert','error','Error al consultar calificaciones.'); }
-}
 
-async function addGrade() {
-  hideAlert('modal-grade-alert');
-  const student = $('mg-student').value.trim();
-  const subject = $('mg-subject').value.trim();
-  const title   = $('mg-title').value.trim();
-  const score   = parseFloat($('mg-score').value);
-  const weight  = parseFloat($('mg-weight').value);
-  if (!student || !subject || !title || isNaN(score) || isNaN(weight)) {
-    showAlert('modal-grade-alert','error','Completa todos los campos.'); return;
-  }
-  setLoading('mg-btn', true, 'Agregar');
-  try {
-    const res  = await fetch(`${API_BASE}/api/classes/add-grade`, { method:'POST', headers: authHeaders(), body: JSON.stringify({ student, subject, title, score, weight }) });
-    const data = await res.json();
-    if (!data.success) { showAlert('modal-grade-alert','error', data.error || 'Error.'); return; }
-    closeModal('modal-grade');
-    $('grade-filter-student').value = student;
-    $('grade-filter-subject').value = subject;
-    loadGrades();
-  } catch { showAlert('modal-grade-alert','error','Error de conexión.'); }
-  finally { setLoading('mg-btn', false, 'Agregar'); }
-}
+# =========================
+# SUBJECTS
+# =========================
 
-// ══════════════════════════════════════════════
-//  MODALS
-// ══════════════════════════════════════════════
-function openModal(id) { $(id)?.classList.remove('hidden'); }
-function closeModal(id) { $(id)?.classList.add('hidden'); }
+@app.get("/api/classes/subjects")
+def get_subjects():
 
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.add('hidden'); });
-});
+    result = []
 
-// ══════════════════════════════════════════════
-//  SIDEBAR MOBILE
-// ══════════════════════════════════════════════
-function toggleSidebar() { $('sidebar').classList.toggle('open'); $('mob-overlay').classList.toggle('open'); }
-function closeSidebar()  { $('sidebar').classList.remove('open'); $('mob-overlay').classList.remove('open'); }
+    for subject in subjects.find({}, {"_id": 0}):
 
-function checkMobile() {
-  const btn = $('mob-menu-btn');
-  if (btn) btn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
-}
-window.addEventListener('resize', checkMobile);
-checkMobile();
+        result.append(subject)
 
-// ══════════════════════════════════════════════
-//  KEYBOARD
-// ══════════════════════════════════════════════
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => m.classList.add('hidden'));
-  if (e.key === 'Enter') {
-    const active = document.querySelector('.view.active');
-    if (!active) return;
-    if (active.id === 'view-login')    handleLogin();
-    if (active.id === 'view-register') handleRegister();
-  }
-});
+    return result
 
-// ══════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════
-(function init() {
-  if (getToken()) showView('dashboard');
-  else showView('login');
-})();
-</script>
-</body>
-</html>
+@app.post("/api/classes/create-subject")
+async def create_subject(request: Request):
+
+    auth = request.headers.get("authorization")
+
+    if not auth:
+
+        return {
+            "success": False
+        }
+
+    token = auth.replace("Bearer ", "")
+
+    user = get_user(token)
+
+    if not user:
+
+        return {
+            "success": False
+        }
+
+    data = await request.json()
+
+    subject = {
+        "id": str(uuid.uuid4()),
+        "name": data.get("name"),
+        "teacher": user["username"],
+        "passing_grade": data.get(
+            "passing_grade",
+            DEFAULT_PASSING_GRADE
+        )
+    }
+
+    subjects.insert_one(subject)
+
+    return {
+        "success": True,
+        "subject": subject
+    }
+
+# =========================
+# HOMEWORK
+# =========================
+
+@app.get("/api/classes/homework")
+def get_homework():
+
+    result = []
+
+    for item in homework.find({}, {"_id": 0}):
+
+        result.append(item)
+
+    return result
+
+@app.post("/api/classes/create-homework")
+async def create_homework(request: Request):
+
+    auth = request.headers.get("authorization")
+
+    if not auth:
+
+        return {
+            "success": False
+        }
+
+    token = auth.replace("Bearer ", "")
+
+    user = get_user(token)
+
+    if not user:
+
+        return {
+            "success": False
+        }
+
+    data = await request.json()
+
+    item = {
+        "id": str(uuid.uuid4()),
+        "title": data.get("title"),
+        "description": data.get("description"),
+        "subject": data.get("subject"),
+        "due_date": data.get("due_date"),
+        "created_by": user["username"]
+    }
+
+    homework.insert_one(item)
+
+    return {
+        "success": True,
+        "homework": item
+    }
+
+# =========================
+# STUDENTS
+# =========================
+
+@app.get("/api/classes/students")
+def get_students():
+
+    result = []
+
+    for student in students.find({}, {"_id": 0}):
+
+        result.append(student)
+
+    return result
+
+@app.post("/api/classes/enroll-student")
+async def enroll_student(request: Request):
+
+    data = await request.json()
+
+    student = {
+        "id": str(uuid.uuid4()),
+        "username": data.get("username"),
+        "grade": data.get("grade")
+    }
+
+    students.insert_one(student)
+
+    return {
+        "success": True,
+        "student": student
+    }
+
+# =========================
+# GRADES
+# =========================
+
+@app.post("/api/classes/add-grade")
+async def add_grade(request: Request):
+
+    data = await request.json()
+
+    grade = {
+        "id": str(uuid.uuid4()),
+        "student": data.get("student"),
+        "subject": data.get("subject"),
+        "title": data.get("title"),
+        "score": data.get("score"),
+        "weight": data.get("weight")
+    }
+
+    grades.insert_one(grade)
+
+    return {
+        "success": True,
+        "grade": grade
+    }
+
+@app.get("/api/classes/grades")
+def get_grades(student: str, subject: str):
+
+    result = []
+
+    total = 0
+    weights = 0
+
+    passing_grade = DEFAULT_PASSING_GRADE
+
+    found_subject = subjects.find_one({
+        "name": subject
+    })
+
+    if found_subject:
+
+        passing_grade = found_subject.get(
+            "passing_grade",
+            DEFAULT_PASSING_GRADE
+        )
+
+    for grade in grades.find({
+        "student": student,
+        "subject": subject
+    }, {"_id": 0}):
+
+        result.append(grade)
+
+        total += (
+            grade["score"] *
+            grade["weight"]
+        )
+
+        weights += grade["weight"]
+
+    average = 0
+
+    if weights > 0:
+
+        average = total / weights
+
+    return {
+        "student": student,
+        "subject": subject,
+        "average": round(average, 2),
+        "passed": average >= passing_grade,
+        "grades": result
+    }
+
+# =========================
+# MESSAGES
+# =========================
+
+@app.get("/api/messages/inbox")
+def inbox(request: Request):
+
+    auth = request.headers.get("authorization")
+
+    if not auth:
+
+        return []
+
+    token = auth.replace("Bearer ", "")
+
+    user = get_user(token)
+
+    if not user:
+
+        return []
+
+    result = []
+
+    for message in messages.find({
+        "to": user["username"]
+    }, {"_id": 0}).sort("timestamp", -1):
+
+        result.append(message)
+
+    return result
+
+@app.get("/api/messages/sent")
+def sent(request: Request):
+
+    auth = request.headers.get("authorization")
+
+    if not auth:
+
+        return []
+
+    token = auth.replace("Bearer ", "")
+
+    user = get_user(token)
+
+    if not user:
+
+        return []
+
+    result = []
+
+    for message in messages.find({
+        "from": f'{user["username"]}@{MAIL_DOMAIN}'
+    }, {"_id": 0}).sort("timestamp", -1):
+
+        result.append(message)
+
+    return result
+
+@app.post("/api/messages/send")
+async def send_message(request: Request):
+
+    auth = request.headers.get("authorization")
+
+    if not auth:
+
+        return {
+            "success": False
+        }
+
+    token = auth.replace("Bearer ", "")
+
+    user = get_user(token)
+
+    if not user:
+
+        return {
+            "success": False
+        }
+
+    data = await request.json()
+
+    message = {
+        "id": str(uuid.uuid4()),
+        "from": f'{user["username"]}@{MAIL_DOMAIN}',
+        "to": data.get("to"),
+        "subject": data.get("subject"),
+        "content": data.get("content"),
+        "read": False,
+        "timestamp": int(time.time())
+    }
+
+    messages.insert_one(message)
+
+    return {
+        "success": True,
+        "message": message
+    }
+
+@app.get("/api/messages/read")
+def read_message(request: Request, id: str):
+
+    message = messages.find_one({
+        "id": id
+    }, {"_id": 0})
+
+    if not message:
+
+        return {
+            "success": False
+        }
+
+    messages.update_one({
+        "id": id
+    }, {
+        "$set": {
+            "read": True
+        }
+    })
+
+    message["read"] = True
+
+    return message
+
+@app.post("/api/messages/delete")
+async def delete_message(request: Request):
+
+    data = await request.json()
+
+    messages.delete_one({
+        "id": data.get("id")
+    })
+
+    return {
+        "success": True
+    }
+
+@app.get("/api/messages/settings")
+def get_settings(request: Request):
+
+    auth = request.headers.get("authorization")
+
+    if not auth:
+
+        return {}
+
+    token = auth.replace("Bearer ", "")
+
+    user = get_user(token)
+
+    if not user:
+
+        return {}
+
+    settings = mail_settings.find_one({
+        "username": user["username"]
+    }, {
+        "_id": 0
+    })
+
+    if not settings:
+
+        settings = {
+            "notifications": True,
+            "signature": ""
+        }
+
+    return settings
+
+@app.post("/api/messages/settings")
+async def update_settings(request: Request):
+
+    auth = request.headers.get("authorization")
+
+    if not auth:
+
+        return {
+            "success": False
+        }
+
+    token = auth.replace("Bearer ", "")
+
+    user = get_user(token)
+
+    if not user:
+
+        return {
+            "success": False
+        }
+
+    data = await request.json()
+
+    mail_settings.update_one({
+        "username": user["username"]
+    }, {
+        "$set": {
+            "notifications": data.get(
+                "notifications",
+                True
+            ),
+            "signature": data.get(
+                "signature",
+                ""
+            )
+        }
+    }, upsert=True)
+
+    return {
+        "success": True
+    }

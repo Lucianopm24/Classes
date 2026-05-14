@@ -983,18 +983,19 @@
 
       const data = await res.json();
 
-      if (!res.ok) {
-        showAlert('login-alert', 'error', data.message || data.error || 'Credenciales inválidas.');
+      if (!data.success) {
+        showAlert('login-alert', 'error', data.error || 'Credenciales inválidas.');
         return;
       }
 
-      const token = data.token || data.access_token || data.jwt;
-      if (!token) {
+      if (!data.token) {
         showAlert('login-alert', 'error', 'El servidor no devolvió un token.');
         return;
       }
 
-      setToken(token);
+      setToken(data.token);
+      // Cache basic user info to reduce /api/me calls
+      localStorage.setItem('wobe_user', JSON.stringify(data.user));
       showView('dashboard');
 
     } catch (err) {
@@ -1031,8 +1032,8 @@
 
       const data = await res.json();
 
-      if (!res.ok) {
-        showAlert('register-alert', 'error', data.message || data.error || 'No se pudo crear la cuenta.');
+      if (!data.success) {
+        showAlert('register-alert', 'error', data.error || 'No se pudo crear la cuenta.');
         return;
       }
 
@@ -1052,6 +1053,7 @@
   // ─── LOGOUT ───────────────────────────────────────────
   function handleLogout() {
     clearToken();
+    localStorage.removeItem('wobe_user');
     showView('login');
   }
 
@@ -1061,31 +1063,37 @@
     if (!token) { showView('login'); return; }
 
     hideAlert('dashboard-alert');
-    resetDashboardSkeleton();
+
+    // Instant render from cache while we fetch fresh data
+    const cached = localStorage.getItem('wobe_user');
+    if (cached) {
+      try { renderDashboard(JSON.parse(cached)); } catch (_) {}
+    } else {
+      resetDashboardSkeleton();
+    }
 
     try {
       const res = await fetch(`${API_BASE}/api/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      if (res.status === 401 || res.status === 403) {
+      const data = await res.json();
+
+      if (!data.success) {
+        // Token invalid — kick to login
         clearToken();
+        localStorage.removeItem('wobe_user');
         showView('login');
         return;
       }
 
-      if (!res.ok) {
-        showAlert('dashboard-alert', 'error', 'No se pudo cargar la información del usuario.');
-        renderDashboardError();
-        return;
-      }
-
-      const data = await res.json();
-      renderDashboard(data);
+      // data.user = { username, role }
+      localStorage.setItem('wobe_user', JSON.stringify(data.user));
+      renderDashboard(data.user);
 
     } catch (err) {
       showAlert('dashboard-alert', 'error', 'Error de conexión al obtener datos del usuario.');
-      renderDashboardError();
+      if (!cached) renderDashboardError();
     }
   }
 
@@ -1102,13 +1110,10 @@
       <div class="skeleton skeleton-line" style="width:60%;height:12px"></div>`;
   }
 
-  function renderDashboard(data) {
-    // Normalize common field names
-    const username  = data.username  || data.name  || data.user || 'Usuario';
-    const email     = data.email     || '—';
-    const createdAt = data.created_at || data.createdAt || data.joined || null;
-    const role      = data.role      || data.type  || 'estudiante';
-    const id        = data.id        || data._id   || '—';
+  function renderDashboard(user) {
+    const username = user.username || 'Usuario';
+    const role     = user.role     || 'student';
+    const isAdmin  = role === 'admin';
 
     // Welcome
     $('welcome-name').textContent = username;
@@ -1119,45 +1124,36 @@
     $('sidebar-avatar').textContent = username.charAt(0).toUpperCase();
 
     // Stats
-    const joinDate = createdAt ? new Date(createdAt).toLocaleDateString('es-ES', {month:'short', year:'numeric'}) : '—';
     $('stats-grid').innerHTML = `
       <div class="stat-card">
         <div class="stat-label">Cursos activos</div>
-        <div class="stat-value green">3</div>
-        <div class="stat-delta">↑ 1 este mes</div>
+        <div class="stat-value green">—</div>
+        <div class="stat-delta">Carga tus materias</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Sesiones totales</div>
-        <div class="stat-value">12</div>
-        <div class="stat-delta">Último acceso hoy</div>
+        <div class="stat-label">Tareas pendientes</div>
+        <div class="stat-value">—</div>
+        <div class="stat-delta">Revisa la agenda</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Miembro desde</div>
-        <div class="stat-value" style="font-size:20px">${joinDate}</div>
-        <div class="stat-delta">Cuenta verificada</div>
+        <div class="stat-label">Rol de cuenta</div>
+        <div class="stat-value" style="font-size:18px;color:${isAdmin ? 'var(--accent)' : 'var(--text)'}">${role}</div>
+        <div class="stat-delta">${isAdmin ? 'Acceso completo' : 'Acceso estándar'}</div>
       </div>`;
 
-    // Info rows
+    // Info rows — only what the backend actually gives us
     $('user-info-body').innerHTML = `
-      <div class="info-row">
-        <span class="info-row-label">ID de usuario</span>
-        <span class="info-row-value">${id}</span>
-      </div>
       <div class="info-row">
         <span class="info-row-label">Nombre de usuario</span>
         <span class="info-row-value">${username}</span>
       </div>
       <div class="info-row">
-        <span class="info-row-label">Correo electrónico</span>
-        <span class="info-row-value">${email}</span>
-      </div>
-      <div class="info-row">
         <span class="info-row-label">Rol</span>
-        <span class="tag tag-green">${role}</span>
+        <span class="tag ${isAdmin ? 'tag-green' : 'tag-muted'}">${role}</span>
       </div>
       <div class="info-row">
-        <span class="info-row-label">Fecha de registro</span>
-        <span class="info-row-value">${createdAt ? new Date(createdAt).toLocaleDateString('es-ES') : '—'}</span>
+        <span class="info-row-label">Estado de sesión</span>
+        <span class="tag tag-green">Activa</span>
       </div>`;
   }
 

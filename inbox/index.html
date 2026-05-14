@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Wobe Mail</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@300;400;500;600&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;1,7..72,300;1,7..72,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:        #08090b;
+  --s1:        #0f1014;
+  --s2:        #161820;
+  --s3:        #1e2028;
+  --line:      #252730;
+  --line2:     #2e3040;
+  --text:      #d4d6e0;
+  --muted:     #5a5c6e;
+  --muted2:    #7a7c90;
+  --blue:      #4f8ef7;
+  --blue-dim:  #1a3060;
+  --blue-bg:   #0a1628;
+  --red:       #f75f5f;
+  --red-bg:    #1a0a0a;
+  --green:     #4fd18a;
+  --green-bg:  #0a1a10;
+  --amber:     #f7b94f;
+  --r:         6px;
+  --r-lg:      10px;
+  --mono:      'Martian Mono', monospace;
+  --serif:     'Literata', serif;
+  --sans:      'Outfit', sans-serif;
+  --col-list:  280px;
+  --col-side:  200px;
+  --ease:      cubic-bezier(.4,0,.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+}
+
+.hidden { display: none !important; }
+
+/* ═══════════════════════
+   AUTH
+═══════════════════════ */
+#auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* grid lines background */
+#auth-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(79,142,247,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,142,247,.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.auth-box {
+  background: var(--s1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  width: 100%;
+  max-width: 360px;
+  padding: 32px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 60px rgba(79,142,247,.06);
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.auth-logo-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--blue);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.auth-logo-icon svg { width: 16px; height: 16px; }
+
+.auth-logo-text {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -.3px;
+}
+
+.auth-logo-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.auth-box h2 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -.3px;
+}
+
+.auth-box p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+.field { margin-bottom: 12px; }
+
+.field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  background: var(--s2);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 9px 11px;
+  outline: none;
+  transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
+}
+
+.field input::placeholder,
+.field textarea::placeholder { color: var(--muted); }
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(79,142,247,.1);
+}
+
+.field textarea { resize: vertical; min-height: 120px; }
+.field select { cursor: pointer; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--r);
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 8px 14px;
+  transition: all .15s var(--ease);
+  white-space: nowrap;
+  letter-spacing: .1px;
+}
+
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn-blue {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
+.btn-blue:hover:not(:disabled) {
+  background: #6fa0f9;
+  box-shadow: 0 3px 14px rgba(79,142,247,.3);
+  transform: translateY(-1px);
+}
+
+.btn-full { width: 100%; padding: 10px; font-size: 13px; margin-top: 4px; }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted2);
+  border-color: var(--line);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--s2);
+  color: var(--text);
+  border-color: var(--line2);
+}
+
+.btn-icon {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  padding: 6px;
+  border-radius: var(--r);
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: var(--s3);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--red);
+  border-color: transparent;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--red-bg);
+  border-color: rgba(247,95,95,.2);
+}
+
+.alert {
+  border-radius: var(--r);
+  padding: 9px 12px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  border: 1px solid transparent;
+  animation: aIn .15s ease;
+}
+
+@keyframes aIn { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:none; } }
+
+.alert-error   { background: var(--red-bg);   color: var(--red);   border-color: rgba(247,95,95,.2); }
+.alert-success { background: var(--green-bg); color: var(--green); border-color: rgba(79,209,138,.2); }
+
+.spinner {
+  width: 12px; height: 12px;
+  border: 2px solid rgba(255,255,255,.15);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.auth-switch {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.auth-switch a {
+  color: var(--blue);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ═══════════════════════
+   APP LAYOUT
+═══════════════════════ */
+#app {
+  display: grid;
+  grid-template-columns: var(--col-side) var(--col-list) 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ═══════════════════════
+   SIDEBAR
+═══════════════════════ */
+.sidebar {
+  background: var(--s1);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sb-top {
+  padding: 16px 14px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sb-wordmark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.sb-icon {
+  width: 26px; height: 26px;
+  background: var(--blue);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.sb-icon svg { width: 12px; height: 12px; }
+
+.sb-wordmark-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -.2px;
+}
+
+.sb-wordmark-sub {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .5px;
+}
+
+.compose-btn {
+  width: 100%;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  padding: 8px 12px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .15s var(--ease);
+}
+
+.compose-btn:hover {
+  background: #6fa0f9;
+  box-shadow: 0 2px 12px rgba(79,142,247,.25);
+}
+
+.sb-nav { padding: 10px 8px; flex: 1; }
+
+.sb-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 6px;
+  margin-bottom: 3px;
+  margin-top: 10px;
+  display: block;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--r);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all .14s var(--ease);
+  user-select: none;
+  position: relative;
+}
+
+.nav-item svg { flex-shrink: 0; opacity: .7; }
+
+.nav-item:hover { background: var(--s2); color: var(--text); }
+.nav-item:hover svg { opacity: 1; }
+
+.nav-item.active {
+  background: var(--blue-bg);
+  color: var(--blue);
+  border: 1px solid var(--blue-dim);
+}
+
+.nav-item.active svg { opacity: 1; }
+
+.nav-unread {
+  margin-left: auto;
+  background: var(--blue);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 99px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.sb-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding: 10px 8px;
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--r);
+  background: var(--s2);
+  margin-bottom: 6px;
+}
+
+.user-av {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--blue-bg);
+  border: 1px solid var(--blue-dim);
+  color: var(--blue);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-addr { font-family: var(--mono); font-size: 9px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ═══════════════════════
+   MESSAGE LIST
+═══════════════════════ */
+.msg-list-col {
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.list-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+
+.list-actions { display: flex; gap: 4px; }
+
+.msg-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.msg-list::-webkit-scrollbar { width: 4px; }
+.msg-list::-webkit-scrollbar-track { background: transparent; }
+.msg-list::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 99px; }
+
+.msg-item {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background .12s var(--ease);
+  position: relative;
+}
+
+.msg-item:hover { background: var(--s1); }
+
+.msg-item.active {
+  background: var(--blue-bg);
+  border-left: 2px solid var(--blue);
+}
+
+.msg-item.unread .msg-item-from { color: #fff; font-weight: 600; }
+.msg-item.unread .msg-item-subject { color: var(--text); }
+
+.msg-item-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.msg-item-from {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.msg-item-time {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.msg-item-subject {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.msg-item-preview {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: .6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unread-dot {
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.list-empty {
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.list-empty-icon {
+  font-size: 28px;
+  display: block;
+  margin-bottom: 8px;
+  opacity: .3;
+}
+
+/* ═══════════════════════
+   MESSAGE VIEWER
+═══════════════════════ */
+.msg-view-col {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.view-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.view-topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+
+.view-subject {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.view-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+.view-meta {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.meta-av {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--s3);
+  border: 1px solid var(--line2);
+  color: var(--muted2);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.meta-details { flex: 1; min-width: 0; }
+
+.meta-from {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.meta-addr {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.meta-time {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.view-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 28px 40px;
+}
+
+.view-body::-webkit-scrollbar { width: 4px; }
+.view-body::-webkit-scrollbar-track { background: transparent; }
+.view-body::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 99px; }
+
+/* HTML message render frame */
+.html-frame {
+  width: 100%;
+  border: none;
+  border-radius: var(--r);
+  background: #fff;
+  min-height: 200px;
+}
+
+/* Plain text render */
+.plain-body {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1.75;
+  white-space: pre-wrap;
+  max-width: 640px;
+}
+
+/* Empty view */
+.view-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  gap: 10px;
+}
+
+.view-empty-icon {
+  font-size: 36px;
+  opacity: .2;
+}
+
+.view-empty p {
+  font-size: 13px;
+}
+
+/* ═══════════════════════
+   COMPOSE OVERLAY
+═══════════════════════ */
+#compose-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8,9,11,.7);
+  backdrop-filter: blur(4px);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 20px;
+  animation: fadeIn .15s ease;
+}
+
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.compose-box {
+  background: var(--s1);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-lg);
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  animation: composeIn .18s ease;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+@keyframes composeIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+
+.compose-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.compose-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text);
+}
+
+.compose-body { padding: 16px; flex: 1; overflow-y: auto; }
+
+.compose-field {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.compose-field-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  width: 48px;
+}
+
+.compose-field input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 0;
+}
+
+.compose-field input::placeholder { color: var(--muted); }
+
+.compose-type-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.type-btn {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted2);
+  cursor: pointer;
+  transition: all .12s;
+  letter-spacing: .3px;
+}
+
+.type-btn.active {
+  background: var(--blue-bg);
+  color: var(--blue);
+  border-color: var(--blue-dim);
+}
+
+.compose-content {
+  width: 100%;
+  background: var(--s2);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 12px;
+  outline: none;
+  resize: vertical;
+  min-height: 160px;
+  transition: border-color .15s;
+}
+
+.compose-content:focus { border-color: var(--blue); }
+
+.compose-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.compose-footer-left { display: flex; align-items: center; gap: 8px; }
+
+.sig-preview {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+/* ═══════════════════════
+   SETTINGS PANEL
+═══════════════════════ */
+.settings-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+}
+
+.settings-panel h2 {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -.3px;
+}
+
+.settings-panel .lead {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+.settings-section {
+  background: var(--s1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.settings-section h3 {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.toggle-info p { font-size: 13px; color: var(--text); margin-bottom: 2px; }
+.toggle-info span { font-size: 11px; color: var(--muted); }
+
+.toggle {
+  width: 40px; height: 22px;
+  background: var(--s3);
+  border: 1px solid var(--line2);
+  border-radius: 99px;
+  cursor: pointer;
+  position: relative;
+  transition: all .18s var(--ease);
+  flex-shrink: 0;
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--muted);
+  top: 2px; left: 2px;
+  transition: all .18s var(--ease);
+}
+
+.toggle.on { background: var(--blue); border-color: var(--blue); }
+.toggle.on::after { background: #fff; transform: translateX(18px); }
+
+/* ═══════════════════════
+   TAG / BADGE
+═══════════════════════ */
+.tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 99px;
+  border: 1px solid transparent;
+  display: inline-block;
+  letter-spacing: .2px;
+}
+
+.tag-blue   { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-dim); }
+.tag-muted  { background: var(--s3); color: var(--muted2); border-color: var(--line2); }
+.tag-green  { background: var(--green-bg); color: var(--green); border-color: rgba(79,209,138,.2); }
+
+/* scrollbars */
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--line); border-radius: 99px; }
+
+/* compose alert */
+#compose-alert { margin-bottom: 10px; }
+
+/* loading list */
+.list-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.list-skel {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.skel {
+  background: linear-gradient(90deg, var(--s2) 25%, var(--s3) 50%, var(--s2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 3px;
+}
+
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+@media (max-width: 900px) {
+  #app { grid-template-columns: var(--col-side) 1fr; }
+  .msg-view-col { display: none; }
+  .msg-view-col.open { display: flex; position: fixed; inset: 0; z-index: 200; background: var(--bg); }
+}
+
+@media (max-width: 600px) {
+  #app { grid-template-columns: 1fr; }
+  .sidebar { display: none; position: fixed; inset: 0; z-index: 150; width: 220px; }
+  .sidebar.open { display: flex; }
+  .msg-list-col { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ AUTH ══════ -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">
+        <svg viewBox="0 0 16 16" fill="none">
+          <path d="M2 4l6 5 6-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+          <rect x="1" y="3" width="14" height="10" rx="2" stroke="#fff" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="auth-logo-text">Wobe Mail</div>
+        <div class="auth-logo-sub">classes · messaging</div>
+      </div>
+    </div>
+    <h2>Iniciar sesión</h2>
+    <p>Usa tu cuenta de Wobe Classes.</p>
+    <div id="auth-alert" class="hidden"></div>
+    <div class="field">
+      <label>Usuario</label>
+      <input id="auth-u" type="text" placeholder="tu_usuario" autocomplete="username"/>
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input id="auth-p" type="password" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn btn-blue btn-full" id="auth-btn" onclick="doLogin()">Entrar</button>
+    <div class="auth-switch">
+      ¿No tienes cuenta? Créala en
+      <a href="wobe-classes.html" target="_blank">Wobe Classes</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ APP ══════ -->
+<div id="app" class="hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-top">
+      <div class="sb-wordmark">
+        <div class="sb-icon">
+          <svg viewBox="0 0 16 16" fill="none">
+            <path d="M2 4l6 5 6-5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="1" y="3" width="14" height="10" rx="2" stroke="#fff" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="sb-wordmark-text">Wobe Mail</div>
+          <div class="sb-wordmark-sub">messaging</div>
+        </div>
+      </div>
+      <button class="compose-btn" onclick="openCompose()">
+        <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Redactar
+      </button>
+    </div>
+
+    <nav class="sb-nav">
+      <span class="sb-label">Buzones</span>
+
+      <div class="nav-item active" id="nav-inbox" onclick="switchFolder('inbox')">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+        </svg>
+        Recibidos
+        <span class="nav-unread hidden" id="unread-count">0</span>
+      </div>
+
+      <div class="nav-item" id="nav-sent" onclick="switchFolder('sent')">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+        </svg>
+        Enviados
+      </div>
+
+      <span class="sb-label">Cuenta</span>
+
+      <div class="nav-item" id="nav-settings" onclick="switchFolder('settings')">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Configuración
+      </div>
+
+      <div class="nav-item btn-danger" onclick="doLogout()" style="margin-top:4px">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+          <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Salir
+      </div>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="user-row">
+        <div class="user-av" id="sb-av">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sb-name">…</div>
+          <div class="user-addr" id="sb-addr">…</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MESSAGE LIST -->
+  <div class="msg-list-col">
+    <div class="list-header">
+      <span class="list-title" id="list-title">Recibidos</span>
+      <div class="list-actions">
+        <button class="btn-icon" title="Actualizar" onclick="refreshList()">
+          <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="msg-list" id="msg-list">
+      <div class="list-loading">
+        <div class="list-skel"><div class="skel" style="height:10px;width:50%;margin-bottom:6px"></div><div class="skel" style="height:10px;width:80%"></div></div>
+        <div class="list-skel"><div class="skel" style="height:10px;width:40%;margin-bottom:6px"></div><div class="skel" style="height:10px;width:70%"></div></div>
+        <div class="list-skel"><div class="skel" style="height:10px;width:60%;margin-bottom:6px"></div><div class="skel" style="height:10px;width:55%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGE VIEWER -->
+  <div class="msg-view-col" id="msg-view-col">
+    <div id="view-empty" class="view-empty">
+      <div class="view-empty-icon">✉️</div>
+      <p>Selecciona un mensaje para leerlo</p>
+    </div>
+    <div id="view-content" class="hidden" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
+      <div class="view-topbar">
+        <div class="view-topbar-left">
+          <span class="view-subject" id="view-subject">—</span>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-ghost" id="view-reply-btn" onclick="replyTo()" style="font-size:11px;padding:5px 10px">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+            Responder
+          </button>
+          <button class="btn-icon btn-danger" id="view-del-btn" onclick="deleteMsg()" title="Eliminar">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="view-meta">
+        <div class="meta-av" id="meta-av">?</div>
+        <div class="meta-details">
+          <div class="meta-from" id="meta-from">—</div>
+          <div class="meta-addr" id="meta-addr">—</div>
+        </div>
+        <div class="meta-time" id="meta-time">—</div>
+      </div>
+      <div class="view-body" id="view-body"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS (dentro de msg-view-col cuando está activo) -->
+</div>
+
+<!-- ══════ COMPOSE ══════ -->
+<div id="compose-overlay" class="hidden">
+  <div class="compose-box">
+    <div class="compose-header">
+      <span class="compose-title">Nuevo mensaje</span>
+      <button class="btn-icon" onclick="closeCompose()">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="compose-body">
+      <div id="compose-alert" class="hidden"></div>
+      <div class="compose-field">
+        <span class="compose-field-label">Para</span>
+        <input id="c-to" type="text" placeholder="usuario o usuario@dominio"/>
+      </div>
+      <div class="compose-field">
+        <span class="compose-field-label">Asunto</span>
+        <input id="c-subject" type="text" placeholder="Asunto del mensaje"/>
+      </div>
+      <div class="compose-type-row">
+        <button class="type-btn active" id="type-plain" onclick="setType('plain')">plain</button>
+        <button class="type-btn" id="type-html" onclick="setType('html')">html</button>
+        <button class="type-btn" id="type-template" onclick="setType('template')">template</button>
+      </div>
+      <textarea class="compose-content" id="c-content" placeholder="Escribe tu mensaje…"></textarea>
+      <div id="sig-preview" class="sig-preview hidden"></div>
+    </div>
+    <div class="compose-footer">
+      <div class="compose-footer-left">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted)" id="compose-from-label">de: …</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="closeCompose()">Cancelar</button>
+        <button class="btn btn-blue" id="send-btn" onclick="sendMsg()">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+          Enviar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── CONFIG ─── */
+const API      = 'https://classes-backend.vercel.app';
+const TK       = 'wobe_token';
+const UK       = 'wobe_user';
+const DOMAIN   = 'wobe.app';
+
+/* ─── STATE ─── */
+let currentFolder  = 'inbox';
+let currentMsgId   = null;
+let currentMsgList = [];
+let composeType    = 'plain';
+let userSettings   = { notifications: true, signature: '' };
+let replyTarget    = null;
+
+/* ─── UTILS ─── */
+const $      = id => document.getElementById(id);
+const getT   = ()  => localStorage.getItem(TK);
+const setT   = t   => localStorage.setItem(TK, t);
+const clearT = ()  => localStorage.removeItem(TK);
+const getU   = ()  => { try { return JSON.parse(localStorage.getItem(UK)); } catch { return null; } };
+const setU   = u   => localStorage.setItem(UK, JSON.stringify(u));
+const clearU = ()  => localStorage.removeItem(UK);
+
+function authH() {
+  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getT()}` };
+}
+
+function alert_(id, type, msg) {
+  const el = $(id); if (!el) return;
+  el.className = `alert alert-${type}`;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function hideAlert(id) { $(id)?.classList.add('hidden'); }
+
+function setBusy(id, on, label = '') {
+  const el = $(id); if (!el) return;
+  el.disabled = on;
+  el.innerHTML = on ? `<span class="spinner"></span> Enviando…` : label;
+}
+
+function fmtTime(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts * 1000);
+  const now = new Date();
+  const diff = now - d;
+  if (diff < 86400000 && d.getDate() === now.getDate()) {
+    return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  }
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+}
+
+function fmtTimeFull(ts) {
+  if (!ts) return '—';
+  return new Date(ts * 1000).toLocaleString('es-ES', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function shortAddr(addr) {
+  if (!addr) return '?';
+  return addr.split('@')[0].charAt(0).toUpperCase();
+}
+
+function displayAddr(addr) {
+  if (!addr) return '—';
+  if (addr.includes('@')) return addr;
+  return `${addr}@${DOMAIN}`;
+}
+
+/* ─── AUTH ─── */
+async function doLogin() {
+  hideAlert('auth-alert');
+  const u = $('auth-u').value.trim();
+  const p = $('auth-p').value;
+  if (!u || !p) { alert_('auth-alert', 'error', 'Completa los campos.'); return; }
+  const btn = $('auth-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Entrando…`;
+  try {
+    const r = await fetch(`${API}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, password: p })
+    });
+    const d = await r.json();
+    if (!d.success) { alert_('auth-alert', 'error', d.error || 'Credenciales inválidas.'); return; }
+    setT(d.token);
+    setU(d.user);
+    launchApp(d.user);
+  } catch { alert_('auth-alert', 'error', 'Error de conexión.'); }
+  finally { btn.disabled = false; btn.innerHTML = 'Entrar'; }
+}
+
+function doLogout() {
+  clearT(); clearU();
+  $('app').classList.add('hidden');
+  $('auth-screen').classList.remove('hidden');
+  $('auth-u').value = '';
+  $('auth-p').value = '';
+}
+
+/* ─── APP INIT ─── */
+async function launchApp(user) {
+  $('auth-screen').classList.add('hidden');
+  $('app').classList.remove('hidden');
+
+  const uname = user.username;
+  const addr  = `${uname}@${DOMAIN}`;
+  $('sb-av').textContent   = uname.charAt(0).toUpperCase();
+  $('sb-name').textContent = uname;
+  $('sb-addr').textContent = addr;
+  $('compose-from-label').textContent = `de: ${addr}`;
+
+  await loadSettings();
+  switchFolder('inbox');
+}
+
+/* ─── SETTINGS ─── */
+async function loadSettings() {
+  try {
+    const r = await fetch(`${API}/api/messages/settings`, { headers: authH() });
+    const d = await r.json();
+    userSettings = { notifications: d.notifications ?? true, signature: d.signature ?? '' };
+  } catch {}
+}
+
+async function saveSettings() {
+  try {
+    await fetch(`${API}/api/messages/settings`, {
+      method: 'POST',
+      headers: authH(),
+      body: JSON.stringify(userSettings)
+    });
+    alert_('settings-alert', 'success', 'Configuración guardada.');
+    setTimeout(() => hideAlert('settings-alert'), 2000);
+  } catch { alert_('settings-alert', 'error', 'Error al guardar.'); }
+}
+
+function renderSettings() {
+  $('list-title').textContent = 'Configuración';
+  $('msg-list').innerHTML = '';
+
+  const vc = $('view-content');
+  const ve = $('view-empty');
+  vc.classList.add('hidden');
+  ve.classList.add('hidden');
+
+  // render settings inside view col
+  const vc2 = $('msg-view-col');
+  vc2.innerHTML = `
+    <div class="settings-panel">
+      <h2>Configuración</h2>
+      <p class="lead">Preferencias de tu cuenta de mensajería.</p>
+      <div id="settings-alert" class="hidden" style="margin-bottom:16px"></div>
+
+      <div class="settings-section">
+        <h3>Notificaciones</h3>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <p>Notificaciones activas</p>
+            <span>Recibe avisos de nuevos mensajes</span>
+          </div>
+          <div class="toggle ${userSettings.notifications ? 'on' : ''}" id="notif-toggle" onclick="toggleNotif()"></div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Firma</h3>
+        <div class="field" style="margin-bottom:12px">
+          <label>Firma del correo</label>
+          <textarea id="sig-input" placeholder="ej. — Enviado desde Wobe Classes" style="min-height:80px">${userSettings.signature || ''}</textarea>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Cuenta</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <p style="font-size:13px;color:var(--text);margin-bottom:2px">Dirección de correo</p>
+            <p style="font-family:var(--mono);font-size:11px;color:var(--blue)">${$('sb-addr').textContent}</p>
+          </div>
+          <span class="tag tag-blue">activo</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="switchFolder('inbox')">Cancelar</button>
+        <button class="btn btn-blue" onclick="saveSettings()">Guardar cambios</button>
+      </div>
+    </div>`;
+}
+
+function toggleNotif() {
+  userSettings.notifications = !userSettings.notifications;
+  const t = $('notif-toggle');
+  if (t) t.classList.toggle('on', userSettings.notifications);
+}
+
+/* ─── FOLDER SWITCH ─── */
+function switchFolder(folder) {
+  currentFolder = folder;
+  currentMsgId  = null;
+  ['inbox','sent','settings'].forEach(f => {
+    $(`nav-${f}`)?.classList.remove('active');
+  });
+  $(`nav-${folder}`)?.classList.add('active');
+
+  if (folder === 'settings') {
+    renderSettings();
+    return;
+  }
+
+  // restore viewer
+  $('msg-view-col').innerHTML = `
+    <div id="view-empty" class="view-empty">
+      <div class="view-empty-icon">✉️</div>
+      <p>Selecciona un mensaje para leerlo</p>
+    </div>
+    <div id="view-content" class="hidden" style="display:flex;flex-direction:column;height:100%;overflow:hidden">
+      <div class="view-topbar">
+        <div class="view-topbar-left">
+          <span class="view-subject" id="view-subject">—</span>
+        </div>
+        <div class="view-actions">
+          <button class="btn btn-ghost" id="view-reply-btn" onclick="replyTo()" style="font-size:11px;padding:5px 10px">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+            Responder
+          </button>
+          <button class="btn-icon btn-danger" id="view-del-btn" onclick="deleteMsg()" title="Eliminar">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="view-meta">
+        <div class="meta-av" id="meta-av">?</div>
+        <div class="meta-details">
+          <div class="meta-from" id="meta-from">—</div>
+          <div class="meta-addr" id="meta-addr">—</div>
+        </div>
+        <div class="meta-time" id="meta-time">—</div>
+      </div>
+      <div class="view-body" id="view-body"></div>
+    </div>`;
+
+  const titles = { inbox: 'Recibidos', sent: 'Enviados' };
+  $('list-title').textContent = titles[folder] || folder;
+  loadList();
+}
+
+/* ─── LOAD LIST ─── */
+async function refreshList() { loadList(); }
+
+async function loadList() {
+  $('msg-list').innerHTML = `
+    <div class="list-loading">
+      <div class="list-skel"><div class="skel" style="height:10px;width:55%;margin-bottom:6px"></div><div class="skel" style="height:10px;width:75%"></div></div>
+      <div class="list-skel"><div class="skel" style="height:10px;width:40%;margin-bottom:6px"></div><div class="skel" style="height:10px;width:65%"></div></div>
+      <div class="list-skel"><div class="skel" style="height:10px;width:60%;margin-bottom:6px"></div><div class="skel" style="height:10px;width:50%"></div></div>
+    </div>`;
+
+  try {
+    const url = currentFolder === 'inbox' ? `${API}/api/messages/inbox` : `${API}/api/messages/sent`;
+    const r = await fetch(url, { headers: authH() });
+    currentMsgList = await r.json();
+    renderList();
+    updateUnreadBadge();
+  } catch {
+    $('msg-list').innerHTML = `<div class="list-empty"><span class="list-empty-icon">⚠️</span>Error al cargar mensajes</div>`;
+  }
+}
+
+function renderList() {
+  if (!currentMsgList.length) {
+    $('msg-list').innerHTML = `<div class="list-empty"><span class="list-empty-icon">${currentFolder === 'inbox' ? '📭' : '📤'}</span>${currentFolder === 'inbox' ? 'Sin mensajes recibidos' : 'Sin mensajes enviados'}</div>`;
+    return;
+  }
+
+  $('msg-list').innerHTML = currentMsgList.map(msg => {
+    const isUnread = currentFolder === 'inbox' && !msg.read;
+    const sender   = currentFolder === 'inbox' ? (msg.from || '?') : `Para: ${msg.to || '?'}`;
+    const senderShort = sender.split('@')[0];
+    const preview  = (msg.content || '').substring(0, 60).replace(/<[^>]*>/g, '');
+    return `
+      <div class="msg-item ${isUnread ? 'unread' : ''} ${msg.id === currentMsgId ? 'active' : ''}"
+           id="item-${msg.id}"
+           onclick="openMsg('${msg.id}')">
+        ${isUnread ? '<div class="unread-dot"></div>' : ''}
+        <div class="msg-item-top">
+          <span class="msg-item-from">${senderShort}</span>
+          <span class="msg-item-time">${fmtTime(msg.timestamp)}</span>
+        </div>
+        <div class="msg-item-subject">${msg.subject || '(sin asunto)'}</div>
+        <div class="msg-item-preview">${preview || '—'}</div>
+      </div>`;
+  }).join('');
+}
+
+function updateUnreadBadge() {
+  if (currentFolder !== 'inbox') return;
+  const unread = currentMsgList.filter(m => !m.read).length;
+  const badge  = $('unread-count');
+  if (unread > 0) {
+    badge.textContent = unread;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+/* ─── OPEN MESSAGE ─── */
+async function openMsg(id) {
+  currentMsgId = id;
+
+  // highlight in list
+  document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('active'));
+  $(`item-${id}`)?.classList.add('active');
+
+  // fetch full message
+  try {
+    const r = await fetch(`${API}/api/messages/read?id=${id}`, { headers: authH() });
+    const msg = await r.json();
+    if (!msg || !msg.id) return;
+
+    // update read state in list
+    const idx = currentMsgList.findIndex(m => m.id === id);
+    if (idx >= 0) { currentMsgList[idx].read = true; }
+    $(`item-${id}`)?.classList.remove('unread');
+    $(`item-${id}`)?.querySelector('.unread-dot')?.remove();
+    updateUnreadBadge();
+
+    renderMessage(msg);
+  } catch {}
+}
+
+function renderMessage(msg) {
+  $('view-empty').classList.add('hidden');
+  const vc = $('view-content');
+  vc.classList.remove('hidden');
+  vc.style.display = 'flex';
+
+  const senderFull = displayAddr(msg.from || '');
+  const senderName = (msg.from || '').split('@')[0];
+
+  $('view-subject').textContent = msg.subject || '(sin asunto)';
+  $('meta-av').textContent      = shortAddr(msg.from || '');
+  $('meta-from').textContent    = senderName;
+  $('meta-addr').textContent    = `${currentFolder === 'inbox' ? 'De' : 'Para'}: ${currentFolder === 'inbox' ? senderFull : displayAddr(msg.to || '')}`;
+  $('meta-time').textContent    = fmtTimeFull(msg.timestamp);
+
+  // render content based on what it looks like
+  const body   = $('view-body');
+  const content = msg.content || '';
+  const isHTML  = content.trim().startsWith('<') || content.includes('</');
+
+  if (isHTML) {
+    // render HTML safely in a blob iframe
+    const blob = new Blob([content], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+    body.innerHTML = `<iframe src="${url}" class="html-frame" onload="this.style.height=(this.contentWindow.document.body.scrollHeight+32)+'px'"></iframe>`;
+  } else {
+    body.innerHTML = `<div class="plain-body">${escapeHtml(content)}</div>`;
+  }
+
+  // store for reply
+  replyTarget = msg;
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/\n/g, '<br>');
+}
+
+/* ─── DELETE ─── */
+async function deleteMsg() {
+  if (!currentMsgId) return;
+  try {
+    await fetch(`${API}/api/messages/delete`, {
+      method: 'POST',
+      headers: authH(),
+      body: JSON.stringify({ id: currentMsgId })
+    });
+    currentMsgList = currentMsgList.filter(m => m.id !== currentMsgId);
+    currentMsgId   = null;
+    renderList();
+    updateUnreadBadge();
+
+    // reset viewer
+    $('view-content').classList.add('hidden');
+    $('view-content').style.display = 'none';
+    $('view-empty').classList.remove('hidden');
+  } catch {}
+}
+
+/* ─── COMPOSE ─── */
+function openCompose(prefill = {}) {
+  hideAlert('compose-alert');
+  $('c-to').value      = prefill.to      || '';
+  $('c-subject').value = prefill.subject || '';
+  $('c-content').value = prefill.content || '';
+  setType('plain');
+
+  // show signature preview
+  if (userSettings.signature) {
+    $('sig-preview').textContent = userSettings.signature;
+    $('sig-preview').classList.remove('hidden');
+  } else {
+    $('sig-preview').classList.add('hidden');
+  }
+
+  $('compose-overlay').classList.remove('hidden');
+  setTimeout(() => $('c-to').focus(), 100);
+}
+
+function closeCompose() {
+  $('compose-overlay').classList.add('hidden');
+  replyTarget = null;
+}
+
+function setType(t) {
+  composeType = t;
+  ['plain','html','template'].forEach(x => {
+    $(`type-${x}`)?.classList.toggle('active', x === t);
+  });
+  const placeholders = {
+    plain:    'Escribe tu mensaje en texto plano…',
+    html:     '<p>Escribe HTML aquí...</p>\n<p>Se renderizará en el navegador del destinatario.</p>',
+    template: 'Mensaje de plantilla: usa variables como {nombre}, {materia}, etc.'
+  };
+  $('c-content').placeholder = placeholders[t];
+}
+
+function replyTo() {
+  if (!replyTarget) return;
+  const toAddr   = replyTarget.from || '';
+  const toUser   = toAddr.split('@')[0];
+  const subject  = replyTarget.subject?.startsWith('Re:')
+    ? replyTarget.subject
+    : `Re: ${replyTarget.subject || ''}`;
+  openCompose({ to: toUser, subject });
+}
+
+async function sendMsg() {
+  hideAlert('compose-alert');
+  const to      = $('c-to').value.trim().split('@')[0]; // normalize to username
+  const subject = $('c-subject').value.trim();
+  let   content = $('c-content').value.trim();
+
+  if (!to || !subject || !content) {
+    alert_('compose-alert', 'error', 'Para, asunto y contenido son obligatorios.');
+    return;
+  }
+
+  // append signature for plain text
+  if (composeType === 'plain' && userSettings.signature) {
+    content += `\n\n${userSettings.signature}`;
+  }
+
+  setBusy('send-btn', true, '');
+  try {
+    const r = await fetch(`${API}/api/messages/send`, {
+      method: 'POST',
+      headers: authH(),
+      body: JSON.stringify({ to, subject, content, type: composeType })
+    });
+    const d = await r.json();
+    if (!d.success) { alert_('compose-alert', 'error', d.error || 'Error al enviar.'); return; }
+    closeCompose();
+    if (currentFolder === 'sent') loadList();
+  } catch { alert_('compose-alert', 'error', 'Error de conexión.'); }
+  finally {
+    setBusy('send-btn', false, '');
+    $('send-btn').innerHTML = `
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+      Enviar`;
+  }
+}
+
+/* ─── KEYBOARD ─── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeCompose();
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if (!$('compose-overlay').classList.contains('hidden')) sendMsg();
+  }
+  if (e.key === 'Enter' && document.activeElement?.id === 'auth-p') doLogin();
+});
+
+$('compose-overlay').addEventListener('click', e => {
+  if (e.target === $('compose-overlay')) closeCompose();
+});
+
+/* ─── INIT ─── */
+(function() {
+  const token = getT();
+  const user  = getU();
+  if (token && user) launchApp(user);
+  else {
+    $('auth-screen').classList.remove('hidden');
+  }
+})();
+</script>
+</body>
+</html>

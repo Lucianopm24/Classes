@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia | Control de Asistencia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color: #1e293b; }
+        .attendance-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .attendance-btn:active { transform: scale(0.9); }
+        .status-present.active { background-color: #10b981; color: white; border-color: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .status-late.active { background-color: #f59e0b; color: white; border-color: #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); }
+        .status-absent.active { background-color: #ef4444; color: white; border-color: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+        
+        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+
+    <nav class="glass-nav sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl">
+                    <i class="fas fa-calendar-check text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold leading-none">Asistencia<span class="text-indigo-600">Pro</span></h1>
+                    <p class="text-[10px] uppercase tracking-tighter text-slate-400 font-bold">Gestión de Presentismo</p>
+                </div>
+            </div>
+            <div id="user-display" class="hidden md:flex items-center gap-3">
+                <div class="text-right">
+                    <p id="nav-username" class="text-sm font-bold text-slate-700"></p>
+                    <p id="nav-role" class="text-[9px] uppercase font-black text-indigo-500 tracking-widest"></p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center font-bold text-slate-500" id="user-avatar">?</div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto p-6 space-y-8">
+        
+        <!-- Filtros de Selección -->
+        <header class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-6 rounded-[2.5rem] card-shadow border border-slate-100">
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Asignatura</label>
+                <select id="subject-select" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-semibold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    <option value="">Cargando materias...</option>
+                </select>
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Fecha de Clase</label>
+                <input type="date" id="attendance-date" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-semibold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+            </div>
+            <div class="flex items-end">
+                <button onclick="loadAttendanceSession()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
+                    <i class="fas fa-search-plus text-xs"></i>
+                    <span>Iniciar Registro</span>
+                </button>
+            </div>
+        </header>
+
+        <section id="attendance-area" class="hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-black text-slate-800">Lista de <span class="text-indigo-600">Estudiantes</span></h2>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold uppercase tracking-wider">Modo Edición</span>
+                </div>
+            </div>
+
+            <div id="student-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Se llenará dinámicamente -->
+            </div>
+
+            <div class="pt-8 flex justify-center">
+                <button onclick="saveBatchAttendance()" id="btn-save" class="px-10 py-5 bg-indigo-600 text-white rounded-3xl font-black text-lg hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200 active:scale-95 flex items-center gap-3">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Guardar Asistencia Completa
+                </button>
+            </div>
+        </section>
+
+        <!-- Empty State -->
+        <section id="empty-state" class="py-20 text-center">
+            <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                <i class="fas fa-clipboard-user text-4xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800">Configura la sesión</h3>
+            <p class="text-slate-400 mt-2 max-w-xs mx-auto">Selecciona una materia y fecha para cargar la lista de alumnos inscritos.</p>
+        </section>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] translate-y-32 opacity-0 transition-all duration-500">
+        <div id="toast-body" class="bg-slate-900 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 border border-white/10">
+            <p id="toast-msg" class="text-sm font-bold tracking-tight"></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "https://classes-backend.vercel.app";
+        let state = {
+            token: localStorage.getItem('gm_token'),
+            students: [],
+            subjects: [],
+            records: {}, // studentUsername: status
+            selectedDate: "",
+            selectedSubject: ""
+        };
+
+        async function init() {
+            // Establecer fecha de hoy por defecto
+            document.getElementById('attendance-date').valueAsDate = new Date();
+            
+            if (!state.token) {
+                notify("Sesión no válida. Redirigiendo...", true);
+                return;
+            }
+
+            await fetchUser();
+            await fetchBaseData();
+        }
+
+        async function fetchUser() {
+            try {
+                const res = await fetch(`${API_BASE}/api/me`, {
+                    headers: { 'Authorization': `Bearer ${state.token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('user-display').classList.remove('hidden');
+                    document.getElementById('nav-username').innerText = data.user.username;
+                    document.getElementById('nav-role').innerText = data.user.role;
+                    document.getElementById('user-avatar').innerText = data.user.username[0].toUpperCase();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function fetchBaseData() {
+            try {
+                const [studentsRes, subjectsRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/classes/students`),
+                    fetch(`${API_BASE}/api/classes/subjects`)
+                ]);
+                
+                state.students = await studentsRes.json();
+                state.subjects = await subjectsRes.json();
+
+                const subSelect = document.getElementById('subject-select');
+                subSelect.innerHTML = '<option value="">Selecciona materia...</option>';
+                state.subjects.forEach(s => {
+                    subSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+                });
+
+            } catch (e) {
+                notify("Error al conectar con el servidor", true);
+            }
+        }
+
+        function loadAttendanceSession() {
+            const sub = document.getElementById('subject-select').value;
+            const date = document.getElementById('attendance-date').value;
+
+            if (!sub || !date) {
+                return notify("Selecciona materia y fecha", true);
+            }
+
+            state.selectedSubject = sub;
+            state.selectedDate = date;
+            state.records = {}; // Reset records for new session
+
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('attendance-area').classList.remove('hidden');
+            
+            renderStudents();
+        }
+
+        function renderStudents() {
+            const container = document.getElementById('student-list');
+            container.innerHTML = "";
+
+            state.students.forEach(student => {
+                // Por defecto, todos están presentes (valor inicial sugerido)
+                if (!state.records[student.username]) {
+                    state.records[student.username] = 'present';
+                }
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-3xl border border-slate-100 card-shadow flex flex-col justify-between";
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold">
+                            ${student.username[0].toUpperCase()}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 leading-tight">${student.username}</h4>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Estudiante Activo</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="setStatus('${student.username}', 'present')" id="btn-${student.username}-present" class="attendance-btn flex-1 py-3 rounded-xl border-2 border-slate-50 bg-slate-50 text-slate-400 font-bold text-xs status-present ${state.records[student.username] === 'present' ? 'active' : ''}">
+                            Asiste
+                        </button>
+                        <button onclick="setStatus('${student.username}', 'late')" id="btn-${student.username}-late" class="attendance-btn flex-1 py-3 rounded-xl border-2 border-slate-50 bg-slate-50 text-slate-400 font-bold text-xs status-late ${state.records[student.username] === 'late' ? 'active' : ''}">
+                            Tarde
+                        </button>
+                        <button onclick="setStatus('${student.username}', 'absent')" id="btn-${student.username}-absent" class="attendance-btn flex-1 py-3 rounded-xl border-2 border-slate-50 bg-slate-50 text-slate-400 font-bold text-xs status-absent ${state.records[student.username] === 'absent' ? 'active' : ''}">
+                            Falla
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setStatus(username, status) {
+            state.records[username] = status;
+            
+            // Actualizar UI del card específico
+            const buttons = ['present', 'late', 'absent'];
+            buttons.forEach(b => {
+                const btn = document.getElementById(`btn-${username}-${b}`);
+                if (b === status) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        async function saveBatchAttendance() {
+            const btn = document.getElementById('btn-save');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Guardando...';
+
+            try {
+                const promises = Object.entries(state.records).map(([student, status]) => {
+                    return fetch(`${API_BASE}/api/classes/attendance`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${state.token}`
+                        },
+                        body: JSON.stringify({
+                            student: student,
+                            subject: state.selectedSubject,
+                            date: state.selectedDate,
+                            status: status
+                        })
+                    });
+                });
+
+                await Promise.all(promises);
+                notify("Asistencia guardada exitosamente");
+                
+                // Efecto visual de éxito
+                btn.className = "px-10 py-5 bg-emerald-500 text-white rounded-3xl font-black text-lg shadow-2xl flex items-center gap-3";
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> ¡Datos Registrados!';
+                
+                setTimeout(() => {
+                    btn.className = "px-10 py-5 bg-indigo-600 text-white rounded-3xl font-black text-lg hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200 active:scale-95 flex items-center gap-3";
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+
+            } catch (e) {
+                notify("Error al guardar registros", true);
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function notify(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const body = document.getElementById('toast-body');
+            document.getElementById('toast-msg').innerText = msg;
+            
+            body.className = isError 
+                ? "bg-red-600 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 border border-white/10" 
+                : "bg-slate-900 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3 border border-white/10";
+            
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-32', 'opacity-0'), 3500);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

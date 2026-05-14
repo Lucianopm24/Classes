@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia | Observador Disciplinario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fdfdfd; color: #1a1a1a; }
+        .report-card { border-left-width: 6px; transition: transform 0.2s; }
+        .report-card:hover { transform: translateX(5px); }
+        .severity-merit { border-left-color: #eab308; background: #fefce8; }
+        .severity-low { border-left-color: #3b82f6; background: #eff6ff; }
+        .severity-medium { border-left-color: #f97316; background: #fff7ed; }
+        .severity-high { border-left-color: #ef4444; background: #fef2f2; }
+        .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <nav class="glass-header sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-slate-900 text-white p-2 rounded-xl">
+                    <i class="fas fa-shield-halved text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold leading-none">Observador<span class="text-indigo-600">Pro</span></h1>
+                    <p class="text-[10px] uppercase tracking-tighter text-slate-400 font-bold">Control Disciplinario</p>
+                </div>
+            </div>
+            <div id="user-info" class="text-right">
+                <!-- Loaded via JS -->
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <div id="unauthorized-message" class="hidden col-span-12 py-20 text-center bg-white rounded-3xl border border-slate-200 shadow-sm">
+            <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800">Sesión no detectada</h2>
+            <p class="text-slate-500 mt-2 mb-8">Debes iniciar sesión en el portal principal para acceder al Observador.</p>
+            <a href="index.html" class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-black transition-all shadow-lg">
+                Ir al Inicio de Sesión
+            </a>
+        </div>
+
+        <aside id="sidebar-content" class="lg:col-span-4 space-y-6">
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tipo de Registro</label>
+                        <select id="rep-type" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold">
+                            <option value="disciplina">Disciplina / Comportamiento</option>
+                            <option value="academico">Rendimiento Académico</option>
+                            <option value="convivencia">Convivencia Escolar</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Gravedad / Nivel</label>
+                        <select id="rep-severity" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold">
+                            <option value="merit">⭐ Mérito / Elogio</option>
+                            <option value="low">🔹 Falta Leve</option>
+                            <option value="medium">🔸 Falta Grave</option>
+                            <option value="high">🚨 Rectoría / Expulsión</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Descripción de los hechos</label>
+                        <textarea id="rep-desc" rows="4" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Detalla lo sucedido..."></textarea>
+                    </div>
+                    <button onclick="createReport()" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-black transition-all shadow-lg active:scale-95">
+                        Registrar en Hoja de Vida
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <section class="lg:col-span-8 space-y-6">
+            <div class="flex justify-between items-end">
+                <h2 class="text-2xl font-black text-slate-800">Historial de <span id="display-name" class="text-indigo-600">Usuario</span></h2>
+                <span id="report-count" class="px-3 py-1 bg-slate-200 text-slate-600 rounded-full text-xs font-bold">0 Registros</span>
+            </div>
+
+            <div id="reports-timeline" class="space-y-4">
+                <div class="p-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                    <i class="fas fa-folder-open text-4xl text-slate-200 mb-4"></i>
+                    <p class="text-slate-400 font-medium italic">Selecciona un estudiante para cargar sus antecedentes.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 translate-y-24 opacity-0 transition-all duration-300 z-[100]">
+        <div id="toast-body" class="bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
+            <p id="toast-msg" class="text-sm font-bold"></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "https://classes-backend.vercel.app";
+        let state = {
+            token: localStorage.getItem('gm_token'),
+            currentUser: null,
+            selectedStudent: ""
+        };
+
+        async function init() {
+            // Verificamos si el token existe y no es una cadena vacía/null
+            if (!state.token || state.token === "null" || state.token === "") {
+                showUnauthorized();
+                return;
+            }
+            
+            try {
+                await fetchMe();
+                await fetchStudents();
+            } catch (err) {
+                console.error("Error durante la carga inicial:", err);
+                // Si falla el fetchMe (token inválido), mostramos el bloqueo
+                showUnauthorized();
+            }
+        }
+
+        function showUnauthorized() {
+            // Ocultamos el contenido principal y mostramos el mensaje de error
+            // Esto es mucho más seguro que window.location.href = ""
+            document.querySelector('main').classList.remove('grid');
+            document.getElementById('sidebar-content').classList.add('hidden');
+            document.querySelector('section.lg\\:col-span-8').classList.add('hidden');
+            document.getElementById('unauthorized-message').classList.remove('hidden');
+        }
+
+        async function fetchMe() {
+            const res = await fetch(`${API_BASE}/api/me`, {
+                headers: { 'Authorization': `Bearer ${state.token}` }
+            });
+            
+            if (!res.ok) throw new Error("Token expirado o inválido");
+            
+            const data = await res.json();
+            if (data.success) {
+                state.currentUser = data.user;
+                document.getElementById('user-info').innerHTML = `
+                    <p class="text-sm font-black text-slate-800">${data.user.username}</p>
+                    <p class="text-[10px] font-bold text-indigo-500 uppercase">${data.user.role}</p>
+                `;
+            }
+        }
+
+        async function fetchStudents() {
+            const res = await fetch(`${API_BASE}/api/classes/students`);
+            const students = await res.json();
+            const select = document.getElementById('student-select');
+            students.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.username;
+                opt.textContent = s.username;
+                select.appendChild(opt);
+            });
+        }
+
+        // --- Actions ---
+        async function loadStudentReport() {
+            const student = document.getElementById('student-select').value;
+            if (!student) return;
+
+            state.selectedStudent = student;
+            document.getElementById('display-name').innerText = student;
+            document.getElementById('form-container').classList.remove('hidden');
+
+            const res = await fetch(`${API_BASE}/api/classes/reports?student=${student}`);
+            const reports = await res.json();
+            renderReports(reports);
+        }
+
+        function renderReports(reports) {
+            const container = document.getElementById('reports-timeline');
+            document.getElementById('report-count').innerText = `${reports.length} Registros`;
+            
+            if (reports.length === 0) {
+                container.innerHTML = `<div class="p-10 text-center bg-white rounded-3xl border border-slate-100 text-slate-400 italic">Este alumno no tiene anotaciones registradas.</div>`;
+                return;
+            }
+
+            const severityLabels = {
+                merit: "Elogio/Mérito",
+                low: "Llamado de Atención",
+                medium: "Falta Grave",
+                high: "Rectoría / Sanción"
+            };
+
+            container.innerHTML = reports.map(r => `
+                <div class="report-card severity-${r.severity} p-6 rounded-2xl shadow-sm relative group">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">${severityLabels[r.severity]}</span>
+                            <h4 class="font-bold text-slate-800">${r.type.toUpperCase()}</h4>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-slate-400">${r.date}</span>
+                            <button onclick="deleteReport('${r.id}')" class="block text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity text-xs mt-1">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-600 leading-relaxed bg-white/50 p-3 rounded-xl border border-black/5">${r.description}</p>
+                    <div class="mt-4 pt-3 border-t border-black/5 flex items-center gap-2">
+                        <div class="w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center text-[8px]"><i class="fas fa-user-tie"></i></div>
+                        <span class="text-[10px] font-bold text-slate-500">Oficial de Caso: ${r.officer}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function createReport() {
+            const desc = document.getElementById('rep-desc').value;
+            if (!desc) return notify("Escribe una descripción", true);
+
+            const payload = {
+                student: state.selectedStudent,
+                type: document.getElementById('rep-type').value,
+                severity: document.getElementById('rep-severity').value,
+                description: desc,
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/api/classes/reports`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    notify("Anotación registrada correctamente");
+                    document.getElementById('rep-desc').value = "";
+                    loadStudentReport();
+                }
+            } catch (e) { notify("Error al registrar", true); }
+        }
+
+        async function deleteReport(id) {
+            if (!confirm("¿Seguro que deseas eliminar esta anotación?")) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/classes/delete-report`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    notify("Registro eliminado");
+                    loadStudentReport();
+                }
+            } catch (e) { notify("Error al borrar", true); }
+        }
+
+        function notify(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const body = document.getElementById('toast-body');
+            document.getElementById('toast-msg').innerText = msg;
+            body.className = isError ? "bg-red-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3" : "bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3";
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3000);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wobe Feed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --ink:       #0f0e0c;
+      --paper:     #f5f2ed;
+      --paper2:    #ede9e2;
+      --paper3:    #e4dfd7;
+      --muted:     #8a8278;
+      --accent:    #c8522a;
+      --accent-bg: #fdf0eb;
+      --blue:      #2a5fc8;
+      --blue-bg:   #ebf0fd;
+      --green:     #2a8c5f;
+      --green-bg:  #ebfdf4;
+      --border:    #d8d2c8;
+      --radius:    8px;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans:  'DM Sans', sans-serif;
+      --font-mono:  'DM Mono', monospace;
+      --ease:       cubic-bezier(.4,0,.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── VIEWS ── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── AUTH ── */
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--paper);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-page::before {
+      content: 'WOBE';
+      position: absolute;
+      font-family: var(--font-serif);
+      font-size: clamp(120px, 25vw, 280px);
+      font-weight: 400;
+      color: var(--paper2);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      letter-spacing: -.02em;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .auth-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 32px rgba(0,0,0,.06);
+    }
+
+    .auth-wordmark {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .auth-wordmark-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .auth-wordmark span {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      letter-spacing: -.02em;
+    }
+
+    .auth-box h1 {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: -.02em;
+      margin-bottom: 6px;
+    }
+
+    .auth-box .sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    /* FORM */
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .field input, .field textarea, .field select {
+      width: 100%;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      padding: 10px 13px;
+      outline: none;
+      transition: border-color .15s var(--ease), box-shadow .15s var(--ease);
+    }
+    .field textarea { resize: vertical; min-height: 90px; }
+    .field input::placeholder, .field textarea::placeholder { color: var(--muted); }
+    .field input:focus, .field textarea:focus, .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(200,82,42,.1);
+      background: #fff;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      font-family: var(--font-sans); font-size: 13px; font-weight: 600;
+      border-radius: var(--radius); border: none; cursor: pointer;
+      padding: 9px 18px; transition: all .15s var(--ease); white-space: nowrap;
+    }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn-primary { background: var(--ink); color: var(--paper); width: 100%; padding: 11px; font-size: 14px; margin-top: 4px; }
+    .btn-primary:hover:not(:disabled) { background: #2a2720; }
+    .btn-sm { padding: 6px 14px; font-size: 12px; }
+    .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+    .btn-ghost:hover:not(:disabled) { background: var(--paper2); }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-accent:hover:not(:disabled) { background: #b04420; }
+    .btn-danger { background: transparent; color: #c0392b; border: 1px solid rgba(192,57,43,.25); }
+    .btn-danger:hover:not(:disabled) { background: #fdf0ef; }
+
+    .auth-switch { margin-top: 20px; text-align: center; font-size: 13px; color: var(--muted); }
+    .auth-switch a { color: var(--accent); text-decoration: none; font-weight: 600; cursor: pointer; }
+
+    /* ALERTS */
+    .alert { border-radius: var(--radius); padding: 10px 14px; font-size: 13px; margin-bottom: 14px; }
+    .alert-error   { background: #fdf0ef; color: #c0392b; border: 1px solid rgba(192,57,43,.2); }
+    .alert-success { background: var(--green-bg); color: var(--green); border: 1px solid rgba(42,140,95,.2); }
+
+    /* SPINNER */
+    .spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
+    .spinner-dark { border-color: rgba(0,0,0,.15); border-top-color: var(--ink); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── APP LAYOUT ── */
+    .app-header {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .app-header-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 20px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .wordmark {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-serif);
+      font-size: 20px;
+      letter-spacing: -.02em;
+    }
+
+    .wordmark-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .user-chip .avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--accent-bg);
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .btn-logout {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: var(--font-sans);
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all .15s;
+    }
+    .btn-logout:hover { background: var(--paper2); color: var(--ink); }
+
+    /* ── TABS ── */
+    .tabs {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      gap: 2px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .tab {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab:hover { color: var(--ink); }
+
+    .tab.active {
+      color: var(--ink);
+      border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .tab-count {
+      background: var(--paper2);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 99px;
+      font-family: var(--font-mono);
+    }
+
+    .tab.active .tab-count {
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 28px 20px 80px;
+    }
+
+    /* CREATE BUTTON (FAB) */
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 40;
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      border-radius: 50px;
+      padding: 13px 22px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
+      transition: all .2s var(--ease);
+    }
+    .fab:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.25); background: #2a2720; }
+    .fab.hidden-fab { display: none; }
+
+    /* ── POSTS ── */
+    .feed-empty {
+      text-align: center;
+      padding: 64px 20px;
+      color: var(--muted);
+    }
+
+    .feed-empty-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: .4;
+      display: block;
+    }
+
+    .feed-empty p { font-size: 14px; }
+
+    .loading-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 48px;
+    }
+
+    .post-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      transition: border-color .15s, box-shadow .15s;
+      animation: cardIn .2s var(--ease);
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .post-card:hover { border-color: var(--paper3); box-shadow: 0 2px 16px rgba(0,0,0,.06); }
+
+    .post-type-bar {
+      height: 3px;
+    }
+
+    .post-type-bar.announcement { background: var(--accent); }
+    .post-type-bar.homework     { background: var(--blue); }
+
+    .post-body { padding: 18px 20px; }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .post-type-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-family: var(--font-mono);
+    }
+
+    .post-type-tag.announcement { background: var(--accent-bg); color: var(--accent); }
+    .post-type-tag.homework     { background: var(--blue-bg);   color: var(--blue); }
+
+    .post-date {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      margin-left: auto;
+    }
+
+    .post-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: -.02em;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .post-content {
+      font-size: 14px;
+      color: #3a3730;
+      line-height: 1.65;
+      white-space: pre-wrap;
+    }
+
+    .post-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      border-top: 1px solid var(--paper2);
+      background: var(--paper);
+    }
+
+    .post-author {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .post-author-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--paper3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .post-actions { display: flex; align-items: center; gap: 6px; }
+
+    .like-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all .15s;
+      color: var(--muted);
+    }
+
+    .like-btn:hover, .like-btn.liked {
+      background: #fdf0eb;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .comment-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-family: var(--font-sans);
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all .15s;
+      color: var(--muted);
+    }
+
+    .comment-toggle:hover {
+      background: var(--paper2);
+      border-color: var(--paper3);
+      color: var(--ink);
+    }
+
+    /* COMMENTS SECTION */
+    .comments-section {
+      border-top: 1px solid var(--paper2);
+      background: var(--paper);
+      padding: 14px 20px;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 9px;
+      margin-bottom: 10px;
+      animation: cardIn .15s ease;
+    }
+
+    .comment-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--paper3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .comment-body { flex: 1; }
+
+    .comment-user {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+
+    .comment-text {
+      font-size: 13px;
+      color: #3a3730;
+      line-height: 1.5;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .comment-input {
+      flex: 1;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: var(--font-sans);
+      color: var(--ink);
+      outline: none;
+      transition: border-color .15s;
+    }
+
+    .comment-input:focus { border-color: var(--accent); }
+    .comment-input::placeholder { color: var(--muted); }
+
+    .comment-submit {
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      border-radius: var(--radius);
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+
+    .comment-submit:hover { background: #2a2720; }
+
+    /* DELETE BUTTON (admin) */
+    .delete-post-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 4px 6px;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1;
+      transition: all .15s;
+    }
+    .delete-post-btn:hover { background: #fdf0ef; color: #c0392b; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15,14,12,.5);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn .15s ease;
+      backdrop-filter: blur(2px);
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      animation: slideUp .18s var(--ease);
+      overflow: hidden;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--paper2);
+    }
+
+    .modal-title {
+      font-family: var(--font-serif);
+      font-size: 19px;
+      font-weight: 400;
+      letter-spacing: -.02em;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: all .15s;
+    }
+    .modal-close:hover { background: var(--paper2); color: var(--ink); }
+
+    .modal-body { padding: 22px; }
+
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      padding: 14px 22px;
+      border-top: 1px solid var(--paper2);
+      background: var(--paper);
+    }
+
+    /* TYPE SELECTOR */
+    .type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .type-option {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--paper);
+    }
+
+    .type-option:hover { border-color: var(--paper3); }
+
+    .type-option.selected-announcement {
+      background: var(--accent-bg);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .type-option.selected-homework {
+      background: var(--blue-bg);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .type-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .type-dot.announcement { background: var(--accent); }
+    .type-dot.homework     { background: var(--blue); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .content { padding: 20px 16px 80px; }
+      .app-header-inner { padding: 0 16px; }
+      .tabs { padding: 0 16px; overflow-x: auto; }
+      .fab { bottom: 20px; right: 16px; }
+      .post-title { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="view-login" class="view active">
+  <div class="auth-page">
+    <div class="auth-box">
+      <div class="auth-wordmark">
+        <div class="auth-wordmark-dot"></div>
+        <span>Wobe Feed</span>
+      </div>
+      <h1>Inicia sesión</h1>
+      <p class="sub">Para publicar anuncios y tareas necesitas una cuenta.</p>
+      <div id="login-alert" class="hidden"></div>
+      <div class="field"><label>Usuario</label><input id="login-user" type="text" placeholder="tu_usuario" autocomplete="username"/></div>
+      <div class="field"><label>Contraseña</label><input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+      <button class="btn btn-primary" id="login-btn" onclick="handleLogin()">Entrar</button>
+      <div class="auth-switch">¿No tienes cuenta? <a onclick="switchAuth('register')">Regístrate</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REGISTER ══ -->
+<div id="view-register" class="view">
+  <div class="auth-page">
+    <div class="auth-box">
+      <div class="auth-wordmark">
+        <div class="auth-wordmark-dot"></div>
+        <span>Wobe Feed</span>
+      </div>
+      <h1>Crear cuenta</h1>
+      <p class="sub">Sin tarjeta de crédito. Sin configuración.</p>
+      <div id="register-alert" class="hidden"></div>
+      <div class="field"><label>Usuario</label><input id="reg-user" type="text" placeholder="elige_un_nombre" autocomplete="username"/></div>
+      <div class="field"><label>Contraseña</label><input id="reg-pass" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"/></div>
+      <button class="btn btn-primary" id="register-btn" onclick="handleRegister()">Crear cuenta</button>
+      <div class="auth-switch">¿Ya tienes cuenta? <a onclick="switchAuth('login')">Inicia sesión</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="view-app" class="view">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="wordmark">
+        <div class="wordmark-dot"></div>
+        Wobe Feed
+      </div>
+      <div class="header-right">
+        <div class="user-chip">
+          <div class="avatar" id="header-avatar">?</div>
+          <span id="header-username">…</span>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()">Salir</button>
+      </div>
+    </div>
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" id="tab-all" onclick="filterFeed('all')">
+        Todo
+        <span class="tab-count" id="count-all">0</span>
+      </div>
+      <div class="tab" id="tab-announcement" onclick="filterFeed('announcement')">
+        📢 Anuncios
+        <span class="tab-count" id="count-announcement">0</span>
+      </div>
+      <div class="tab" id="tab-homework" onclick="filterFeed('homework')">
+        📚 Tareas
+        <span class="tab-count" id="count-homework">0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- FEED -->
+  <div class="content">
+    <div id="feed-alert" class="hidden"></div>
+    <div id="feed-list">
+      <div class="loading-wrap"><span class="spinner spinner-dark"></span></div>
+    </div>
+  </div>
+
+  <!-- FAB: solo si está logueado -->
+  <button class="fab" id="fab-create" onclick="openCreateModal()">
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+    Publicar
+  </button>
+</div>
+
+<!-- ══ MODAL: CREAR POST ══ -->
+<div id="modal-create" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nueva publicación</span>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="create-alert" class="hidden"></div>
+
+      <div style="margin-bottom:14px">
+        <label style="display:block;font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Tipo</label>
+        <div class="type-selector">
+          <div class="type-option selected-announcement" id="type-announcement" onclick="selectType('announcement')">
+            <div class="type-dot announcement"></div>
+            Anuncio
+          </div>
+          <div class="type-option" id="type-homework" onclick="selectType('homework')">
+            <div class="type-dot homework"></div>
+            Tarea
+          </div>
+        </div>
+      </div>
+
+      <div class="field"><label>Título</label><input id="create-title" type="text" placeholder="Título de la publicación"/></div>
+      <div class="field"><label>Contenido</label><textarea id="create-content" placeholder="Escribe el contenido…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-accent btn-sm" id="create-btn" onclick="createPost()">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════
+const API = 'https://classes-backend.vercel.app';
+const TK  = 'wobe_token';
+const UK  = 'wobe_user';
+
+// ══════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════
+const $      = id => document.getElementById(id);
+const getToken = () => localStorage.getItem(TK);
+const setToken = t  => localStorage.setItem(TK, t);
+const clearToken = () => localStorage.removeItem(TK);
+const getUser  = () => { try { return JSON.parse(localStorage.getItem(UK)); } catch { return null; } };
+const setUser  = u  => localStorage.setItem(UK, JSON.stringify(u));
+const clearUser = () => localStorage.removeItem(UK);
+const isLoggedIn = () => !!getToken();
+const isAdmin    = () => getUser()?.role === 'admin';
+
+function authH() {
+  return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` };
+}
+
+function showAlert(id, type, msg) {
+  const el = $(id); if (!el) return;
+  el.className = `alert alert-${type}`;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function hideAlert(id) { $(id)?.classList.add('hidden'); }
+
+function setLoading(id, on, label = '') {
+  const el = $(id); if (!el) return;
+  el.disabled = on;
+  el.innerHTML = on ? `<span class="spinner"></span>` : label;
+}
+
+function tsToRelative(ts) {
+  const diff = Math.floor(Date.now() / 1000) - ts;
+  if (diff < 60)   return 'ahora';
+  if (diff < 3600) return `${Math.floor(diff/60)}m`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+  return `${Math.floor(diff/86400)}d`;
+}
+
+// ══════════════════════════════════════
+//  VIEWS
+// ══════════════════════════════════════
+function showView(name) {
+  ['login','register','app'].forEach(v => {
+    $(`view-${v}`)?.classList.remove('active');
+  });
+  $(`view-${name}`)?.classList.add('active');
+}
+
+function switchAuth(to) { showView(to); }
+
+// ══════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════
+async function handleLogin() {
+  hideAlert('login-alert');
+  const username = $('login-user').value.trim();
+  const password = $('login-pass').value;
+  if (!username || !password) { showAlert('login-alert','error','Completa todos los campos.'); return; }
+  setLoading('login-btn', true);
+  try {
+    const res  = await fetch(`${API}/api/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username,password}) });
+    const data = await res.json();
+    if (!data.success) { showAlert('login-alert','error', data.error || 'Credenciales inválidas.'); return; }
+    setToken(data.token); setUser(data.user);
+    enterApp();
+  } catch { showAlert('login-alert','error','Error de conexión.'); }
+  finally { setLoading('login-btn', false, 'Entrar'); }
+}
+
+async function handleRegister() {
+  hideAlert('register-alert');
+  const username = $('reg-user').value.trim();
+  const password = $('reg-pass').value;
+  if (!username || !password) { showAlert('register-alert','error','Completa todos los campos.'); return; }
+  if (password.length < 6)   { showAlert('register-alert','error','Mínimo 6 caracteres.'); return; }
+  setLoading('register-btn', true);
+  try {
+    const res  = await fetch(`${API}/api/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username,password}) });
+    const data = await res.json();
+    if (!data.success) { showAlert('register-alert','error', data.error || 'No se pudo crear la cuenta.'); return; }
+    showAlert('register-alert','success','¡Cuenta creada! Iniciando sesión…');
+    // Auto-login
+    setTimeout(async () => {
+      const res2  = await fetch(`${API}/api/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username,password}) });
+      const data2 = await res2.json();
+      if (data2.success) { setToken(data2.token); setUser(data2.user); enterApp(); }
+      else showView('login');
+    }, 900);
+  } catch { showAlert('register-alert','error','Error de conexión.'); }
+  finally { setLoading('register-btn', false, 'Crear cuenta'); }
+}
+
+function handleLogout() { clearToken(); clearUser(); showView('login'); }
+
+// ══════════════════════════════════════
+//  APP INIT
+// ══════════════════════════════════════
+function enterApp() {
+  const user = getUser();
+  if (!user) return;
+  $('header-avatar').textContent   = user.username.charAt(0).toUpperCase();
+  $('header-username').textContent = user.username;
+  showView('app');
+  loadFeed();
+}
+
+// ══════════════════════════════════════
+//  FEED
+// ══════════════════════════════════════
+let allPosts   = [];
+let currentFilter = 'all';
+
+async function loadFeed() {
+  $('feed-list').innerHTML = `<div class="loading-wrap"><span class="spinner spinner-dark"></span></div>`;
+  hideAlert('feed-alert');
+  try {
+    const res   = await fetch(`${API}/api/classes/feed`);
+    allPosts    = await res.json();
+    updateCounts();
+    renderFeed();
+  } catch {
+    showAlert('feed-alert','error','No se pudo cargar el feed.');
+    $('feed-list').innerHTML = '';
+  }
+}
+
+function updateCounts() {
+  $('count-all').textContent          = allPosts.length;
+  $('count-announcement').textContent = allPosts.filter(p => p.type === 'announcement').length;
+  $('count-homework').textContent     = allPosts.filter(p => p.type === 'homework').length;
+}
+
+function filterFeed(type) {
+  currentFilter = type;
+  ['all','announcement','homework'].forEach(t => $(`tab-${t}`)?.classList.remove('active'));
+  $(`tab-${type}`)?.classList.add('active');
+  renderFeed();
+}
+
+function renderFeed() {
+  const posts = currentFilter === 'all'
+    ? allPosts
+    : allPosts.filter(p => p.type === currentFilter);
+
+  if (!posts.length) {
+    $('feed-list').innerHTML = `
+      <div class="feed-empty">
+        <span class="feed-empty-icon">${currentFilter === 'homework' ? '📚' : currentFilter === 'announcement' ? '📢' : '📭'}</span>
+        <p>${isLoggedIn() ? 'Aún no hay publicaciones. ¡Sé el primero!' : 'Inicia sesión para publicar.'}</p>
+      </div>`;
+    return;
+  }
+
+  $('feed-list').innerHTML = posts.map(post => renderPostCard(post)).join('');
+}
+
+function renderPostCard(post) {
+  const type    = post.type || 'announcement';
+  const typeLabel = type === 'homework' ? 'Tarea' : 'Anuncio';
+  const canDelete = isLoggedIn() && (isAdmin() || getUser()?.username === post.author);
+
+  return `
+  <div class="post-card" id="post-${post.id}">
+    <div class="post-type-bar ${type}"></div>
+    <div class="post-body">
+      <div class="post-meta">
+        <span class="post-type-tag ${type}">${typeLabel}</span>
+        <span class="post-date">${tsToRelative(post.timestamp)}</span>
+      </div>
+      <div class="post-title">${escHtml(post.title || '')}</div>
+      <div class="post-content">${escHtml(post.content || '')}</div>
+    </div>
+    <div class="post-footer">
+      <div class="post-author">
+        <div class="post-author-dot">${(post.author||'?').charAt(0).toUpperCase()}</div>
+        ${escHtml(post.author || 'Anónimo')}
+      </div>
+      <div class="post-actions">
+        <button class="like-btn" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
+          ♡ <span id="like-count-${post.id}">…</span>
+        </button>
+        <button class="comment-toggle" onclick="toggleComments('${post.id}')">
+          💬 <span id="comment-count-${post.id}">…</span>
+        </button>
+        ${canDelete ? `<button class="delete-post-btn" onclick="deletePost('${post.id}')" title="Eliminar">✕</button>` : ''}
+      </div>
+    </div>
+    <div class="comments-section hidden" id="comments-${post.id}">
+      <div id="comments-list-${post.id}">
+        <div style="text-align:center;padding:12px"><span class="spinner spinner-dark"></span></div>
+      </div>
+      ${isLoggedIn() ? `
+      <div class="comment-form">
+        <input class="comment-input" id="comment-input-${post.id}" type="text" placeholder="Escribe un comentario…"/>
+        <button class="comment-submit" onclick="submitComment('${post.id}')">Enviar</button>
+      </div>` : `<p style="font-size:12px;color:var(--muted);margin-top:8px">Inicia sesión para comentar.</p>`}
+    </div>
+  </div>`;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════
+//  LIKES
+// ══════════════════════════════════════
+const likeCache = {}; // post_id -> { count, liked }
+
+async function loadLikes(postId) {
+  try {
+    const res  = await fetch(`${API}/api/classes/feed/post/${postId}/likes`);
+    const data = await res.json();
+    const me   = getUser()?.username || '';
+    const liked = data.likes?.some(l => l.user === me);
+    likeCache[postId] = { count: data.count, liked };
+    updateLikeUI(postId);
+  } catch { /* silent */ }
+}
+
+function updateLikeUI(postId) {
+  const { count, liked } = likeCache[postId] || { count: 0, liked: false };
+  const btn = $(`like-btn-${postId}`);
+  const cnt = $(`like-count-${postId}`);
+  if (cnt) cnt.textContent = count;
+  if (btn) { btn.classList.toggle('liked', liked); btn.innerHTML = `${liked ? '♥' : '♡'} <span id="like-count-${postId}">${count}</span>`; }
+}
+
+async function toggleLike(postId) {
+  const user = getUser()?.username || 'anon';
+  try {
+    const res  = await fetch(`${API}/api/classes/feed/like`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ post_id: postId, user }) });
+    const data = await res.json();
+    if (data.success) {
+      const prev = likeCache[postId] || { count: 0, liked: false };
+      likeCache[postId] = {
+        count: data.liked ? prev.count + 1 : Math.max(0, prev.count - 1),
+        liked: data.liked
+      };
+      updateLikeUI(postId);
+    }
+  } catch { /* silent */ }
+}
+
+// Load likes for all posts after render
+function loadAllLikes() {
+  allPosts.forEach(p => loadLikes(p.id));
+}
+
+// ══════════════════════════════════════
+//  COMMENTS
+// ══════════════════════════════════════
+const commentsOpen = new Set();
+
+async function toggleComments(postId) {
+  const section = $(`comments-${postId}`);
+  if (!section) return;
+
+  if (commentsOpen.has(postId)) {
+    section.classList.add('hidden');
+    commentsOpen.delete(postId);
+    return;
+  }
+
+  section.classList.remove('hidden');
+  commentsOpen.add(postId);
+  await loadComments(postId);
+}
+
+async function loadComments(postId) {
+  const list = $(`comments-list-${postId}`);
+  if (!list) return;
+  list.innerHTML = `<div style="text-align:center;padding:10px"><span class="spinner spinner-dark"></span></div>`;
+  try {
+    const res  = await fetch(`${API}/api/classes/feed/post/${postId}/comments`);
+    const data = await res.json();
+    const comments = data.comments || [];
+    $(`comment-count-${postId}`).textContent = comments.length;
+
+    if (!comments.length) {
+      list.innerHTML = `<p style="font-size:12px;color:var(--muted);padding:4px 0">Sin comentarios aún.</p>`;
+      return;
+    }
+
+    list.innerHTML = comments.map(c => `
+      <div class="comment-item">
+        <div class="comment-avatar">${(c.user||'?').charAt(0).toUpperCase()}</div>
+        <div class="comment-body">
+          <div class="comment-user">${escHtml(c.user || 'Anónimo')}</div>
+          <div class="comment-text">${escHtml(c.content || '')}</div>
+        </div>
+      </div>`).join('');
+  } catch {
+    list.innerHTML = `<p style="font-size:12px;color:var(--muted)">Error al cargar comentarios.</p>`;
+  }
+}
+
+async function submitComment(postId) {
+  const input = $(`comment-input-${postId}`);
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) return;
+  const user = getUser()?.username || 'anon';
+  input.disabled = true;
+  try {
+    const res  = await fetch(`${API}/api/classes/feed/comment`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ post_id: postId, user, content }) });
+    const data = await res.json();
+    if (data.success) {
+      input.value = '';
+      await loadComments(postId);
+    }
+  } catch { /* silent */ }
+  finally { input.disabled = false; input.focus(); }
+}
+
+// ══════════════════════════════════════
+//  CREATE POST
+// ══════════════════════════════════════
+let selectedType = 'announcement';
+
+function selectType(type) {
+  selectedType = type;
+  ['announcement','homework'].forEach(t => {
+    const el = $(`type-${t}`);
+    el.className = 'type-option';
+    if (t === type) el.classList.add(`selected-${t}`);
+  });
+}
+
+function openCreateModal() {
+  if (!isLoggedIn()) { showView('login'); return; }
+  $('modal-create').classList.remove('hidden');
+  hideAlert('create-alert');
+  $('create-title').focus();
+}
+
+function closeModal() {
+  $('modal-create').classList.add('hidden');
+}
+
+async function createPost() {
+  hideAlert('create-alert');
+  const title   = $('create-title').value.trim();
+  const content = $('create-content').value.trim();
+  if (!title)   { showAlert('create-alert','error','El título es obligatorio.'); return; }
+  if (!content) { showAlert('create-alert','error','El contenido es obligatorio.'); return; }
+  setLoading('create-btn', true);
+  try {
+    const res  = await fetch(`${API}/api/classes/feed/create`, { method:'POST', headers: authH(), body: JSON.stringify({ title, content, type: selectedType }) });
+    const data = await res.json();
+    if (!data.success) { showAlert('create-alert','error', data.error || 'No se pudo publicar.'); return; }
+    closeModal();
+    $('create-title').value = ''; $('create-content').value = '';
+    selectType('announcement');
+    await loadFeed();
+  } catch { showAlert('create-alert','error','Error de conexión.'); }
+  finally { setLoading('create-btn', false, 'Publicar'); }
+}
+
+async function deletePost(postId) {
+  if (!confirm('¿Eliminar esta publicación?')) return;
+  try {
+    await fetch(`${API}/api/classes/feed/delete`, { method:'POST', headers: authH(), body: JSON.stringify({ id: postId }) });
+    allPosts = allPosts.filter(p => p.id !== postId);
+    updateCounts();
+    renderFeed();
+  } catch { /* silent */ }
+}
+
+// ══════════════════════════════════════
+//  POST-RENDER HOOKS
+// ══════════════════════════════════════
+const _origRender = renderFeed;
+renderFeed = function() {
+  _origRender();
+  // Load likes after DOM update
+  requestAnimationFrame(() => loadAllLikes());
+};
+
+// ══════════════════════════════════════
+//  KEYBOARD
+// ══════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter') {
+    if ($('view-login').classList.contains('active'))    handleLogin();
+    if ($('view-register').classList.contains('active')) handleRegister();
+  }
+});
+
+$('modal-create').addEventListener('click', e => {
+  if (e.target === $('modal-create')) closeModal();
+});
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+(function init() {
+  if (isLoggedIn()) enterApp();
+  else showView('login');
+})();
+</script>
+</body>
+</html>

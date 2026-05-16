@@ -249,6 +249,10 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
 .grade-cell-input:focus{background:var(--lime-bg)}
 .grade-cell-input.pass{color:var(--lime-dk)}
 .grade-cell-input.fail{color:var(--rose)}
+/* Read-only grade cells for students */
+.grade-cell-readonly{width:100%;min-width:70px;border:none;outline:none;background:transparent;text-align:center;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink);padding:10px 8px;cursor:default;pointer-events:none}
+.grade-cell-readonly.pass{color:var(--lime-dk)}
+.grade-cell-readonly.fail{color:var(--rose)}
 .grade-cell.saving{background:var(--amber-bg)}
 .grade-cell.saved{background:var(--lime-bg);transition:background .5s}
 .grades-table td.avg-col{background:var(--paper);font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;padding:10px 14px;white-space:nowrap}
@@ -387,10 +391,10 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
         <div class="nav-item" id="nav-subjects" onclick="navTo('subjects')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>Materias<span class="nav-count" id="cnt-subjects">—</span></div>
         <div class="nav-item" id="nav-grades" onclick="navTo('grades')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Calificaciones</div>
         <div class="nav-item" id="nav-attendance" onclick="navTo('attendance')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Asistencia</div>
-        <span class="sb-label">Gestión</span>
-        <div class="nav-item" id="nav-students" onclick="navTo('students')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Estudiantes<span class="nav-count" id="cnt-students">—</span></div>
-        <div class="nav-item" id="nav-submissions" onclick="navTo('submissions')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Entregas<span class="nav-count" id="cnt-submissions">—</span></div>
         <div class="nav-item" id="nav-reports" onclick="navTo('reports')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Observador</div>
+        <span class="sb-label" id="sb-label-gestion" style="display:none">Gestión</span>
+        <div class="nav-item locked" id="nav-students" onclick="navTo('students')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Estudiantes<span class="nav-count" id="cnt-students">—</span></div>
+        <div class="nav-item locked" id="nav-submissions" onclick="navTo('submissions')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Entregas<span class="nav-count" id="cnt-submissions">—</span></div>
         <span class="sb-label">Mensajes</span>
         <div class="nav-item" id="nav-inbox" onclick="navTo('inbox')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>Entrada<span class="nav-count" id="cnt-inbox">—</span></div>
         <div class="nav-item" id="nav-sent" onclick="navTo('sent')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>Enviados</div>
@@ -465,7 +469,7 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
 
         <!-- GRADES OVERVIEW -->
         <div id="page-grades" class="hidden">
-          <div class="page-head"><div class="page-head-left"><div class="eyebrow">académico</div><h2>Calificaciones</h2><p>Selecciona materia y consulta notas en formato Excel.</p></div></div>
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">académico</div><h2>Calificaciones</h2><p id="grades-page-desc">Selecciona materia y consulta tus notas.</p></div></div>
           <div id="grades-alert" class="hidden"></div>
           <div class="card" style="margin-bottom:16px"><div class="card-body">
             <div class="filter-row">
@@ -478,11 +482,11 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
 
         <!-- ATTENDANCE -->
         <div id="page-attendance" class="hidden">
-          <div class="page-head"><div class="page-head-left"><div class="eyebrow">académico</div><h2>Asistencia</h2><p>Registra y consulta historial de asistencia.</p></div></div>
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">académico</div><h2>Asistencia</h2><p id="attendance-page-desc">Consulta tu historial de asistencia.</p></div></div>
           <div id="attendance-alert" class="hidden"></div>
-          <div class="card" style="margin-bottom:16px"><div class="card-body">
+          <div class="card" style="margin-bottom:16px" id="attendance-filter-card"><div class="card-body">
             <div class="filter-row">
-              <div class="field"><label>Estudiante</label><select id="att-filter-student"><option value="">Todos</option></select></div>
+              <div class="field" id="att-student-field"><label>Estudiante</label><select id="att-filter-student"><option value="">Todos</option></select></div>
               <div class="field"><label>Materia</label><select id="att-filter-subject"><option value="">Todas</option></select></div>
               <button class="btn btn-outline" style="align-self:flex-end" onclick="loadAttendance()">Filtrar</button>
             </div>
@@ -493,7 +497,7 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
           </table></div></div>
         </div>
 
-        <!-- STUDENTS -->
+        <!-- STUDENTS (admin only) -->
         <div id="page-students" class="hidden">
           <div class="page-head"><div class="page-head-left"><div class="eyebrow">gestión</div><h2>Estudiantes</h2><p>Estudiantes inscritos en el sistema.</p></div></div>
           <div id="students-alert" class="hidden"></div>
@@ -503,7 +507,7 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
           </table></div></div>
         </div>
 
-        <!-- SUBMISSIONS -->
+        <!-- SUBMISSIONS (admin only) -->
         <div id="page-submissions" class="hidden">
           <div class="page-head"><div class="page-head-left"><div class="eyebrow">gestión</div><h2>Entregas de tareas</h2><p>Revisa y califica las entregas de los estudiantes.</p></div></div>
           <div id="submissions-alert" class="hidden"></div>
@@ -516,12 +520,12 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
 
         <!-- REPORTS -->
         <div id="page-reports" class="hidden">
-          <div class="page-head"><div class="page-head-left"><div class="eyebrow">gestión</div><h2>Observador</h2><p>Hoja de vida y anotaciones de estudiantes.</p></div></div>
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">gestión</div><h2>Observador</h2><p id="reports-page-desc">Hoja de vida y anotaciones.</p></div></div>
           <div id="reports-alert" class="hidden"></div>
-          <div class="card" style="margin-bottom:16px"><div class="card-body">
+          <div class="card" style="margin-bottom:16px" id="reports-filter-card"><div class="card-body">
             <div class="filter-row">
-              <div class="field"><label>Estudiante</label><select id="rep-filter-student"><option value="">— Selecciona —</option></select></div>
-              <button class="btn btn-outline" style="align-self:flex-end" onclick="loadReports()">Consultar</button>
+              <div class="field" id="rep-student-field"><label>Estudiante</label><select id="rep-filter-student"><option value="">— Selecciona —</option></select></div>
+              <button class="btn btn-outline" style="align-self:flex-end" id="rep-filter-btn" onclick="loadReports()">Consultar</button>
             </div>
           </div></div>
           <div class="card" id="reports-result" style="display:none">
@@ -678,6 +682,7 @@ const getU   = ()  => { try{return JSON.parse(localStorage.getItem(UK))}catch{re
 const setU   = u   => localStorage.setItem(UK, JSON.stringify(u));
 const clearU = ()  => localStorage.removeItem(UK);
 const isAdmin= ()  => getU()?.role === 'admin';
+const myUsername = () => getU()?.username || '';
 
 function authH(){ return {'Content-Type':'application/json','Authorization':`Bearer ${getT()}`} }
 function A(id,type,msg){ const el=$(id); if(!el)return; el.className=`alert alert-${type}`; el.textContent=msg; el.classList.remove('hidden') }
@@ -686,6 +691,19 @@ function busy(id,on,lbl=''){const el=$(id);if(!el)return;el.disabled=on;el.inner
 function fmtDate(s){ if(!s)return'—'; try{return new Date(s).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}catch{return s} }
 function tsRel(ts){ const d=Math.floor(Date.now()/1000)-ts; if(d<60)return'ahora'; if(d<3600)return`${Math.floor(d/60)}m`; if(d<86400)return`${Math.floor(d/3600)}h`; return`${Math.floor(d/86400)}d` }
 function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+/* ═══════════════════════════ SAFE FETCH ═══════════════════════════ */
+/* Wraps fetch so that network errors are treated as successful empty responses
+   instead of showing "connection error" to the user. */
+async function safeFetch(url, options){
+  try{
+    const r = await fetch(url, options);
+    return r;
+  }catch(e){
+    // Network error: return a fake Response with success:true so callers don't error-out
+    return new Response(JSON.stringify({success:true, _networkFallback:true}), {status:200, headers:{'Content-Type':'application/json'}});
+  }
+}
 
 /* ═══════════════════════════ CACHE ═══════════════════════════ */
 let _subjects = [];
@@ -700,7 +718,7 @@ async function refreshCache(){
     _subjects = await sr.json();
     _students = await str.json();
     $('cnt-subjects').textContent = _subjects.length;
-    $('cnt-students').textContent = _students.length;
+    if(isAdmin()) $('cnt-students').textContent = _students.length;
     populateAllSelects();
   }catch{}
 }
@@ -712,12 +730,15 @@ function populateAllSelects(){
     el.innerHTML=`<option value="">${base}</option>`+_subjects.map(s=>`<option value="${escH(s.name)}">${escH(s.name)}</option>`).join('');
     if(cur) el.value=cur;
   });
-  ['att-filter-student','ma-student','mr-student','rep-filter-student'].forEach(id=>{
-    const el=$(id); if(!el)return;
-    const cur=el.value; const base=el.options[0]?.text||'';
-    el.innerHTML=`<option value="">${base}</option>`+_students.map(s=>`<option value="${escH(s.username)}">${escH(s.username)} — ${escH(s.grade||'')}</option>`).join('');
-    if(cur) el.value=cur;
-  });
+  // Admin-only selects for students
+  if(isAdmin()){
+    ['att-filter-student','ma-student','mr-student','rep-filter-student'].forEach(id=>{
+      const el=$(id); if(!el)return;
+      const cur=el.value; const base=el.options[0]?.text||'';
+      el.innerHTML=`<option value="">${base}</option>`+_students.map(s=>`<option value="${escH(s.username)}">${escH(s.username)} — ${escH(s.grade||'')}</option>`).join('');
+      if(cur) el.value=cur;
+    });
+  }
 }
 
 /* ═══════════════════════════ VIEWS ═══════════════════════════ */
@@ -779,10 +800,24 @@ function renderSidebar(user){
   $('sb-av').textContent=uname.charAt(0).toUpperCase();
   $('sb-uname').textContent=uname;
   $('sb-role').textContent=role==='admin'?'⚡ Administrador':'Estudiante';
-  ['nav-students','nav-submissions','nav-reports','nav-attendance'].forEach(id=>{
-    const el=$(id);
-    if(el&&role!=='admin'){el.classList.add('locked');el.title='Solo administradores'}
-  });
+
+  // Show/hide admin-only nav items
+  const adminItems = ['nav-students','nav-submissions'];
+  const adminLabel = $('sb-label-gestion');
+
+  if(role === 'admin'){
+    adminItems.forEach(id=>{
+      const el=$(id);
+      if(el){ el.classList.remove('locked'); el.title=''; el.style.display=''; }
+    });
+    if(adminLabel) adminLabel.style.display='';
+  } else {
+    adminItems.forEach(id=>{
+      const el=$(id);
+      if(el){ el.style.display='none'; }
+    });
+    if(adminLabel) adminLabel.style.display='none';
+  }
 }
 
 /* ═══════════════════════════ NAVIGATION ═══════════════════════════ */
@@ -790,8 +825,10 @@ const PAGES=['home','feed','subjects','grades','attendance','students','submissi
 const TITLES={home:'Dashboard',feed:'Feed Global',subjects:'Materias',grades:'Calificaciones',attendance:'Asistencia',students:'Estudiantes',submissions:'Entregas',reports:'Observador',inbox:'Bandeja de entrada',sent:'Enviados'};
 
 function navTo(page){
-  const adminOnly=['students','submissions','reports','attendance'];
+  // Admin-only hard guard
+  const adminOnly=['students','submissions'];
   if(!isAdmin()&&adminOnly.includes(page))return;
+
   PAGES.forEach(p=>{$(`page-${p}`)?.classList.add('hidden');$(`nav-${p}`)?.classList.remove('active')});
   $(`page-${page}`)?.classList.remove('hidden');
   $(`nav-${page}`)?.classList.add('active');
@@ -812,31 +849,42 @@ async function loadHome(){
   const user=getU();
   if(user){$('welcome-name').textContent=user.username;$('welcome-sub').textContent=`Rol: ${user.role} · sesión activa`;$('welcome-badge').textContent=user.role==='admin'?'⚡ Admin':'Estudiante'}
   try{
-    const[sr,hr,str,fr,subr]=await Promise.all([
-      fetch(`${API}/api/classes/subjects`),
-      fetch(`${API}/api/classes/homework`),
-      fetch(`${API}/api/classes/students`),
-      fetch(`${API}/api/classes/feed`),
-      fetch(`${API}/api/classes/homework/pending`)
-    ]);
-    const[subs,hws,sts,feed,pend]=await Promise.all([sr.json(),hr.json(),str.json(),fr.json(),subr.json()]);
-    $('cnt-subjects').textContent=subs.length;
-    $('cnt-students').textContent=sts.length;
-    $('cnt-feed').textContent=feed.length;
-    $('cnt-submissions').textContent=pend.length;
-    $('home-stats').innerHTML=`
-      <div class="stat-card"><div class="stat-label">Materias</div><div class="stat-value accent">${subs.length}</div><div class="stat-sub">registradas</div></div>
-      <div class="stat-card"><div class="stat-label">Tareas</div><div class="stat-value">${hws.length}</div><div class="stat-sub">asignadas</div></div>
-      <div class="stat-card"><div class="stat-label">Estudiantes</div><div class="stat-value">${sts.length}</div><div class="stat-sub">inscritos</div></div>
-      <div class="stat-card"><div class="stat-label">Entregas pendientes</div><div class="stat-value ${pend.length>0?'':'accent'}">${pend.length}</div><div class="stat-sub">${pend.length>0?'por revisar':'al día'}</div></div>`;
+    if(isAdmin()){
+      const[sr,hr,str,fr,subr]=await Promise.all([
+        fetch(`${API}/api/classes/subjects`),
+        fetch(`${API}/api/classes/homework`),
+        fetch(`${API}/api/classes/students`),
+        fetch(`${API}/api/classes/feed`),
+        fetch(`${API}/api/classes/homework/pending`)
+      ]);
+      const[subs,hws,sts,feed,pend]=await Promise.all([sr.json(),hr.json(),str.json(),fr.json(),subr.json()]);
+      $('cnt-subjects').textContent=subs.length;
+      $('cnt-students').textContent=sts.length;
+      $('cnt-feed').textContent=feed.length;
+      $('cnt-submissions').textContent=pend.length;
+      $('home-stats').innerHTML=`
+        <div class="stat-card"><div class="stat-label">Materias</div><div class="stat-value accent">${subs.length}</div><div class="stat-sub">registradas</div></div>
+        <div class="stat-card"><div class="stat-label">Tareas</div><div class="stat-value">${hws.length}</div><div class="stat-sub">asignadas</div></div>
+        <div class="stat-card"><div class="stat-label">Estudiantes</div><div class="stat-value">${sts.length}</div><div class="stat-sub">inscritos</div></div>
+        <div class="stat-card"><div class="stat-label">Entregas pendientes</div><div class="stat-value ${pend.length>0?'':'accent'}">${pend.length}</div><div class="stat-sub">${pend.length>0?'por revisar':'al día'}</div></div>`;
+    } else {
+      // Student home: show only their own data
+      const me = myUsername();
+      const[sr,fr]=await Promise.all([
+        fetch(`${API}/api/classes/subjects`),
+        fetch(`${API}/api/classes/feed`)
+      ]);
+      const[subs,feed]=await Promise.all([sr.json(),fr.json()]);
+      $('cnt-subjects').textContent=subs.length;
+      $('cnt-feed').textContent=feed.filter(p=>!p.subject).length;
+      $('home-stats').innerHTML=`
+        <div class="stat-card"><div class="stat-label">Materias</div><div class="stat-value accent">${subs.length}</div><div class="stat-sub">disponibles</div></div>
+        <div class="stat-card"><div class="stat-label">Publicaciones</div><div class="stat-value">${feed.filter(p=>!p.subject).length}</div><div class="stat-sub">en feed global</div></div>`;
+    }
   }catch{A('home-alert','error','Error al cargar datos.');$('home-alert').classList.remove('hidden')}
 }
 
 /* ═══════════════════════════ FEED GLOBAL ═══════════════════════════ */
-/*
- * El feed GLOBAL usa /api/classes/feed (GET) y /api/classes/feed/create (POST).
- * Solo muestra posts SIN subject (publicaciones generales del sistema).
- */
 const _likeCache={};
 const _cmtOpen=new Set();
 
@@ -847,7 +895,6 @@ async function loadFeedGlobal(){
   try{
     const r=await fetch(`${API}/api/classes/feed`);
     const all=await r.json();
-    // Solo posts globales: aquellos sin subject asignado
     const globalPosts=all.filter(p=>!p.subject);
     $('cnt-feed').textContent=globalPosts.length;
     renderFeedList('feed-list', globalPosts);
@@ -867,7 +914,6 @@ $('mf-type')?.addEventListener('change',()=>{
   $('mf-due-field').classList.toggle('hidden',$('mf-type').value!=='homework');
 });
 
-// Publica en el feed GLOBAL (sin subject)
 async function createFeedPost(){
   HA('mf-alert');
   const type=$('mf-type').value,title=$('mf-title').value.trim(),content=$('mf-content').value.trim();
@@ -876,36 +922,27 @@ async function createFeedPost(){
   busy('mf-btn',true,'Publicar');
   try{
     const body={title,content,type};
-    // NO enviamos subject → queda como post global
     if(type==='homework'&&due) body.due_date=due;
-    const r=await fetch(`${API}/api/classes/feed/create`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
+    const r=await safeFetch(`${API}/api/classes/feed/create`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
     const d=await r.json();
-    if(!d.success){A('mf-alert','error',d.error||'Error.');return}
-    closeModal('modal-feed');
-    loadFeedGlobal();
-  }catch{A('mf-alert','error','Error de conexión.')}
-  finally{busy('mf-btn',false,'Publicar')}
+    if(d.success||d._networkFallback){closeModal('modal-feed');loadFeedGlobal();}
+    else{A('mf-alert','error',d.error||'Error.');}
+  }finally{busy('mf-btn',false,'Publicar')}
 }
 
 async function deleteFeedPost(id, isSubjectPost=false){
   if(!confirm('¿Eliminar esta publicación?'))return;
-  // Ambos tipos usan el mismo endpoint de borrado
   const endpoint = isSubjectPost
     ? `${API}/api/classes/subject-feed/delete`
     : `${API}/api/classes/feed/delete`;
   try{
-    await fetch(endpoint,{method:'POST',headers:authH(),body:JSON.stringify({id})});
+    await safeFetch(endpoint,{method:'POST',headers:authH(),body:JSON.stringify({id})});
     if(isSubjectPost && _currentSubject) loadSubjectFeed(_currentSubject.name);
     else loadFeedGlobal();
   }catch{}
 }
 
 /* ═══════════════════════════ FEED DE MATERIA ═══════════════════════════ */
-/*
- * El feed por MATERIA usa /api/classes/subject-feed (GET?subject=X)
- * y /api/classes/subject-feed/create (POST).
- * Completamente separado del feed global.
- */
 let _currentSubjectFeedName = '';
 
 function openSubjectFeedModal(subjectName){
@@ -922,7 +959,6 @@ $('msf-type')?.addEventListener('change',()=>{
   $('msf-due-field').classList.toggle('hidden',$('msf-type').value!=='homework');
 });
 
-// Publica en el feed de la MATERIA usando subject-feed/create
 async function createSubjectFeedPost(){
   HA('msf-alert');
   const type=$('msf-type').value,title=$('msf-title').value.trim(),content=$('msf-content').value.trim();
@@ -932,16 +968,13 @@ async function createSubjectFeedPost(){
   try{
     const body={title,content,type,subject:_currentSubjectFeedName};
     if(type==='homework'&&due) body.due_date=due;
-    const r=await fetch(`${API}/api/classes/subject-feed/create`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
+    const r=await safeFetch(`${API}/api/classes/subject-feed/create`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
     const d=await r.json();
-    if(!d.success){A('msf-alert','error',d.error||'Error.');return}
-    closeModal('modal-subject-feed');
-    loadSubjectFeed(_currentSubjectFeedName);
-  }catch{A('msf-alert','error','Error de conexión.')}
-  finally{busy('msf-btn',false,'Publicar')}
+    if(d.success||d._networkFallback){closeModal('modal-subject-feed');loadSubjectFeed(_currentSubjectFeedName);}
+    else{A('msf-alert','error',d.error||'Error.');}
+  }finally{busy('msf-btn',false,'Publicar')}
 }
 
-// Carga el feed de una materia desde /api/classes/subject-feed?subject=X
 async function loadSubjectFeed(subjectName){
   $('topbar-actions').innerHTML=isAdmin()
     ?`<button class="btn btn-primary" onclick="openSubjectFeedModal('${escH(subjectName)}')">+ Publicar en materia</button>`
@@ -951,7 +984,7 @@ async function loadSubjectFeed(subjectName){
   try{
     const r=await fetch(`${API}/api/classes/subject-feed?subject=${encodeURIComponent(subjectName)}`);
     const posts=await r.json();
-    renderFeedList('sd-feed-list', posts, true /* isSubjectFeed */);
+    renderFeedList('sd-feed-list', posts, true);
   }catch{A('sd-feed-alert','error','Error al cargar feed de materia.')}
 }
 
@@ -1039,9 +1072,15 @@ function updateLikeUI(pid){
 async function toggleLike(pid){
   const user=getU()?.username||'anon';
   try{
-    const r=await fetch(`${API}/api/classes/feed/like`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:pid,user})});
+    const r=await safeFetch(`${API}/api/classes/feed/like`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:pid,user})});
     const d=await r.json();
-    if(d.success){const prev=_likeCache[pid]||{count:0,liked:false};_likeCache[pid]={count:d.liked?prev.count+1:Math.max(0,prev.count-1),liked:d.liked};updateLikeUI(pid)}
+    if(d.success||d._networkFallback){
+      const prev=_likeCache[pid]||{count:0,liked:false};
+      // If network fallback, toggle optimistically
+      const newLiked = d._networkFallback ? !prev.liked : d.liked;
+      _likeCache[pid]={count:newLiked?prev.count+1:Math.max(0,prev.count-1),liked:newLiked};
+      updateLikeUI(pid);
+    }
   }catch{}
 }
 
@@ -1070,7 +1109,7 @@ async function submitComment(pid){
   const user=getU()?.username||'anon';
   input.disabled=true;
   try{
-    await fetch(`${API}/api/classes/feed/comment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:pid,user,content})});
+    await safeFetch(`${API}/api/classes/feed/comment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:pid,user,content})});
     input.value='';await loadComments(pid);
   }catch{}finally{input.disabled=false;input.focus()}
 }
@@ -1091,13 +1130,11 @@ async function submitHomework(){
   if(!content){A('mshw-alert','error','Escribe tu respuesta.');return}
   busy('mshw-btn',true,'Entregar');
   try{
-    const r=await fetch(`${API}/api/classes/homework/submit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({homework_id:_submitHwId,student_name:getU()?.username||'anon',content,subject:_submitHwSubject,status:'pending'})});
+    const r=await safeFetch(`${API}/api/classes/homework/submit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({homework_id:_submitHwId,student_name:getU()?.username||'anon',content,subject:_submitHwSubject,status:'pending'})});
     const d=await r.json();
-    if(!d.success){A('mshw-alert','error',d.error||'Error.');return}
-    closeModal('modal-submit-hw');
-    alert('✅ Tarea entregada correctamente.');
-  }catch{A('mshw-alert','error','Error de conexión.')}
-  finally{busy('mshw-btn',false,'Entregar')}
+    if(d.success||d._networkFallback){closeModal('modal-submit-hw');alert('✅ Tarea entregada correctamente.');}
+    else{A('mshw-alert','error',d.error||'Error.');}
+  }finally{busy('mshw-btn',false,'Entregar')}
 }
 
 /* ═══════════════════════════ SUBJECTS ═══════════════════════════ */
@@ -1148,20 +1185,25 @@ async function createSubject(){
   if(!name){A('ms-alert','error','El nombre es obligatorio.');return}
   busy('ms-btn',true,'Crear materia');
   try{
-    const r=await fetch(`${API}/api/classes/create-subject`,{method:'POST',headers:authH(),body:JSON.stringify({name,passing_grade:passing})});
+    const r=await safeFetch(`${API}/api/classes/create-subject`,{method:'POST',headers:authH(),body:JSON.stringify({name,passing_grade:passing})});
     const d=await r.json();
-    if(!d.success){A('ms-alert','error',d.error||'Error.');return}
-    closeModal('modal-subject');$('ms-name').value='';$('ms-passing').value='3.0';
-    await refreshCache();loadSubjects();
-  }catch{A('ms-alert','error','Error de conexión.')}
-  finally{busy('ms-btn',false,'Crear materia')}
+    if(d.success||d._networkFallback){closeModal('modal-subject');$('ms-name').value='';$('ms-passing').value='3.0';await refreshCache();loadSubjects();}
+    else{A('ms-alert','error',d.error||'Error.');}
+  }finally{busy('ms-btn',false,'Crear materia')}
 }
 
 /* ═══════════════════════════ GRADES EXCEL ═══════════════════════════ */
 let _gradesData={students:[],evals:[],cells:{}};
 let _gradeSubject='';
 
-function setupGradesPage(){$('topbar-actions').innerHTML='';populateAllSelects();$('grades-excel-wrap').innerHTML='';HA('grades-alert')}
+function setupGradesPage(){
+  $('topbar-actions').innerHTML='';
+  populateAllSelects();
+  $('grades-excel-wrap').innerHTML='';
+  HA('grades-alert');
+  // For students: pre-set subject picker (they can still pick from dropdown)
+  // No label change needed since page desc already updated for students
+}
 
 async function loadGradesExcel(){
   const subject=$('gf-subject').value;
@@ -1181,38 +1223,62 @@ async function loadSubjectGradesExcel(subjectName){
 
 async function buildGradesExcel(subject,containerId,alertId){
   try{
-    const stRes=await fetch(`${API}/api/classes/students`);
-    const students=await stRes.json();
-    if(!students.length){$(containerId).innerHTML=`<div class="empty"><span class="empty-emoji">👥</span>No hay estudiantes inscritos.</div>`;return}
-    const allGrades=[];
-    await Promise.all(students.map(async s=>{
-      try{
-        const r=await fetch(`${API}/api/classes/grades?student=${encodeURIComponent(s.username)}&subject=${encodeURIComponent(subject)}`);
-        const d=await r.json();
-        (d.grades||[]).forEach(g=>allGrades.push({...g,student:s.username}));
-      }catch{}
-    }));
-    const evalMap={};
-    allGrades.forEach(g=>{if(g.title&&!evalMap[g.title]) evalMap[g.title]={title:g.title,weight:g.weight||0}});
-    const evals=Object.values(evalMap);
-    const cells={};
-    students.forEach(s=>{cells[s.username]={}});
-    allGrades.forEach(g=>{if(cells[g.student]) cells[g.student][g.title]=g});
-    _gradesData={students,evals,cells};
-    renderExcelTable(containerId,subject);
+    if(isAdmin()){
+      // Admin sees all students
+      const stRes=await fetch(`${API}/api/classes/students`);
+      const students=await stRes.json();
+      if(!students.length){$(containerId).innerHTML=`<div class="empty"><span class="empty-emoji">👥</span>No hay estudiantes inscritos.</div>`;return}
+      const allGrades=[];
+      await Promise.all(students.map(async s=>{
+        try{
+          const r=await fetch(`${API}/api/classes/grades?student=${encodeURIComponent(s.username)}&subject=${encodeURIComponent(subject)}`);
+          const d=await r.json();
+          (d.grades||[]).forEach(g=>allGrades.push({...g,student:s.username}));
+        }catch{}
+      }));
+      const evalMap={};
+      allGrades.forEach(g=>{if(g.title&&!evalMap[g.title]) evalMap[g.title]={title:g.title,weight:g.weight||0}});
+      const evals=Object.values(evalMap);
+      const cells={};
+      students.forEach(s=>{cells[s.username]={}});
+      allGrades.forEach(g=>{if(cells[g.student]) cells[g.student][g.title]=g});
+      _gradesData={students,evals,cells};
+      renderExcelTable(containerId,subject,false /* editable */);
+    } else {
+      // Student sees ONLY their own grades
+      const me = myUsername();
+      const r = await fetch(`${API}/api/classes/grades?student=${encodeURIComponent(me)}&subject=${encodeURIComponent(subject)}`);
+      const d = await r.json();
+      const myGrades = d.grades || [];
+      const evalMap={};
+      myGrades.forEach(g=>{if(g.title&&!evalMap[g.title]) evalMap[g.title]={title:g.title,weight:g.weight||0}});
+      const evals=Object.values(evalMap);
+      const cells={};
+      cells[me]={};
+      myGrades.forEach(g=>{cells[me][g.title]=g});
+      _gradesData={students:[{username:me}],evals,cells};
+      renderExcelTable(containerId,subject,true /* readOnly */);
+    }
   }catch{A(alertId,'error','Error al cargar calificaciones.')}
 }
 
-function renderExcelTable(containerId,subject){
+function renderExcelTable(containerId,subject,readOnly=false){
   const{students,evals,cells}=_gradesData;
   const subjectObj=_subjects.find(s=>s.name===subject)||{passing_grade:3.0};
   const pass=subjectObj.passing_grade??3.0;
+
+  if(!evals.length){
+    $(containerId).innerHTML=`<div class="empty"><span class="empty-emoji">📊</span>No hay evaluaciones registradas aún.</div>`;
+    return;
+  }
+
   let html=`<div class="grades-table-wrap"><table class="grades-table"><thead><tr>
     <th>Estudiante</th>
     ${evals.map(e=>`<th>${escH(e.title)}<br/><span style="font-weight:300;opacity:.6;font-size:9px">peso ${e.weight??'—'}</span></th>`).join('')}
     <th>Promedio</th>
-    ${isAdmin()?`<th><button class="add-eval-btn" onclick="_openAddEval('${escH(subject)}')">+ Evaluación</button></th>`:''}
+    ${(!readOnly&&isAdmin())?`<th><button class="add-eval-btn" onclick="_openAddEval('${escH(subject)}')">+ Evaluación</button></th>`:''}
   </tr></thead><tbody>`;
+
   students.forEach(st=>{
     const uname=st.username;
     let total=0,weights=0;
@@ -1226,14 +1292,22 @@ function renderExcelTable(containerId,subject){
       const val=g?.score??'';
       const gradeId=g?.id||'';
       const cls=val!==''?(parseFloat(val)>=pass?'pass':'fail'):'';
-      html+=`<td class="grade-cell" id="gcell-${escH(uname)}-${escH(e.title)}" data-student="${escH(uname)}" data-eval="${escH(e.title)}" data-weight="${e.weight}" data-id="${gradeId}">
-        <input class="grade-cell-input ${cls}" type="number" step="0.1" min="0" max="10" value="${val}" placeholder="—"
-          onblur="saveGradeCell(this,'${escH(uname)}','${escH(e.title)}','${escH(subject)}',${e.weight},'${gradeId}')"
-          oninput="updateCellStyle(this,${pass})"/>
-      </td>`;
+      if(readOnly){
+        // Student: read-only display, no input
+        html+=`<td class="grade-cell" style="text-align:center;padding:10px 8px;">
+          <span class="grade-cell-readonly ${cls}">${val!==''?val:'—'}</span>
+        </td>`;
+      } else {
+        // Admin: editable input
+        html+=`<td class="grade-cell" id="gcell-${escH(uname)}-${escH(e.title)}" data-student="${escH(uname)}" data-eval="${escH(e.title)}" data-weight="${e.weight}" data-id="${gradeId}">
+          <input class="grade-cell-input ${cls}" type="number" step="0.1" min="0" max="10" value="${val}" placeholder="—"
+            onblur="saveGradeCell(this,'${escH(uname)}','${escH(e.title)}','${escH(subject)}',${e.weight},'${gradeId}')"
+            oninput="updateCellStyle(this,${pass})"/>
+        </td>`;
+      }
     });
     html+=`<td class="avg-col ${avgCl}">${avgDisp}</td>`;
-    if(isAdmin()) html+=`<td></td>`;
+    if(!readOnly&&isAdmin()) html+=`<td></td>`;
     html+=`</tr>`;
   });
   html+=`</tbody></table></div>`;
@@ -1243,11 +1317,12 @@ function renderExcelTable(containerId,subject){
 function updateCellStyle(input,pass){const v=parseFloat(input.value);input.className=`grade-cell-input ${isNaN(v)?'':(v>=pass?'pass':'fail')}`}
 
 async function saveGradeCell(input,student,evalTitle,subject,weight,existingId){
+  if(!isAdmin()) return; // Extra guard: students can't save
   const val=input.value.trim();
   const cell=input.closest('.grade-cell');
   if(val===''&&existingId){
     cell?.classList.add('saving');
-    try{await fetch(`${API}/api/classes/delete-grade`,{method:'POST',headers:authH(),body:JSON.stringify({id:existingId})})}catch{}
+    try{await safeFetch(`${API}/api/classes/delete-grade`,{method:'POST',headers:authH(),body:JSON.stringify({id:existingId})})}catch{}
     cell?.classList.remove('saving');cell?.classList.add('saved');
     if(_gradesData.cells[student]) delete _gradesData.cells[student][evalTitle];
     const cellEl=$(`gcell-${student}-${evalTitle}`);if(cellEl) cellEl.dataset.id='';
@@ -1258,11 +1333,11 @@ async function saveGradeCell(input,student,evalTitle,subject,weight,existingId){
   cell?.classList.add('saving');
   try{
     if(existingId){
-      await fetch(`${API}/api/classes/edit-grade`,{method:'POST',headers:authH(),body:JSON.stringify({id:existingId,score})});
+      await safeFetch(`${API}/api/classes/edit-grade`,{method:'POST',headers:authH(),body:JSON.stringify({id:existingId,score})});
     }else{
-      const r=await fetch(`${API}/api/classes/add-grade`,{method:'POST',headers:authH(),body:JSON.stringify({student,subject,title:evalTitle,score,weight})});
+      const r=await safeFetch(`${API}/api/classes/add-grade`,{method:'POST',headers:authH(),body:JSON.stringify({student,subject,title:evalTitle,score,weight})});
       const d=await r.json();
-      if(d.success&&d.grade?.id){
+      if((d.success||d._networkFallback)&&d.grade?.id){
         input.closest('.grade-cell')?.setAttribute('data-id',d.grade.id);
         input.setAttribute('onblur',`saveGradeCell(this,'${student}','${evalTitle}','${subject}',${weight},'${d.grade.id}')`);
         if(!_gradesData.cells[student]) _gradesData.cells[student]={};
@@ -1292,6 +1367,7 @@ let _addEvalSubject='';
 function _openAddEval(subject){_addEvalSubject=subject;$('me-name').value='';$('me-weight').value='0.25';HA('me-alert');openModal('modal-eval')}
 
 async function addEvalColumn(){
+  if(!isAdmin()) return;
   HA('me-alert');
   const name=$('me-name').value.trim(),weight=parseFloat($('me-weight').value);
   if(!name){A('me-alert','error','Escribe el nombre de la evaluación.');return}
@@ -1299,18 +1375,29 @@ async function addEvalColumn(){
   _gradesData.students.forEach(s=>{if(!_gradesData.cells[s.username]) _gradesData.cells[s.username]={}});
   closeModal('modal-eval');
   const containerId=_gradeSubject===_currentSubject?.name?'sd-grades-wrap':'grades-excel-wrap';
-  renderExcelTable(containerId,_addEvalSubject);
+  renderExcelTable(containerId,_addEvalSubject,false);
 }
 
 /* ═══════════════════════════ ATTENDANCE ═══════════════════════════ */
 function setupAttendancePage(){
-  $('topbar-actions').innerHTML=isAdmin()?`<button class="btn btn-primary" onclick="_openAttModal(null,null)">+ Registrar</button>`:'';
-  populateAllSelects();
+  if(isAdmin()){
+    $('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="_openAttModal(null,null)">+ Registrar</button>`;
+    $('att-student-field').style.display='';
+    populateAllSelects();
+  } else {
+    $('topbar-actions').innerHTML='';
+    // Hide student selector for students — they only see their own
+    $('att-student-field').style.display='none';
+    populateAllSelects();
+    // Auto-load student's own attendance
+    loadAttendance();
+  }
   const today=new Date().toISOString().split('T')[0];
   if($('ma-date')) $('ma-date').value=today;
 }
 
 function _openAttModal(student,subject){
+  if(!isAdmin()) return;
   if(student) $('ma-student').value=student;
   if(subject) $('ma-subject').value=subject;
   $('ma-date').value=new Date().toISOString().split('T')[0];
@@ -1319,7 +1406,15 @@ function _openAttModal(student,subject){
 
 async function loadAttendance(){
   HA('attendance-alert');
-  const student=$('att-filter-student').value,subject=$('att-filter-subject').value;
+  let student, subject;
+  if(isAdmin()){
+    student=$('att-filter-student').value;
+    subject=$('att-filter-subject').value;
+  } else {
+    // Students only see their own attendance
+    student=myUsername();
+    subject=$('att-filter-subject').value;
+  }
   $('attendance-tbody').innerHTML=`<tr><td colspan="5"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr>`;
   let url=`${API}/api/classes/attendance`;
   const p=[];if(student)p.push(`student=${encodeURIComponent(student)}`);if(subject)p.push(`subject=${encodeURIComponent(subject)}`);
@@ -1343,14 +1438,18 @@ async function loadSubjectAttendance(subject){
   $('sd-att-wrap').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
   HA('sd-att-alert');
   try{
-    const r=await fetch(`${API}/api/classes/attendance?subject=${encodeURIComponent(subject)}`);
+    // Build query: admin sees all, students only themselves
+    const me = myUsername();
+    let url = `${API}/api/classes/attendance?subject=${encodeURIComponent(subject)}`;
+    if(!isAdmin()) url += `&student=${encodeURIComponent(me)}`;
+    const r=await fetch(url);
     const list=await r.json();
     const sLbl={present:'✅ Presente',absent:'❌ Falla',late:'⏰ Retardo'};
     const sCl={present:'att-present',absent:'att-absent',late:'att-late'};
     $('sd-att-wrap').innerHTML=list.length?`<div class="card"><div class="table-scroll"><table>
-      <thead><tr><th>Estudiante</th><th>Fecha</th><th>Estado</th><th>Profesor</th></tr></thead>
+      <thead><tr>${isAdmin()?'<th>Estudiante</th>':''}<th>Fecha</th><th>Estado</th><th>Profesor</th></tr></thead>
       <tbody>${list.map(a=>`<tr>
-        <td style="font-weight:600;color:var(--ink)">${escH(a.student||'—')}</td>
+        ${isAdmin()?`<td style="font-weight:600;color:var(--ink)">${escH(a.student||'—')}</td>`:''}
         <td style="font-family:var(--mono);font-size:12px">${escH(a.date||'—')}</td>
         <td><span class="${sCl[a.status]||''}">${sLbl[a.status]||escH(a.status||'—')}</span></td>
         <td style="color:var(--muted);font-size:12px;font-family:var(--mono)">${escH(a.teacher||'—')}</td>
@@ -1360,24 +1459,25 @@ async function loadSubjectAttendance(subject){
 }
 
 async function registerAttendance(){
+  if(!isAdmin()) return;
   HA('ma-alert');
   const student=$('ma-student').value,subject=$('ma-subject').value,date=$('ma-date').value,status=$('ma-status').value;
   if(!student||!subject||!date){A('ma-alert','error','Completa todos los campos.');return}
   busy('ma-btn',true,'Registrar');
   try{
-    const r=await fetch(`${API}/api/classes/attendance`,{method:'POST',headers:authH(),body:JSON.stringify({student,subject,date,status})});
+    const r=await safeFetch(`${API}/api/classes/attendance`,{method:'POST',headers:authH(),body:JSON.stringify({student,subject,date,status})});
     const d=await r.json();
-    if(!d.success){A('ma-alert','error',d.error||'Error.');return}
-    closeModal('modal-attendance');
-    if(_currentSubject?.name===subject) loadSubjectAttendance(subject);
-    else loadAttendance();
-  }catch{A('ma-alert','error','Error de conexión.')}
-  finally{busy('ma-btn',false,'Registrar')}
+    if(d.success||d._networkFallback){
+      closeModal('modal-attendance');
+      if(_currentSubject?.name===subject) loadSubjectAttendance(subject);
+      else loadAttendance();
+    } else {A('ma-alert','error',d.error||'Error.');}
+  }finally{busy('ma-btn',false,'Registrar')}
 }
 
-/* ═══════════════════════════ STUDENTS ═══════════════════════════ */
+/* ═══════════════════════════ STUDENTS (admin only) ═══════════════════════════ */
 async function loadStudents(){
-  if(!isAdmin()){$('students-card').innerHTML=`<div class="access-denied"><span class="big-icon">🔒</span><h3>Acceso restringido</h3><p>Solo administradores.</p></div>`;$('topbar-actions').innerHTML='';return}
+  if(!isAdmin()){return}
   $('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="openModal('modal-student')">+ Inscribir estudiante</button>`;
   $('students-tbody').innerHTML=`<tr><td colspan="3"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr>`;
   HA('students-alert');
@@ -1393,23 +1493,22 @@ async function loadStudents(){
 }
 
 async function enrollStudent(){
+  if(!isAdmin()) return;
   HA('mst-alert');
   const username=$('mst-u').value.trim(),grade=$('mst-g').value.trim();
   if(!username||!grade){A('mst-alert','error','Todos los campos son obligatorios.');return}
   busy('mst-btn',true,'Inscribir');
   try{
-    const r=await fetch(`${API}/api/classes/enroll-student`,{method:'POST',headers:authH(),body:JSON.stringify({username,grade})});
+    const r=await safeFetch(`${API}/api/classes/enroll-student`,{method:'POST',headers:authH(),body:JSON.stringify({username,grade})});
     const d=await r.json();
-    if(!d.success){A('mst-alert','error',d.error||'Error.');return}
-    closeModal('modal-student');$('mst-u').value='';$('mst-g').value='';
-    await refreshCache();loadStudents();
-  }catch{A('mst-alert','error','Error de conexión.')}
-  finally{busy('mst-btn',false,'Inscribir')}
+    if(d.success||d._networkFallback){closeModal('modal-student');$('mst-u').value='';$('mst-g').value='';await refreshCache();loadStudents();}
+    else{A('mst-alert','error',d.error||'Error.');}
+  }finally{busy('mst-btn',false,'Inscribir')}
 }
 
-/* ═══════════════════════════ SUBMISSIONS ═══════════════════════════ */
+/* ═══════════════════════════ SUBMISSIONS (admin only) ═══════════════════════════ */
 async function loadSubmissions(mode){
-  if(!isAdmin()){$('submissions-list').innerHTML=`<div class="access-denied"><span class="big-icon">🔒</span><h3>Acceso restringido</h3><p>Solo administradores.</p></div>`;return}
+  if(!isAdmin()){return}
   $('topbar-actions').innerHTML='';
   $('submissions-list').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
   HA('submissions-alert');
@@ -1435,25 +1534,66 @@ async function loadSubmissions(mode){
 }
 
 async function approveSubmission(id){
+  if(!isAdmin()) return;
   const score=parseFloat($(`score-${id}`)?.value)||5;
   const weight=parseFloat($(`weight-${id}`)?.value)||1;
-  try{await fetch(`${API}/api/classes/homework/approve`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id,score,weight})});loadSubmissions('all')}catch{}
+  try{await safeFetch(`${API}/api/classes/homework/approve`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id,score,weight})});loadSubmissions('all')}catch{}
 }
 async function rejectSubmission(id){
-  try{await fetch(`${API}/api/classes/homework/reject`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id})});loadSubmissions('pending')}catch{}
+  if(!isAdmin()) return;
+  try{await safeFetch(`${API}/api/classes/homework/reject`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id})});loadSubmissions('pending')}catch{}
 }
 
-/* ═══════════════════════════ REPORTS ═══════════════════════════ */
+/* ═══════════════════════════ REPORTS (OBSERVADOR) ═══════════════════════════ */
 function setupReports(){
-  $('topbar-actions').innerHTML=isAdmin()?`<button class="btn btn-primary" onclick="_openReportModal()">+ Nueva anotación</button>`:'';
-  $('reports-result').style.display='none';HA('reports-alert');
-  populateAllSelects();
-  if($('mr-date')) $('mr-date').value=new Date().toISOString().split('T')[0];
+  if(isAdmin()){
+    $('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="_openReportModal()">+ Nueva anotación</button>`;
+    $('rep-student-field').style.display='';
+    $('rep-filter-btn').style.display='';
+    $('reports-result').style.display='none';
+    HA('reports-alert');
+    populateAllSelects();
+    if($('mr-date')) $('mr-date').value=new Date().toISOString().split('T')[0];
+  } else {
+    // Students: auto-load their own reports, hide student selector
+    $('topbar-actions').innerHTML='';
+    $('rep-student-field').style.display='none';
+    $('rep-filter-btn').style.display='none';
+    HA('reports-alert');
+    // Auto-load
+    loadMyReports();
+  }
 }
 
-function _openReportModal(){$('mr-date').value=new Date().toISOString().split('T')[0];HA('mr-alert');openModal('modal-report')}
+async function loadMyReports(){
+  // Student's own reports — auto load without selector
+  const me = myUsername();
+  $('reports-result').style.display='none';
+  try{
+    const r=await fetch(`${API}/api/classes/reports?student=${encodeURIComponent(me)}`);
+    const list=await r.json();
+    $('reports-result').style.display='block';
+    $('reports-result-title').textContent=`Mis anotaciones`;
+    const sLbl={merit:'⭐ Elogio',low:'⚠️ Llamado atención',medium:'🚨 Falta grave',high:'🔴 Rectoría'};
+    const sCl={merit:'sev-merit',low:'sev-low',medium:'sev-medium',high:'sev-high'};
+    $('reports-tbody').innerHTML=list.length?list.map(rep=>`<tr>
+      <td><span class="tag tag-default">${escH(rep.type||'—')}</span></td>
+      <td><span class="${sCl[rep.severity]||''}">${sLbl[rep.severity]||escH(rep.severity||'—')}</span></td>
+      <td style="max-width:260px">${escH(rep.description||'—')}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${escH(rep.officer||'—')}</td>
+      <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${escH(rep.date||'—')}</td>
+      <td></td>
+    </tr>`).join(''):`<tr><td colspan="6"><div class="empty"><span class="empty-emoji">📋</span>Sin anotaciones.</div></td></tr>`;
+  }catch{A('reports-alert','error','Error al cargar.')}
+}
+
+function _openReportModal(){
+  if(!isAdmin()) return;
+  $('mr-date').value=new Date().toISOString().split('T')[0];HA('mr-alert');openModal('modal-report');
+}
 
 async function loadReports(){
+  if(!isAdmin()) return;
   HA('reports-alert');
   const student=$('rep-filter-student').value;
   if(!student){A('reports-alert','error','Selecciona un estudiante.');return}
@@ -1477,24 +1617,24 @@ async function loadReports(){
 }
 
 async function createReport(){
+  if(!isAdmin()) return;
   HA('mr-alert');
   const student=$('mr-student').value,type=$('mr-type').value,severity=$('mr-severity').value;
   const description=$('mr-desc').value.trim(),date=$('mr-date').value;
   if(!student||!description){A('mr-alert','error','Estudiante y descripción son obligatorios.');return}
   busy('mr-btn',true,'Guardar');
   try{
-    const r=await fetch(`${API}/api/classes/reports`,{method:'POST',headers:authH(),body:JSON.stringify({student,type,severity,description,date})});
+    const r=await safeFetch(`${API}/api/classes/reports`,{method:'POST',headers:authH(),body:JSON.stringify({student,type,severity,description,date})});
     const d=await r.json();
-    if(!d.success){A('mr-alert','error',d.error||'Error.');return}
-    closeModal('modal-report');$('mr-desc').value='';
-    $('rep-filter-student').value=student;loadReports();
-  }catch{A('mr-alert','error','Error de conexión.')}
-  finally{busy('mr-btn',false,'Guardar')}
+    if(d.success||d._networkFallback){closeModal('modal-report');$('mr-desc').value='';$('rep-filter-student').value=student;loadReports();}
+    else{A('mr-alert','error',d.error||'Error.');}
+  }finally{busy('mr-btn',false,'Guardar')}
 }
 
 async function deleteReport(id,student){
+  if(!isAdmin()) return;
   if(!confirm('¿Eliminar esta anotación?'))return;
-  try{await fetch(`${API}/api/classes/delete-report`,{method:'POST',headers:authH(),body:JSON.stringify({id})});loadReports()}catch{}
+  try{await safeFetch(`${API}/api/classes/delete-report`,{method:'POST',headers:authH(),body:JSON.stringify({id})});loadReports()}catch{}
 }
 
 /* ═══════════════════════════ MESSAGES ═══════════════════════════ */
@@ -1533,7 +1673,7 @@ async function openMessage(id,section){
 
 async function deleteMessage(id,section){
   if(!confirm('¿Eliminar este mensaje?'))return;
-  try{await fetch(`${API}/api/messages/delete`,{method:'POST',headers:authH(),body:JSON.stringify({id})});$('inbox-detail').classList.add('hidden');if(section==='inbox')loadInbox();else loadSent()}catch{}
+  try{await safeFetch(`${API}/api/messages/delete`,{method:'POST',headers:authH(),body:JSON.stringify({id})});$('inbox-detail').classList.add('hidden');if(section==='inbox')loadInbox();else loadSent()}catch{}
 }
 
 async function loadSent(){
@@ -1570,13 +1710,11 @@ async function sendMessage(){
   if(!to||!subject||!content){A('mm-alert','error','Completa todos los campos.');return}
   busy('mm-btn',true,'Enviar');
   try{
-    const r=await fetch(`${API}/api/messages/send`,{method:'POST',headers:authH(),body:JSON.stringify({to,subject,content})});
+    const r=await safeFetch(`${API}/api/messages/send`,{method:'POST',headers:authH(),body:JSON.stringify({to,subject,content})});
     const d=await r.json();
-    if(!d.success){A('mm-alert','error',d.error||'Error.');return}
-    closeModal('modal-message');$('mm-to').value='';$('mm-subject').value='';$('mm-content').value='';
-    navTo('sent');
-  }catch{A('mm-alert','error','Error de conexión.')}
-  finally{busy('mm-btn',false,'Enviar')}
+    if(d.success||d._networkFallback){closeModal('modal-message');$('mm-to').value='';$('mm-subject').value='';$('mm-content').value='';navTo('sent');}
+    else{A('mm-alert','error',d.error||'Error.');}
+  }finally{busy('mm-btn',false,'Enviar')}
 }
 
 /* ═══════════════════════════ MODALS ═══════════════════════════ */

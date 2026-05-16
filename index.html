@@ -234,9 +234,6 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
 /* ── SUBMIT HOMEWORK AREA ── */
 .hw-submit-area{background:var(--lime-bg);border:1.5px solid rgba(122,184,48,.3);border-radius:var(--r-lg);padding:16px 18px;margin-top:12px}
 .hw-submit-title{font-size:13px;font-weight:600;color:var(--lime-dk);margin-bottom:10px;display:flex;align-items:center;gap:7px}
-.hw-submit-form{display:flex;flex-direction:column;gap:8px}
-.hw-submit-input{background:#fff;border:1.5px solid rgba(122,184,48,.3);border-radius:var(--r);padding:9px 12px;font-size:13px;font-family:var(--sans);color:var(--ink);outline:none;resize:vertical;min-height:70px;width:100%;transition:border-color .15s}
-.hw-submit-input:focus{border-color:var(--lime-dk)}
 .hw-due-passed{background:var(--rose-bg);border:1.5px solid rgba(240,72,90,.2);border-radius:var(--r-lg);padding:12px 16px;font-size:13px;color:var(--rose);font-weight:500}
 
 /* ── EXCEL GRADES ── */
@@ -428,20 +425,18 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
 
         <!-- FEED GLOBAL -->
         <div id="page-feed" class="hidden">
-          <div class="page-head"><div class="page-head-left"><div class="eyebrow">global</div><h2>Feed Global</h2><p>Todos los anuncios y publicaciones del sistema.</p></div></div>
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">global</div><h2>Feed Global</h2><p>Anuncios y publicaciones generales del sistema.</p></div></div>
           <div id="feed-alert" class="hidden"></div>
           <div id="feed-list"><div class="empty"><span class="spinner spinner-light"></span></div></div>
         </div>
 
         <!-- SUBJECTS LIST / DETAIL -->
         <div id="page-subjects" class="hidden">
-          <!-- Subject list view -->
           <div id="subjects-list-view">
             <div class="page-head"><div class="page-head-left"><div class="eyebrow">académico</div><h2>Materias</h2><p>Selecciona una materia para ver su feed, tareas y notas.</p></div></div>
             <div id="subjects-alert" class="hidden"></div>
             <div class="subjects-grid" id="subjects-grid"><div class="empty"><span class="spinner spinner-light"></span></div></div>
           </div>
-          <!-- Subject detail view -->
           <div id="subject-detail-view" class="hidden">
             <button class="back-btn" onclick="backToSubjects()" style="margin-bottom:18px"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>Volver a materias</button>
             <div class="subject-detail-header">
@@ -519,7 +514,7 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
           <div id="submissions-list"><div class="empty"><span class="spinner spinner-light"></span></div></div>
         </div>
 
-        <!-- REPORTS / OBSERVADOR -->
+        <!-- REPORTS -->
         <div id="page-reports" class="hidden">
           <div class="page-head"><div class="page-head-left"><div class="eyebrow">gestión</div><h2>Observador</h2><p>Hoja de vida y anotaciones de estudiantes.</p></div></div>
           <div id="reports-alert" class="hidden"></div>
@@ -570,7 +565,7 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-subject')">Cancelar</button><button class="btn btn-primary" id="ms-btn" onclick="createSubject()">Crear materia</button></div></div>
 </div>
 
-<!-- Feed Post (global & per-subject) -->
+<!-- Feed Post Global -->
 <div id="modal-feed" class="modal-overlay hidden">
   <div class="modal"><div class="modal-header"><span class="modal-title" id="modal-feed-title">Nueva publicación</span><button class="modal-close" onclick="closeModal('modal-feed')">×</button></div>
   <div class="modal-body"><div id="mf-alert" class="hidden"></div>
@@ -582,7 +577,19 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
   <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-feed')">Cancelar</button><button class="btn btn-primary" id="mf-btn" onclick="createFeedPost()">Publicar</button></div></div>
 </div>
 
-<!-- Submit Homework (student) -->
+<!-- Feed Post Materia (subject-feed) -->
+<div id="modal-subject-feed" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="modal-sf-title">Publicar en materia</span><button class="modal-close" onclick="closeModal('modal-subject-feed')">×</button></div>
+  <div class="modal-body"><div id="msf-alert" class="hidden"></div>
+    <div class="field"><label>Tipo</label><select id="msf-type"><option value="announcement">📢 Anuncio</option><option value="homework">📚 Tarea</option></select></div>
+    <div class="field"><label>Título</label><input id="msf-title" type="text" placeholder="Título"/></div>
+    <div class="field"><label>Contenido</label><textarea id="msf-content" placeholder="Escribe el contenido…"></textarea></div>
+    <div class="field hidden" id="msf-due-field"><label>Fecha límite (para tareas)</label><input id="msf-due" type="date"/></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-subject-feed')">Cancelar</button><button class="btn btn-primary" id="msf-btn" onclick="createSubjectFeedPost()">Publicar</button></div></div>
+</div>
+
+<!-- Submit Homework -->
 <div id="modal-submit-hw" class="modal-overlay hidden">
   <div class="modal"><div class="modal-header"><span class="modal-title">Entregar tarea</span><button class="modal-close" onclick="closeModal('modal-submit-hw')">×</button></div>
   <div class="modal-body"><div id="mshw-alert" class="hidden"></div>
@@ -663,21 +670,19 @@ const TK  = 'wobe_token';
 const UK  = 'wobe_user';
 
 /* ═══════════════════════════ UTILS ═══════════════════════════ */
-const $        = id => document.getElementById(id);
-const getT     = ()  => localStorage.getItem(TK);
-const setT     = t   => localStorage.setItem(TK, t);
-const clearT   = ()  => localStorage.removeItem(TK);
-const getU     = ()  => { try{return JSON.parse(localStorage.getItem(UK))}catch{return null} };
-const setU     = u   => localStorage.setItem(UK, JSON.stringify(u));
-const clearU   = ()  => localStorage.removeItem(UK);
-const isAdmin  = ()  => getU()?.role === 'admin';
+const $      = id => document.getElementById(id);
+const getT   = ()  => localStorage.getItem(TK);
+const setT   = t   => localStorage.setItem(TK, t);
+const clearT = ()  => localStorage.removeItem(TK);
+const getU   = ()  => { try{return JSON.parse(localStorage.getItem(UK))}catch{return null} };
+const setU   = u   => localStorage.setItem(UK, JSON.stringify(u));
+const clearU = ()  => localStorage.removeItem(UK);
+const isAdmin= ()  => getU()?.role === 'admin';
 
 function authH(){ return {'Content-Type':'application/json','Authorization':`Bearer ${getT()}`} }
-
 function A(id,type,msg){ const el=$(id); if(!el)return; el.className=`alert alert-${type}`; el.textContent=msg; el.classList.remove('hidden') }
 function HA(id){ $(id)?.classList.add('hidden') }
 function busy(id,on,lbl=''){const el=$(id);if(!el)return;el.disabled=on;el.innerHTML=on?`<span class="spinner"></span> Guardando…`:lbl}
-
 function fmtDate(s){ if(!s)return'—'; try{return new Date(s).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}catch{return s} }
 function tsRel(ts){ const d=Math.floor(Date.now()/1000)-ts; if(d<60)return'ahora'; if(d<3600)return`${Math.floor(d/60)}m`; if(d<86400)return`${Math.floor(d/3600)}h`; return`${Math.floor(d/86400)}d` }
 function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
@@ -688,7 +693,10 @@ let _students = [];
 
 async function refreshCache(){
   try{
-    const [sr,str] = await Promise.all([fetch(`${API}/api/classes/subjects`), fetch(`${API}/api/classes/students`)]);
+    const [sr,str] = await Promise.all([
+      fetch(`${API}/api/classes/subjects`),
+      fetch(`${API}/api/classes/students`)
+    ]);
     _subjects = await sr.json();
     _students = await str.json();
     $('cnt-subjects').textContent = _subjects.length;
@@ -698,21 +706,17 @@ async function refreshCache(){
 }
 
 function populateAllSelects(){
-  // all subject selects
   ['gf-subject','att-filter-subject','ma-subject'].forEach(id=>{
     const el=$(id); if(!el)return;
-    const cur = el.value;
-    const base = el.options[0] ? el.options[0].text : '';
-    el.innerHTML = `<option value="">${base}</option>` + _subjects.map(s=>`<option value="${escH(s.name)}">${escH(s.name)}</option>`).join('');
-    if(cur) el.value = cur;
+    const cur=el.value; const base=el.options[0]?.text||'';
+    el.innerHTML=`<option value="">${base}</option>`+_subjects.map(s=>`<option value="${escH(s.name)}">${escH(s.name)}</option>`).join('');
+    if(cur) el.value=cur;
   });
-  // all student selects
   ['att-filter-student','ma-student','mr-student','rep-filter-student'].forEach(id=>{
     const el=$(id); if(!el)return;
-    const cur = el.value;
-    const base = el.options[0] ? el.options[0].text : '';
-    el.innerHTML = `<option value="">${base}</option>` + _students.map(s=>`<option value="${escH(s.username)}">${escH(s.username)} — ${escH(s.grade||'')}</option>`).join('');
-    if(cur) el.value = cur;
+    const cur=el.value; const base=el.options[0]?.text||'';
+    el.innerHTML=`<option value="">${base}</option>`+_students.map(s=>`<option value="${escH(s.username)}">${escH(s.username)} — ${escH(s.grade||'')}</option>`).join('');
+    if(cur) el.value=cur;
   });
 }
 
@@ -793,7 +797,12 @@ function navTo(page){
   $(`nav-${page}`)?.classList.add('active');
   $('topbar-crumb').textContent=TITLES[page]||page;
   closeSidebar();
-  const loaders={home:loadHome,feed:loadFeedGlobal,subjects:loadSubjects,grades:setupGradesPage,attendance:setupAttendancePage,students:loadStudents,submissions:()=>loadSubmissions('pending'),reports:setupReports,inbox:loadInbox,sent:loadSent};
+  const loaders={
+    home:loadHome, feed:loadFeedGlobal, subjects:loadSubjects,
+    grades:setupGradesPage, attendance:setupAttendancePage,
+    students:loadStudents, submissions:()=>loadSubmissions('pending'),
+    reports:setupReports, inbox:loadInbox, sent:loadSent
+  };
   loaders[page]?.();
 }
 
@@ -803,10 +812,18 @@ async function loadHome(){
   const user=getU();
   if(user){$('welcome-name').textContent=user.username;$('welcome-sub').textContent=`Rol: ${user.role} · sesión activa`;$('welcome-badge').textContent=user.role==='admin'?'⚡ Admin':'Estudiante'}
   try{
-    const[sr,hr,str,fr,subr]=await Promise.all([fetch(`${API}/api/classes/subjects`),fetch(`${API}/api/classes/homework`),fetch(`${API}/api/classes/students`),fetch(`${API}/api/classes/feed`),fetch(`${API}/api/classes/homework/pending`)]);
+    const[sr,hr,str,fr,subr]=await Promise.all([
+      fetch(`${API}/api/classes/subjects`),
+      fetch(`${API}/api/classes/homework`),
+      fetch(`${API}/api/classes/students`),
+      fetch(`${API}/api/classes/feed`),
+      fetch(`${API}/api/classes/homework/pending`)
+    ]);
     const[subs,hws,sts,feed,pend]=await Promise.all([sr.json(),hr.json(),str.json(),fr.json(),subr.json()]);
-    $('cnt-subjects').textContent=subs.length;$('cnt-homework')&&($('cnt-homework').textContent=hws.length);
-    $('cnt-students').textContent=sts.length;$('cnt-feed').textContent=feed.length;$('cnt-submissions').textContent=pend.length;
+    $('cnt-subjects').textContent=subs.length;
+    $('cnt-students').textContent=sts.length;
+    $('cnt-feed').textContent=feed.length;
+    $('cnt-submissions').textContent=pend.length;
     $('home-stats').innerHTML=`
       <div class="stat-card"><div class="stat-label">Materias</div><div class="stat-value accent">${subs.length}</div><div class="stat-sub">registradas</div></div>
       <div class="stat-card"><div class="stat-label">Tareas</div><div class="stat-value">${hws.length}</div><div class="stat-sub">asignadas</div></div>
@@ -815,28 +832,30 @@ async function loadHome(){
   }catch{A('home-alert','error','Error al cargar datos.');$('home-alert').classList.remove('hidden')}
 }
 
-/* ═══════════════════════════ FEED (global) ═══════════════════════════ */
-let _feedPosts=[];
+/* ═══════════════════════════ FEED GLOBAL ═══════════════════════════ */
+/*
+ * El feed GLOBAL usa /api/classes/feed (GET) y /api/classes/feed/create (POST).
+ * Solo muestra posts SIN subject (publicaciones generales del sistema).
+ */
 const _likeCache={};
 const _cmtOpen=new Set();
-let _feedSubject=null; // null = global, string = subject name
 
 async function loadFeedGlobal(){
-  _feedSubject=null;
-  $('topbar-actions').innerHTML=isAdmin()?`<button class="btn btn-primary" onclick="_openFeedModal(null)">+ Publicar</button>`:'';
+  $('topbar-actions').innerHTML=isAdmin()?`<button class="btn btn-primary" onclick="openGlobalFeedModal()">+ Publicar</button>`:'';
   HA('feed-alert');
   $('feed-list').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
   try{
     const r=await fetch(`${API}/api/classes/feed`);
-    _feedPosts=await r.json();
-    $('cnt-feed').textContent=_feedPosts.length;
-    renderFeedList('feed-list',_feedPosts,null);
+    const all=await r.json();
+    // Solo posts globales: aquellos sin subject asignado
+    const globalPosts=all.filter(p=>!p.subject);
+    $('cnt-feed').textContent=globalPosts.length;
+    renderFeedList('feed-list', globalPosts);
   }catch{A('feed-alert','error','Error al cargar feed.')}
 }
 
-function _openFeedModal(subjectName){
-  _feedSubject=subjectName;
-  $('modal-feed-title').textContent=subjectName?`Publicar en ${subjectName}`:'Nueva publicación';
+function openGlobalFeedModal(){
+  $('modal-feed-title').textContent='Nueva publicación global';
   $('mf-type').value='announcement';
   $('mf-title').value='';$('mf-content').value='';$('mf-due').value='';
   $('mf-due-field').classList.add('hidden');
@@ -845,10 +864,10 @@ function _openFeedModal(subjectName){
 }
 
 $('mf-type')?.addEventListener('change',()=>{
-  const isHw=$('mf-type').value==='homework';
-  $('mf-due-field').classList.toggle('hidden',!isHw);
+  $('mf-due-field').classList.toggle('hidden',$('mf-type').value!=='homework');
 });
 
+// Publica en el feed GLOBAL (sin subject)
 async function createFeedPost(){
   HA('mf-alert');
   const type=$('mf-type').value,title=$('mf-title').value.trim(),content=$('mf-content').value.trim();
@@ -857,94 +876,212 @@ async function createFeedPost(){
   busy('mf-btn',true,'Publicar');
   try{
     const body={title,content,type};
-    if(_feedSubject) body.subject=_feedSubject;
+    // NO enviamos subject → queda como post global
     if(type==='homework'&&due) body.due_date=due;
     const r=await fetch(`${API}/api/classes/feed/create`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
     const d=await r.json();
     if(!d.success){A('mf-alert','error',d.error||'Error.');return}
     closeModal('modal-feed');
-    if(_feedSubject) loadSubjectFeed(_feedSubject);
-    else loadFeedGlobal();
+    loadFeedGlobal();
   }catch{A('mf-alert','error','Error de conexión.')}
   finally{busy('mf-btn',false,'Publicar')}
 }
 
-async function deleteFeedPost(id){
+async function deleteFeedPost(id, isSubjectPost=false){
   if(!confirm('¿Eliminar esta publicación?'))return;
+  // Ambos tipos usan el mismo endpoint de borrado
+  const endpoint = isSubjectPost
+    ? `${API}/api/classes/subject-feed/delete`
+    : `${API}/api/classes/feed/delete`;
   try{
-    await fetch(`${API}/api/classes/feed/delete`,{method:'POST',headers:authH(),body:JSON.stringify({id})});
-    if(_currentSubject) loadSubjectFeed(_currentSubject.name);
+    await fetch(endpoint,{method:'POST',headers:authH(),body:JSON.stringify({id})});
+    if(isSubjectPost && _currentSubject) loadSubjectFeed(_currentSubject.name);
     else loadFeedGlobal();
   }catch{}
 }
 
-function renderFeedList(containerId,posts,subjectFilter){
-  const filtered=subjectFilter?posts.filter(p=>p.subject===subjectFilter):posts;
-  const container=$(containerId);
-  if(!filtered.length){container.innerHTML=`<div class="empty"><span class="empty-emoji">📭</span>No hay publicaciones aún.</div>`;return}
-  container.innerHTML=filtered.map(p=>renderFeedCard(p)).join('');
-  requestAnimationFrame(()=>filtered.forEach(p=>loadLikes(p.id)));
+/* ═══════════════════════════ FEED DE MATERIA ═══════════════════════════ */
+/*
+ * El feed por MATERIA usa /api/classes/subject-feed (GET?subject=X)
+ * y /api/classes/subject-feed/create (POST).
+ * Completamente separado del feed global.
+ */
+let _currentSubjectFeedName = '';
+
+function openSubjectFeedModal(subjectName){
+  _currentSubjectFeedName = subjectName;
+  $('modal-sf-title').textContent = `Publicar en ${subjectName}`;
+  $('msf-type').value='announcement';
+  $('msf-title').value='';$('msf-content').value='';$('msf-due').value='';
+  $('msf-due-field').classList.add('hidden');
+  HA('msf-alert');
+  openModal('modal-subject-feed');
 }
 
-function renderFeedCard(p){
+$('msf-type')?.addEventListener('change',()=>{
+  $('msf-due-field').classList.toggle('hidden',$('msf-type').value!=='homework');
+});
+
+// Publica en el feed de la MATERIA usando subject-feed/create
+async function createSubjectFeedPost(){
+  HA('msf-alert');
+  const type=$('msf-type').value,title=$('msf-title').value.trim(),content=$('msf-content').value.trim();
+  const due=$('msf-due').value;
+  if(!title||!content){A('msf-alert','error','Título y contenido son obligatorios.');return}
+  busy('msf-btn',true,'Publicar');
+  try{
+    const body={title,content,type,subject:_currentSubjectFeedName};
+    if(type==='homework'&&due) body.due_date=due;
+    const r=await fetch(`${API}/api/classes/subject-feed/create`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
+    const d=await r.json();
+    if(!d.success){A('msf-alert','error',d.error||'Error.');return}
+    closeModal('modal-subject-feed');
+    loadSubjectFeed(_currentSubjectFeedName);
+  }catch{A('msf-alert','error','Error de conexión.')}
+  finally{busy('msf-btn',false,'Publicar')}
+}
+
+// Carga el feed de una materia desde /api/classes/subject-feed?subject=X
+async function loadSubjectFeed(subjectName){
+  $('topbar-actions').innerHTML=isAdmin()
+    ?`<button class="btn btn-primary" onclick="openSubjectFeedModal('${escH(subjectName)}')">+ Publicar en materia</button>`
+    :'';
+  HA('sd-feed-alert');
+  $('sd-feed-list').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  try{
+    const r=await fetch(`${API}/api/classes/subject-feed?subject=${encodeURIComponent(subjectName)}`);
+    const posts=await r.json();
+    renderFeedList('sd-feed-list', posts, true /* isSubjectFeed */);
+  }catch{A('sd-feed-alert','error','Error al cargar feed de materia.')}
+}
+
+/* ═══════════════════════════ RENDER FEED CARDS ═══════════════════════════ */
+function renderFeedList(containerId, posts, isSubjectFeed=false){
+  const container=$(containerId);
+  if(!posts.length){container.innerHTML=`<div class="empty"><span class="empty-emoji">📭</span>No hay publicaciones aún.</div>`;return}
+  container.innerHTML=posts.map(p=>renderFeedCard(p, isSubjectFeed)).join('');
+  requestAnimationFrame(()=>posts.forEach(p=>loadLikes(p.id)));
+}
+
+function renderFeedCard(p, isSubjectFeed=false){
   const type=p.type||'announcement';
   const lbl=type==='homework'?'Tarea':'Anuncio';
   const tagCl=type==='homework'?'tag-blue':'tag-amber';
   const canDel=isAdmin()||getU()?.username===p.author;
-  const now=Math.floor(Date.now()/1000);
   const isPastDue=p.due_date&&new Date(p.due_date).getTime()<Date.now();
   const isStudent=!isAdmin();
+
   let submitArea='';
-  if(type==='homework'){
-    if(isStudent){
-      if(isPastDue) submitArea=`<div class="hw-due-passed">⏰ Fecha límite pasada — ya no se pueden entregar respuestas.</div>`;
-      else submitArea=`<div class="hw-submit-area"><div class="hw-submit-title">📤 Entregar tarea</div><button class="btn btn-accent btn-sm" onclick="openSubmitHw('${p.id}','${escH(p.title||'')}','${escH(p.subject||'')}')">Entregar respuesta</button>${p.due_date?`<span style="font-size:12px;color:var(--lime-dk);margin-left:10px">Límite: ${fmtDate(p.due_date)}</span>`:''}</div>`;
-    }
+  if(type==='homework'&&isStudent){
+    submitArea=isPastDue
+      ?`<div class="hw-due-passed">⏰ Fecha límite pasada — ya no se pueden entregar respuestas.</div>`
+      :`<div class="hw-submit-area"><div class="hw-submit-title">📤 Entregar tarea</div>
+         <button class="btn btn-accent btn-sm" onclick="openSubmitHw('${p.id}','${escH(p.title||'')}','${escH(p.subject||'')}')">Entregar respuesta</button>
+         ${p.due_date?`<span style="font-size:12px;color:var(--lime-dk);margin-left:10px">Límite: ${fmtDate(p.due_date)}</span>`:''}
+        </div>`;
   }
+
+  const delCall=isSubjectFeed
+    ?`deleteFeedPost('${p.id}',true)`
+    :`deleteFeedPost('${p.id}',false)`;
+
   return`
   <div class="feed-card" id="fcard-${p.id}">
     <div class="feed-type-bar ${type}"></div>
     <div class="feed-body">
-      <div class="feed-meta"><span class="tag ${tagCl}">${lbl}</span>${p.subject?`<span class="tag tag-default">${escH(p.subject)}</span>`:''}<span class="feed-date">${tsRel(p.timestamp)}</span></div>
+      <div class="feed-meta">
+        <span class="tag ${tagCl}">${lbl}</span>
+        ${p.subject?`<span class="tag tag-default">${escH(p.subject)}</span>`:''}
+        <span class="feed-date">${tsRel(p.timestamp)}</span>
+      </div>
       <div class="feed-title">${escH(p.title||'')}</div>
       <div class="feed-content">${escH(p.content||'')}</div>
       ${p.due_date?`<div style="margin-top:8px;font-size:12px;color:var(--muted);font-family:var(--mono)">📅 Límite: <strong style="color:${isPastDue?'var(--rose)':'var(--body)'}">${fmtDate(p.due_date)}</strong></div>`:''}
       ${submitArea}
     </div>
     <div class="feed-footer">
-      <div class="feed-author"><div class="feed-author-dot">${(p.author||'?').charAt(0).toUpperCase()}</div>${escH(p.author||'Anónimo')}</div>
+      <div class="feed-author">
+        <div class="feed-author-dot">${(p.author||'?').charAt(0).toUpperCase()}</div>
+        ${escH(p.author||'Anónimo')}
+      </div>
       <div class="feed-actions">
         <button class="like-btn" id="like-btn-${p.id}" onclick="toggleLike('${p.id}')">♡ <span id="like-cnt-${p.id}">…</span></button>
         <button class="cmt-toggle" onclick="toggleComments('${p.id}')">💬 <span id="cmt-cnt-${p.id}">…</span></button>
-        ${canDel?`<button class="feed-del-btn" onclick="deleteFeedPost('${p.id}')" title="Eliminar">✕</button>`:''}
+        ${canDel?`<button class="feed-del-btn" onclick="${delCall}" title="Eliminar">✕</button>`:''}
       </div>
     </div>
     <div class="comments-wrap hidden" id="cmts-${p.id}">
       <div id="cmts-list-${p.id}"></div>
-      <div class="cmt-form"><input class="cmt-input" id="cmt-input-${p.id}" type="text" placeholder="Comenta…"/><button class="cmt-send" onclick="submitComment('${p.id}')">Enviar</button></div>
+      <div class="cmt-form">
+        <input class="cmt-input" id="cmt-input-${p.id}" type="text" placeholder="Comenta…"/>
+        <button class="cmt-send" onclick="submitComment('${p.id}')">Enviar</button>
+      </div>
     </div>
   </div>`;
 }
 
-// Likes
+/* ── Likes ── */
 async function loadLikes(pid){
-  try{const r=await fetch(`${API}/api/classes/feed/post/${pid}/likes`);const d=await r.json();const me=getU()?.username||'';const liked=d.likes?.some(l=>l.user===me);_likeCache[pid]={count:d.count,liked};updateLikeUI(pid)}catch{}
+  try{
+    const r=await fetch(`${API}/api/classes/feed/post/${pid}/likes`);
+    const d=await r.json();
+    const me=getU()?.username||'';
+    const liked=d.likes?.some(l=>l.user===me);
+    _likeCache[pid]={count:d.count,liked};
+    updateLikeUI(pid);
+  }catch{}
 }
-function updateLikeUI(pid){const{count=0,liked=false}=_likeCache[pid]||{};const btn=$(`like-btn-${pid}`);if(btn){btn.innerHTML=`${liked?'♥':'♡'} <span id="like-cnt-${pid}">${count}</span>`;btn.classList.toggle('liked',liked)}}
-async function toggleLike(pid){const user=getU()?.username||'anon';try{const r=await fetch(`${API}/api/classes/feed/like`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:pid,user})});const d=await r.json();if(d.success){const prev=_likeCache[pid]||{count:0,liked:false};_likeCache[pid]={count:d.liked?prev.count+1:Math.max(0,prev.count-1),liked:d.liked};updateLikeUI(pid)}}catch{}}
+function updateLikeUI(pid){
+  const{count=0,liked=false}=_likeCache[pid]||{};
+  const btn=$(`like-btn-${pid}`);
+  if(btn){btn.innerHTML=`${liked?'♥':'♡'} <span id="like-cnt-${pid}">${count}</span>`;btn.classList.toggle('liked',liked)}
+}
+async function toggleLike(pid){
+  const user=getU()?.username||'anon';
+  try{
+    const r=await fetch(`${API}/api/classes/feed/like`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:pid,user})});
+    const d=await r.json();
+    if(d.success){const prev=_likeCache[pid]||{count:0,liked:false};_likeCache[pid]={count:d.liked?prev.count+1:Math.max(0,prev.count-1),liked:d.liked};updateLikeUI(pid)}
+  }catch{}
+}
 
-// Comments
-async function toggleComments(pid){const wrap=$(`cmts-${pid}`);if(!wrap)return;if(_cmtOpen.has(pid)){wrap.classList.add('hidden');_cmtOpen.delete(pid);return}wrap.classList.remove('hidden');_cmtOpen.add(pid);await loadComments(pid)}
-async function loadComments(pid){const list=$(`cmts-list-${pid}`);if(!list)return;list.innerHTML=`<div style="padding:6px 0"><span class="spinner spinner-light"></span></div>`;try{const r=await fetch(`${API}/api/classes/feed/post/${pid}/comments`);const d=await r.json();const cmts=d.comments||[];$(`cmt-cnt-${pid}`).textContent=cmts.length;list.innerHTML=cmts.length?cmts.map(c=>`<div class="cmt-item"><div class="cmt-av">${(c.user||'?').charAt(0).toUpperCase()}</div><div><div class="cmt-user">${escH(c.user||'')}</div><div class="cmt-text">${escH(c.content||'')}</div></div></div>`).join(''):`<p style="font-size:12px;color:var(--muted);padding:4px 0">Sin comentarios.</p>`}catch{list.innerHTML='<p style="font-size:12px;color:var(--muted)">Error al cargar.</p>'}}
-async function submitComment(pid){const input=$(`cmt-input-${pid}`);if(!input)return;const content=input.value.trim();if(!content)return;const user=getU()?.username||'anon';input.disabled=true;try{await fetch(`${API}/api/classes/feed/comment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:pid,user,content})});input.value='';await loadComments(pid)}catch{}finally{input.disabled=false;input.focus()}}
+/* ── Comments ── */
+async function toggleComments(pid){
+  const wrap=$(`cmts-${pid}`);if(!wrap)return;
+  if(_cmtOpen.has(pid)){wrap.classList.add('hidden');_cmtOpen.delete(pid);return}
+  wrap.classList.remove('hidden');_cmtOpen.add(pid);await loadComments(pid);
+}
+async function loadComments(pid){
+  const list=$(`cmts-list-${pid}`);if(!list)return;
+  list.innerHTML=`<div style="padding:6px 0"><span class="spinner spinner-light"></span></div>`;
+  try{
+    const r=await fetch(`${API}/api/classes/feed/post/${pid}/comments`);
+    const d=await r.json();
+    const cmts=d.comments||[];
+    $(`cmt-cnt-${pid}`).textContent=cmts.length;
+    list.innerHTML=cmts.length
+      ?cmts.map(c=>`<div class="cmt-item"><div class="cmt-av">${(c.user||'?').charAt(0).toUpperCase()}</div><div><div class="cmt-user">${escH(c.user||'')}</div><div class="cmt-text">${escH(c.content||'')}</div></div></div>`).join('')
+      :`<p style="font-size:12px;color:var(--muted);padding:4px 0">Sin comentarios.</p>`;
+  }catch{list.innerHTML='<p style="font-size:12px;color:var(--muted)">Error al cargar.</p>'}
+}
+async function submitComment(pid){
+  const input=$(`cmt-input-${pid}`);if(!input)return;
+  const content=input.value.trim();if(!content)return;
+  const user=getU()?.username||'anon';
+  input.disabled=true;
+  try{
+    await fetch(`${API}/api/classes/feed/comment`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({post_id:pid,user,content})});
+    input.value='';await loadComments(pid);
+  }catch{}finally{input.disabled=false;input.focus()}
+}
 
 /* ═══════════════════════════ SUBMIT HOMEWORK ═══════════════════════════ */
-let _submitHwId='', _submitHwSubject='';
+let _submitHwId='',_submitHwSubject='';
 
 function openSubmitHw(hwId,title,subject){
-  _submitHwId=hwId; _submitHwSubject=subject;
+  _submitHwId=hwId;_submitHwSubject=subject;
   $('mshw-desc').textContent=`Tarea: ${title}`;
-  $('mshw-content').value=''; HA('mshw-alert');
+  $('mshw-content').value='';HA('mshw-alert');
   openModal('modal-submit-hw');
 }
 
@@ -969,13 +1106,14 @@ let _currentSubject=null;
 async function loadSubjects(){
   $('topbar-actions').innerHTML=isAdmin()?`<button class="btn btn-primary" onclick="openModal('modal-subject')">+ Nueva materia</button>`:'';
   $('subjects-list-view').classList.remove('hidden');$('subject-detail-view').classList.add('hidden');
-  HA('subjects-alert');$('subjects-grid').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  HA('subjects-alert');
+  $('subjects-grid').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
   try{
     const r=await fetch(`${API}/api/classes/subjects`);
     _subjects=await r.json();$('cnt-subjects').textContent=_subjects.length;
     if(!_subjects.length){$('subjects-grid').innerHTML=`<div class="empty"><span class="empty-emoji">📚</span>No hay materias aún.${isAdmin()?' Crea la primera.':''}</div>`;return}
     $('subjects-grid').innerHTML=_subjects.map(s=>`
-      <div class="subject-card" onclick="openSubject(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+      <div class="subject-card" onclick='openSubject(${JSON.stringify(s).replace(/'/g,"&#39;")})'>
         <div class="subject-icon">📚</div>
         <div class="subject-info">
           <div class="subject-name">${escH(s.name||'')}</div>
@@ -1004,18 +1142,6 @@ function sdTab(tab){
   if(tab==='attendance') loadSubjectAttendance(_currentSubject.name);
 }
 
-async function loadSubjectFeed(subjectName){
-  $('topbar-actions').innerHTML=isAdmin()?`<button class="btn btn-primary" onclick="_openFeedModal('${escH(subjectName)}')">+ Publicar en materia</button>`:'';
-  HA('sd-feed-alert');
-  $('sd-feed-list').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
-  try{
-    const r=await fetch(`${API}/api/classes/feed`);
-    const all=await r.json();
-    const filtered=all.filter(p=>p.subject===subjectName||(!p.subject&&false));
-    renderFeedList('sd-feed-list',filtered,null);
-  }catch{A('sd-feed-alert','error','Error al cargar feed de materia.')}
-}
-
 async function createSubject(){
   HA('ms-alert');
   const name=$('ms-name').value.trim(),passing=parseFloat($('ms-passing').value);
@@ -1032,16 +1158,10 @@ async function createSubject(){
 }
 
 /* ═══════════════════════════ GRADES EXCEL ═══════════════════════════ */
-// currentGradesData: { students:[], evals:[{title,weight}], cells:{student:{evalTitle:grade}} }
 let _gradesData={students:[],evals:[],cells:{}};
 let _gradeSubject='';
 
-function setupGradesPage(){
-  $('topbar-actions').innerHTML='';
-  populateAllSelects();
-  $('grades-excel-wrap').innerHTML='';
-  HA('grades-alert');
-}
+function setupGradesPage(){$('topbar-actions').innerHTML='';populateAllSelects();$('grades-excel-wrap').innerHTML='';HA('grades-alert')}
 
 async function loadGradesExcel(){
   const subject=$('gf-subject').value;
@@ -1061,15 +1181,9 @@ async function loadSubjectGradesExcel(subjectName){
 
 async function buildGradesExcel(subject,containerId,alertId){
   try{
-    // Fetch all students and grades for subject
-    const[stRes,...gradeResArr]=await Promise.all([
-      fetch(`${API}/api/classes/students`),
-      fetch(`${API}/api/classes/grades?student=__all__&subject=${encodeURIComponent(subject)}`).catch(()=>null)
-    ]);
+    const stRes=await fetch(`${API}/api/classes/students`);
     const students=await stRes.json();
     if(!students.length){$(containerId).innerHTML=`<div class="empty"><span class="empty-emoji">👥</span>No hay estudiantes inscritos.</div>`;return}
-
-    // Fetch grades per student
     const allGrades=[];
     await Promise.all(students.map(async s=>{
       try{
@@ -1078,19 +1192,13 @@ async function buildGradesExcel(subject,containerId,alertId){
         (d.grades||[]).forEach(g=>allGrades.push({...g,student:s.username}));
       }catch{}
     }));
-
-    // Build eval columns (unique titles)
     const evalMap={};
     allGrades.forEach(g=>{if(g.title&&!evalMap[g.title]) evalMap[g.title]={title:g.title,weight:g.weight||0}});
     const evals=Object.values(evalMap);
-
-    // Build cell map: cells[student][evalTitle] = grade object
     const cells={};
     students.forEach(s=>{cells[s.username]={}});
     allGrades.forEach(g=>{if(cells[g.student]) cells[g.student][g.title]=g});
-
     _gradesData={students,evals,cells};
-
     renderExcelTable(containerId,subject);
   }catch{A(alertId,'error','Error al cargar calificaciones.')}
 }
@@ -1099,23 +1207,19 @@ function renderExcelTable(containerId,subject){
   const{students,evals,cells}=_gradesData;
   const subjectObj=_subjects.find(s=>s.name===subject)||{passing_grade:3.0};
   const pass=subjectObj.passing_grade??3.0;
-
   let html=`<div class="grades-table-wrap"><table class="grades-table"><thead><tr>
     <th>Estudiante</th>
     ${evals.map(e=>`<th>${escH(e.title)}<br/><span style="font-weight:300;opacity:.6;font-size:9px">peso ${e.weight??'—'}</span></th>`).join('')}
     <th>Promedio</th>
     ${isAdmin()?`<th><button class="add-eval-btn" onclick="_openAddEval('${escH(subject)}')">+ Evaluación</button></th>`:''}
   </tr></thead><tbody>`;
-
   students.forEach(st=>{
     const uname=st.username;
-    // Calculate weighted average
     let total=0,weights=0;
     evals.forEach(e=>{const g=cells[uname]?.[e.title];if(g&&g.score!=null&&g.weight!=null){total+=g.score*g.weight;weights+=g.weight}});
     const avg=weights>0?total/weights:null;
     const avgDisp=avg!=null?avg.toFixed(2):'—';
     const avgCl=avg!=null?(avg>=pass?'avg-pass':'avg-fail'):'';
-
     html+=`<tr><td>${escH(uname)}</td>`;
     evals.forEach(e=>{
       const g=cells[uname]?.[e.title];
@@ -1136,59 +1240,41 @@ function renderExcelTable(containerId,subject){
   $(containerId).innerHTML=html;
 }
 
-function updateCellStyle(input,pass){
-  const v=parseFloat(input.value);
-  input.className=`grade-cell-input ${isNaN(v)?'':(v>=pass?'pass':'fail')}`;
-}
+function updateCellStyle(input,pass){const v=parseFloat(input.value);input.className=`grade-cell-input ${isNaN(v)?'':(v>=pass?'pass':'fail')}`}
 
 async function saveGradeCell(input,student,evalTitle,subject,weight,existingId){
   const val=input.value.trim();
   const cell=input.closest('.grade-cell');
-
   if(val===''&&existingId){
-    // Delete grade
     cell?.classList.add('saving');
-    try{await fetch(`${API}/api/classes/delete-grade`,{method:'POST',headers:authH(),body:JSON.stringify({id:existingId})});}catch{}
-    cell?.classList.remove('saving');
-    cell?.classList.add('saved');
-    // Update local data
+    try{await fetch(`${API}/api/classes/delete-grade`,{method:'POST',headers:authH(),body:JSON.stringify({id:existingId})})}catch{}
+    cell?.classList.remove('saving');cell?.classList.add('saved');
     if(_gradesData.cells[student]) delete _gradesData.cells[student][evalTitle];
     const cellEl=$(`gcell-${student}-${evalTitle}`);if(cellEl) cellEl.dataset.id='';
-    setTimeout(()=>cell?.classList.remove('saved'),800);
-    return;
+    setTimeout(()=>cell?.classList.remove('saved'),800);return;
   }
-
   const score=parseFloat(val);
   if(isNaN(score)||val==='') return;
   cell?.classList.add('saving');
-
   try{
     if(existingId){
-      // Edit existing
       await fetch(`${API}/api/classes/edit-grade`,{method:'POST',headers:authH(),body:JSON.stringify({id:existingId,score})});
     }else{
-      // Create new
       const r=await fetch(`${API}/api/classes/add-grade`,{method:'POST',headers:authH(),body:JSON.stringify({student,subject,title:evalTitle,score,weight})});
       const d=await r.json();
       if(d.success&&d.grade?.id){
-        // update cell data-id
-        if(input.closest('.grade-cell')) input.closest('.grade-cell').dataset.id=d.grade.id;
         input.closest('.grade-cell')?.setAttribute('data-id',d.grade.id);
-        // update onblur attr
         input.setAttribute('onblur',`saveGradeCell(this,'${student}','${evalTitle}','${subject}',${weight},'${d.grade.id}')`);
-        // store in local cache
         if(!_gradesData.cells[student]) _gradesData.cells[student]={};
         _gradesData.cells[student][evalTitle]=d.grade;
       }
     }
   }catch{}
-  cell?.classList.remove('saving');
-  cell?.classList.add('saved');
+  cell?.classList.remove('saving');cell?.classList.add('saved');
   setTimeout(()=>{cell?.classList.remove('saved');refreshRowAvg(student,subject)},700);
 }
 
 function refreshRowAvg(student,subject){
-  // Recalculate avg for this student row
   const subjectObj=_subjects.find(s=>s.name===subject)||{passing_grade:3.0};
   const pass=subjectObj.passing_grade??3.0;
   let total=0,weights=0;
@@ -1198,9 +1284,8 @@ function refreshRowAvg(student,subject){
     if(!isNaN(v)&&e.weight){total+=v*e.weight;weights+=e.weight}
   });
   const avg=weights>0?total/weights:null;
-  // find avg cell in row (after all eval cells + 1)
   const row=document.querySelector(`#gcell-${student}-${_gradesData.evals[0]?.title}`)?.closest('tr');
-  if(row){const avgCell=row.querySelector('.avg-col');if(avgCell){avgCell.textContent=avg!=null?avg.toFixed(2):'—';avgCell.className=`avg-col ${avg!=null?(avg>=pass?'avg-pass':'avg-fail'):''}`;}}
+  if(row){const avgCell=row.querySelector('.avg-col');if(avgCell){avgCell.textContent=avg!=null?avg.toFixed(2):'—';avgCell.className=`avg-col ${avg!=null?(avg>=pass?'avg-pass':'avg-fail'):''}`}}
 }
 
 let _addEvalSubject='';
@@ -1210,9 +1295,7 @@ async function addEvalColumn(){
   HA('me-alert');
   const name=$('me-name').value.trim(),weight=parseFloat($('me-weight').value);
   if(!name){A('me-alert','error','Escribe el nombre de la evaluación.');return}
-  // Add column to local data & re-render — actual grades created when user types scores
   _gradesData.evals.push({title:name,weight});
-  // pre-fill cells
   _gradesData.students.forEach(s=>{if(!_gradesData.cells[s.username]) _gradesData.cells[s.username]={}});
   closeModal('modal-eval');
   const containerId=_gradeSubject===_currentSubject?.name?'sd-grades-wrap':'grades-excel-wrap';
@@ -1230,9 +1313,8 @@ function setupAttendancePage(){
 function _openAttModal(student,subject){
   if(student) $('ma-student').value=student;
   if(subject) $('ma-subject').value=subject;
-  const today=new Date().toISOString().split('T')[0];
-  $('ma-date').value=today; HA('ma-alert');
-  openModal('modal-attendance');
+  $('ma-date').value=new Date().toISOString().split('T')[0];
+  HA('ma-alert');openModal('modal-attendance');
 }
 
 async function loadAttendance(){
@@ -1260,9 +1342,9 @@ async function loadSubjectAttendance(subject){
   $('topbar-actions').innerHTML=isAdmin()?`<button class="btn btn-primary" onclick="_openAttModal(null,'${escH(subject)}')">+ Registrar</button>`:'';
   $('sd-att-wrap').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
   HA('sd-att-alert');
-  let url=`${API}/api/classes/attendance?subject=${encodeURIComponent(subject)}`;
   try{
-    const r=await fetch(url);const list=await r.json();
+    const r=await fetch(`${API}/api/classes/attendance?subject=${encodeURIComponent(subject)}`);
+    const list=await r.json();
     const sLbl={present:'✅ Presente',absent:'❌ Falla',late:'⏰ Retardo'};
     const sCl={present:'att-present',absent:'att-absent',late:'att-late'};
     $('sd-att-wrap').innerHTML=list.length?`<div class="card"><div class="table-scroll"><table>
@@ -1305,14 +1387,9 @@ async function loadStudents(){
     $('students-tbody').innerHTML=list.length?list.map(s=>`<tr>
       <td><strong style="color:var(--ink)">${escH(s.username||'—')}</strong></td>
       <td><span class="tag tag-default">${escH(s.grade||'—')}</span></td>
-      <td><div class="td-actions"><button class="btn btn-outline btn-sm" onclick="navToGradesStudent('${escH(s.username)}')">Ver notas →</button></div></td>
+      <td><div class="td-actions"><button class="btn btn-outline btn-sm" onclick="navTo('grades')">Ver notas →</button></div></td>
     </tr>`).join(''):`<tr><td colspan="3"><div class="empty"><span class="empty-emoji">👥</span>No hay estudiantes.</div></td></tr>`;
   }catch{A('students-alert','error','Error al cargar.')}
-}
-
-function navToGradesStudent(username){
-  navTo('grades');
-  // Student-specific grades would need subject selection — just nav there
 }
 
 async function enrollStudent(){
@@ -1360,17 +1437,10 @@ async function loadSubmissions(mode){
 async function approveSubmission(id){
   const score=parseFloat($(`score-${id}`)?.value)||5;
   const weight=parseFloat($(`weight-${id}`)?.value)||1;
-  try{
-    await fetch(`${API}/api/classes/homework/approve`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id,score,weight})});
-    loadSubmissions('all');
-  }catch{}
+  try{await fetch(`${API}/api/classes/homework/approve`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id,score,weight})});loadSubmissions('all')}catch{}
 }
-
 async function rejectSubmission(id){
-  try{
-    await fetch(`${API}/api/classes/homework/reject`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id})});
-    loadSubmissions('pending');
-  }catch{}
+  try{await fetch(`${API}/api/classes/homework/reject`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id})});loadSubmissions('pending')}catch{}
 }
 
 /* ═══════════════════════════ REPORTS ═══════════════════════════ */
@@ -1378,10 +1448,10 @@ function setupReports(){
   $('topbar-actions').innerHTML=isAdmin()?`<button class="btn btn-primary" onclick="_openReportModal()">+ Nueva anotación</button>`:'';
   $('reports-result').style.display='none';HA('reports-alert');
   populateAllSelects();
-  const today=new Date().toISOString().split('T')[0];if($('mr-date'))$('mr-date').value=today;
+  if($('mr-date')) $('mr-date').value=new Date().toISOString().split('T')[0];
 }
 
-function _openReportModal(){const today=new Date().toISOString().split('T')[0];$('mr-date').value=today;HA('mr-alert');openModal('modal-report')}
+function _openReportModal(){$('mr-date').value=new Date().toISOString().split('T')[0];HA('mr-alert');openModal('modal-report')}
 
 async function loadReports(){
   HA('reports-alert');
@@ -1401,7 +1471,7 @@ async function loadReports(){
       <td style="max-width:260px">${escH(rep.description||'—')}</td>
       <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${escH(rep.officer||'—')}</td>
       <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${escH(rep.date||'—')}</td>
-      <td>${isAdmin()?`<button class="btn btn-danger btn-xs" onclick="deleteReport('${rep.id}','${escH(student)}')">Eliminar</button>`:''}
+      <td>${isAdmin()?`<button class="btn btn-danger btn-xs" onclick="deleteReport('${rep.id}','${escH(student)}')">Eliminar</button>`:''}</td>
     </tr>`).join(''):`<tr><td colspan="6"><div class="empty"><span class="empty-emoji">📋</span>Sin anotaciones.</div></td></tr>`;
   }catch{A('reports-alert','error','Error al cargar.')}
 }
@@ -1483,7 +1553,15 @@ async function loadSent(){
 }
 
 async function openSentMsg(id){
-  try{const r=await fetch(`${API}/api/messages/read?id=${id}`);const m=await r.json();const det=$('inbox-detail');det.innerHTML=`<div class="msg-detail-from">De: ${escH(m.from||'—')} · Para: ${escH(m.to||'—')} · ${tsRel(m.timestamp)}</div><div class="msg-detail-subject">${escH(m.subject||'(sin asunto)')}</div><div class="msg-detail-body">${escH(m.content||'')}</div><div style="margin-top:16px"><button class="btn btn-ghost btn-sm" onclick="$('inbox-detail').classList.add('hidden')">Cerrar</button></div>`;det.classList.remove('hidden')}catch{}
+  try{
+    const r=await fetch(`${API}/api/messages/read?id=${id}`);const m=await r.json();
+    const det=$('inbox-detail');
+    det.innerHTML=`<div class="msg-detail-from">De: ${escH(m.from||'—')} · Para: ${escH(m.to||'—')} · ${tsRel(m.timestamp)}</div>
+      <div class="msg-detail-subject">${escH(m.subject||'(sin asunto)')}</div>
+      <div class="msg-detail-body">${escH(m.content||'')}</div>
+      <div style="margin-top:16px"><button class="btn btn-ghost btn-sm" onclick="$('inbox-detail').classList.add('hidden')">Cerrar</button></div>`;
+    det.classList.remove('hidden');
+  }catch{}
 }
 
 async function sendMessage(){
@@ -1504,7 +1582,9 @@ async function sendMessage(){
 /* ═══════════════════════════ MODALS ═══════════════════════════ */
 function openModal(id){$(id)?.classList.remove('hidden')}
 function closeModal(id){$(id)?.classList.add('hidden')}
-document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.add('hidden')})});
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.add('hidden')})
+});
 
 /* ═══════════════════════════ SIDEBAR MOBILE ═══════════════════════════ */
 function toggleSidebar(){$('sidebar').classList.toggle('open');$('mob-overlay').classList.toggle('open')}
@@ -1515,7 +1595,11 @@ window.addEventListener('resize',checkMobile);checkMobile();
 /* ═══════════════════════════ KEYBOARD ═══════════════════════════ */
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m=>m.classList.add('hidden'));
-  if(e.key==='Enter'){const av=document.querySelector('.view.active');if(!av)return;if(av.id==='view-login')doLogin();if(av.id==='view-register')doRegister();}
+  if(e.key==='Enter'){
+    const av=document.querySelector('.view.active');if(!av)return;
+    if(av.id==='view-login') doLogin();
+    if(av.id==='view-register') doRegister();
+  }
 });
 
 /* ═══════════════════════════ INIT ═══════════════════════════ */

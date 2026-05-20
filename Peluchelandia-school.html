@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Wobe Classes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,500&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --ink:#0e0f12;--ink2:#1b1d24;--paper:#f4f1ea;--paper2:#ece8df;--paper3:#e4dfd4;
+  --line:#d8d3c8;--line2:#cbc5b8;--body:#3e3c38;--muted:#8a8680;
+  --lime:#b8f060;--lime-dk:#6aaa20;--lime-bg:#f0fcd8;
+  --rose:#f0485a;--rose-bg:#fef0f2;
+  --amber:#f0921c;--amber-bg:#fef6e8;
+  --blue:#2a5fc8;--blue-bg:#ebf0fd;
+  --purple:#7c3aed;--purple-bg:#f3f0ff;
+  --r:8px;--r-lg:14px;--sidebar:236px;
+  --mono:'DM Mono',monospace;--serif:'Fraunces',serif;--sans:'Outfit',sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--body);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;mix-blend-mode:multiply}
+.view{display:none}.view.active{display:block}.hidden{display:none!important}
+/* ── AUTH ── */
+.auth-root{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.auth-left{background:var(--ink);color:var(--paper);padding:52px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.auth-left::after{content:'';position:absolute;width:460px;height:460px;border-radius:50%;border:80px solid rgba(184,240,96,.06);bottom:-160px;right:-160px;pointer-events:none}
+.wmark{display:flex;align-items:center;gap:11px}
+.wmark-icon{width:38px;height:38px;background:var(--lime);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.wmark-icon svg{width:20px;height:20px}
+.wmark-text{font-family:var(--serif);font-size:17px;font-weight:500;color:var(--paper);letter-spacing:-.3px}
+.auth-hero h1{font-family:var(--serif);font-size:48px;font-weight:300;line-height:1.15;letter-spacing:-1.5px;color:var(--paper);margin-bottom:22px}
+.auth-hero h1 em{font-style:italic;color:var(--lime)}
+.auth-pills{display:flex;flex-direction:column;gap:10px}
+.auth-pill{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(244,241,234,.55);font-family:var(--mono);font-weight:300}
+.auth-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--lime);flex-shrink:0}
+.auth-right{background:var(--paper);display:flex;align-items:center;justify-content:center;padding:52px 40px}
+.auth-form-wrap{width:100%;max-width:380px}
+.auth-form-wrap h2{font-family:var(--serif);font-size:30px;font-weight:500;letter-spacing:-.8px;color:var(--ink);margin-bottom:4px}
+.auth-form-wrap .lead{font-size:14px;color:var(--muted);margin-bottom:30px}
+.auth-switch{margin-top:22px;text-align:center;font-size:13px;color:var(--muted)}
+.auth-switch a{color:var(--ink);font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* school config banner on login */
+.school-config-bar{background:var(--amber-bg);border:1.5px solid rgba(240,146,28,.3);border-radius:var(--r);padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.school-config-bar .sc-label{font-family:var(--mono);font-size:11px;color:var(--amber);font-weight:500}
+.school-config-bar .sc-id{font-family:var(--mono);font-size:11px;color:var(--body);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.school-config-bar button{font-size:11px;padding:3px 9px}
+/* ── FORM ── */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;font-family:var(--mono)}
+.field input,.field select,.field textarea{width:100%;background:var(--paper2);border:1.5px solid var(--line);border-radius:var(--r);color:var(--ink);font-family:var(--sans);font-size:14px;padding:10px 13px;outline:none;transition:border-color .18s,box-shadow .18s,background .18s}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted);opacity:.7}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--ink);background:#fff;box-shadow:0 0 0 3px rgba(14,15,18,.07)}
+.field textarea{resize:vertical;min-height:80px}
+.field select{cursor:pointer}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--sans);font-size:13px;font-weight:600;border-radius:var(--r);border:none;cursor:pointer;padding:9px 16px;letter-spacing:.1px;transition:all .18s var(--ease);white-space:nowrap}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--ink);color:var(--lime)}
+.btn-primary:hover:not(:disabled){background:var(--ink2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(14,15,18,.18)}
+.btn-full{width:100%;padding:12px 16px;font-size:14px;margin-top:4px}
+.btn-outline{background:transparent;color:var(--body);border:1.5px solid var(--line)}
+.btn-outline:hover:not(:disabled){background:var(--paper2);border-color:var(--line2)}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid transparent}
+.btn-ghost:hover:not(:disabled){background:var(--paper2);color:var(--body)}
+.btn-danger{background:transparent;color:var(--rose);border:1.5px solid transparent}
+.btn-danger:hover:not(:disabled){background:var(--rose-bg);border-color:rgba(240,72,90,.2)}
+.btn-accent{background:var(--lime);color:var(--ink)}
+.btn-accent:hover:not(:disabled){background:#c8f070;transform:translateY(-1px)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px}
+/* ── ALERTS ── */
+.alert{border-radius:var(--r);padding:10px 14px;font-size:13px;margin-bottom:14px;border:1.5px solid transparent;animation:alertIn .2s ease}
+@keyframes alertIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.alert-error{background:var(--rose-bg);color:var(--rose);border-color:rgba(240,72,90,.2)}
+.alert-success{background:var(--lime-bg);color:var(--lime-dk);border-color:rgba(122,184,48,.3)}
+.alert-warn{background:var(--amber-bg);color:var(--amber);border-color:rgba(240,146,28,.25)}
+.alert-info{background:var(--blue-bg);color:var(--blue);border-color:rgba(42,95,200,.2)}
+/* ── SPINNER / SKELETON ── */
+.spinner{width:13px;height:13px;border:2px solid rgba(14,15,18,.12);border-top-color:var(--ink);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0;display:inline-block}
+.spinner-light{border-color:rgba(14,15,18,.08);border-top-color:var(--muted)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.skeleton{background:linear-gradient(90deg,var(--paper2) 25%,var(--paper3) 50%,var(--paper2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:5px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* ── TAGS ── */
+.tag{font-size:11px;font-weight:500;padding:2px 9px;border-radius:99px;font-family:var(--mono);display:inline-block;border:1px solid transparent;letter-spacing:.1px}
+.tag-default{background:var(--paper2);color:var(--muted);border-color:var(--line)}
+.tag-green{background:var(--lime-bg);color:var(--lime-dk);border-color:rgba(122,184,48,.3)}
+.tag-red{background:var(--rose-bg);color:var(--rose);border-color:rgba(240,72,90,.2)}
+.tag-amber{background:var(--amber-bg);color:var(--amber);border-color:rgba(240,146,28,.25)}
+.tag-blue{background:var(--blue-bg);color:var(--blue);border-color:rgba(42,95,200,.2)}
+.tag-ink{background:var(--ink);color:var(--lime)}
+.tag-purple{background:var(--purple-bg);color:var(--purple);border-color:rgba(124,58,237,.2)}
+/* ── DASHBOARD LAYOUT ── */
+.dash{display:grid;grid-template-columns:var(--sidebar) 1fr;min-height:100vh}
+.sidebar{background:var(--ink);color:var(--paper);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;padding:22px 0 18px}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:0 18px 20px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:12px}
+.sb-section{padding:0 10px}
+.sb-label{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:1.2px;text-transform:uppercase;color:rgba(244,241,234,.28);padding:0 8px;margin-bottom:4px;margin-top:14px;display:block}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;font-size:13px;font-weight:500;color:rgba(244,241,234,.5);cursor:pointer;transition:all .16s var(--ease);user-select:none}
+.nav-item svg{flex-shrink:0}
+.nav-item:hover{background:rgba(255,255,255,.06);color:var(--paper)}
+.nav-item.active{background:rgba(184,240,96,.12);color:var(--lime)}
+.nav-item.locked{opacity:.28;cursor:not-allowed;pointer-events:none}
+.nav-count{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:500;color:rgba(244,241,234,.3);background:rgba(255,255,255,.06);padding:1px 7px;border-radius:99px}
+.nav-item.active .nav-count{color:var(--lime);background:rgba(184,240,96,.15)}
+.sb-footer{margin-top:auto;padding:14px 10px 0;border-top:1px solid rgba(255,255,255,.07)}
+.user-card{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;background:rgba(255,255,255,.05);margin-bottom:8px}
+.u-av{width:30px;height:30px;border-radius:50%;background:var(--lime);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;text-transform:uppercase;font-family:var(--mono)}
+.u-info{flex:1;min-width:0}
+.u-name{font-size:13px;font-weight:600;color:var(--paper);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-role{font-size:11px;color:rgba(244,241,234,.4);font-family:var(--mono)}
+/* MAIN */
+.main{background:var(--paper);display:flex;flex-direction:column;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1.5px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-crumb{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--ink);letter-spacing:-.3px}
+.topbar-actions{display:flex;gap:8px}
+.page-body{padding:28px;flex:1}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.page-head-left .eyebrow{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.page-head-left h2{font-family:var(--serif);font-size:26px;font-weight:500;color:var(--ink);letter-spacing:-.6px}
+.page-head-left p{font-size:13px;color:var(--muted);margin-top:3px}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);padding:20px;transition:border-color .18s,box-shadow .18s;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;bottom:-20px;right:-20px;width:70px;height:70px;border-radius:50%;background:var(--lime-bg);opacity:.6;pointer-events:none}
+.stat-card:hover{border-color:var(--line2);box-shadow:0 4px 20px rgba(14,15,18,.06)}
+.stat-label{font-family:var(--mono);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:10px}
+.stat-value{font-family:var(--serif);font-size:36px;font-weight:500;letter-spacing:-1.5px;color:var(--ink);line-height:1}
+.stat-value.accent{color:var(--lime-dk)}
+.stat-sub{font-size:12px;color:var(--muted);margin-top:5px}
+/* CARD / TABLE */
+.card{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1.5px solid var(--line)}
+.card-title{font-family:var(--serif);font-size:15px;font-weight:500;color:var(--ink);letter-spacing:-.3px}
+.card-body{padding:20px}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);padding:0 16px 12px;border-bottom:1.5px solid var(--line);white-space:nowrap}
+tbody td{padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--body)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(14,15,18,.018)}
+.td-actions{display:flex;gap:5px;justify-content:flex-end}
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;color:var(--muted);font-size:13px}
+.empty-emoji{font-size:28px;display:block;margin-bottom:8px;opacity:.5}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(14,15,18,.5);backdrop-filter:blur(2px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:#fff;border:1.5px solid var(--line);border-radius:16px;width:100%;max-width:480px;animation:slideUp .18s ease;box-shadow:0 24px 60px rgba(14,15,18,.18)}
+.modal-lg{max-width:680px}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1.5px solid var(--line)}
+.modal-title{font-family:var(--serif);font-size:17px;font-weight:500;color:var(--ink);letter-spacing:-.3px}
+.modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;padding:3px 8px;border-radius:6px;transition:all .15s}
+.modal-close:hover{background:var(--paper2);color:var(--ink)}
+.modal-body{padding:22px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;padding:14px 22px;border-top:1.5px solid var(--line)}
+/* WELCOME BANNER */
+.welcome-banner{background:var(--ink);border-radius:var(--r-lg);padding:28px 30px;margin-bottom:24px;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+.welcome-banner::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(184,240,96,.12) 0%,transparent 70%);right:-60px;top:-80px;pointer-events:none}
+.welcome-banner h3{font-family:var(--serif);font-size:28px;font-weight:300;color:var(--paper);letter-spacing:-.8px;line-height:1.2}
+.welcome-banner h3 em{font-style:italic;color:var(--lime)}
+.welcome-meta{font-family:var(--mono);font-size:11px;color:rgba(244,241,234,.4);margin-top:6px;letter-spacing:.3px}
+.welcome-badge{flex-shrink:0;background:rgba(184,240,96,.12);border:1px solid rgba(184,240,96,.2);color:var(--lime);font-family:var(--mono);font-size:11px;font-weight:500;padding:6px 14px;border-radius:99px;letter-spacing:.3px;white-space:nowrap}
+/* SUBJECTS GRID */
+.subjects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.subject-card{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;cursor:pointer;transition:all .18s var(--ease);display:flex;align-items:center;gap:14px}
+.subject-card:hover{border-color:var(--line2);box-shadow:0 4px 20px rgba(14,15,18,.08);transform:translateY(-1px)}
+.subject-icon{width:44px;height:44px;background:var(--rose-bg);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:1px solid rgba(240,72,90,.15)}
+.subject-info{flex:1;min-width:0}
+.subject-name{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--ink);letter-spacing:-.2px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.subject-teacher{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.subject-teacher strong{color:var(--body);font-weight:500}
+/* SUBJECT DETAIL */
+.subject-detail-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:20px;border-bottom:1.5px solid var(--line)}
+.subject-detail-icon{width:52px;height:52px;background:var(--rose-bg);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;border:1px solid rgba(240,72,90,.15)}
+.subject-detail-name{font-family:var(--serif);font-size:24px;font-weight:500;color:var(--ink);letter-spacing:-.5px}
+.subject-detail-meta{font-size:13px;color:var(--muted);margin-top:3px}
+.back-btn{display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted);padding:0;transition:color .15s}
+.back-btn:hover{color:var(--ink)}
+.subject-tabs{display:flex;gap:2px;border-bottom:1.5px solid var(--line);margin-bottom:20px}
+.subject-tab{padding:10px 16px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:all .15s}
+.subject-tab:hover{color:var(--ink)}
+.subject-tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+/* FEED CARDS */
+.feed-card{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);margin-bottom:14px;overflow:hidden;transition:box-shadow .18s}
+.feed-card:hover{box-shadow:0 4px 20px rgba(14,15,18,.06)}
+.feed-type-bar{height:3px}
+.feed-type-bar.announcement{background:var(--amber)}
+.feed-type-bar.homework{background:var(--blue)}
+.feed-body{padding:18px 20px}
+.feed-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.feed-date{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto}
+.feed-title{font-family:var(--serif);font-size:19px;font-weight:500;color:var(--ink);letter-spacing:-.3px;margin-bottom:6px;line-height:1.3}
+.feed-content{font-size:13px;color:var(--body);line-height:1.65;white-space:pre-wrap}
+.feed-footer{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-top:1px solid var(--paper2);background:var(--paper)}
+.feed-author{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.feed-author-dot{width:18px;height:18px;border-radius:50%;background:var(--paper3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase}
+.feed-actions{display:flex;align-items:center;gap:6px}
+.like-btn{background:none;border:1px solid var(--line);border-radius:99px;padding:4px 12px;font-size:12px;font-family:var(--sans);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;color:var(--muted)}
+.like-btn:hover,.like-btn.liked{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.cmt-toggle{background:none;border:1px solid var(--line);border-radius:99px;padding:4px 12px;font-size:12px;font-family:var(--sans);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;color:var(--muted)}
+.cmt-toggle:hover{background:var(--paper2);color:var(--body)}
+.feed-del-btn{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px 7px;border-radius:6px;font-size:13px;line-height:1;transition:all .15s}
+.feed-del-btn:hover{background:var(--rose-bg);color:var(--rose)}
+.comments-wrap{border-top:1px solid var(--paper2);background:var(--paper);padding:14px 20px}
+.cmt-item{display:flex;gap:9px;margin-bottom:10px;animation:alertIn .15s ease}
+.cmt-av{width:22px;height:22px;border-radius:50%;background:var(--paper3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;flex-shrink:0;margin-top:1px}
+.cmt-user{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.cmt-text{font-size:13px;color:var(--body)}
+.cmt-form{display:flex;gap:8px;margin-top:10px}
+.cmt-input{flex:1;background:#fff;border:1.5px solid var(--line);border-radius:var(--r);padding:8px 12px;font-size:13px;font-family:var(--sans);color:var(--ink);outline:none;transition:border-color .15s}
+.cmt-input:focus{border-color:var(--ink)}
+.cmt-input::placeholder{color:var(--muted);opacity:.7}
+.cmt-send{background:var(--ink);color:var(--lime);border:none;border-radius:var(--r);padding:8px 14px;font-size:12px;font-weight:600;font-family:var(--sans);cursor:pointer;transition:background .15s;white-space:nowrap}
+.cmt-send:hover{background:var(--ink2)}
+/* SUBMIT HOMEWORK AREA */
+.hw-submit-area{background:var(--lime-bg);border:1.5px solid rgba(122,184,48,.3);border-radius:var(--r-lg);padding:16px 18px;margin-top:12px}
+.hw-submit-title{font-size:13px;font-weight:600;color:var(--lime-dk);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.hw-due-passed{background:var(--rose-bg);border:1.5px solid rgba(240,72,90,.2);border-radius:var(--r-lg);padding:12px 16px;font-size:13px;color:var(--rose);font-weight:500}
+/* EXCEL GRADES */
+.grades-table-wrap{overflow-x:auto;border-radius:var(--r-lg);border:1.5px solid var(--line)}
+.grades-table{border-collapse:collapse;min-width:100%;background:#fff;font-size:13px}
+.grades-table th{background:var(--ink);color:var(--lime);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;padding:10px 14px;white-space:nowrap;position:sticky;top:0;z-index:2;border-right:1px solid rgba(255,255,255,.08)}
+.grades-table th:first-child{position:sticky;left:0;z-index:3;background:var(--ink);border-right:1.5px solid rgba(255,255,255,.15)}
+.grades-table td{padding:0;border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:middle}
+.grades-table td:first-child{position:sticky;left:0;background:#fff;z-index:1;border-right:1.5px solid var(--line);padding:10px 14px;font-weight:600;color:var(--ink);white-space:nowrap;min-width:140px}
+.grades-table tbody tr:last-child td{border-bottom:none}
+.grades-table tbody tr:hover td:first-child{background:var(--paper2)}
+.grade-cell-input{width:100%;min-width:70px;border:none;outline:none;background:transparent;text-align:center;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink);padding:10px 8px;transition:background .15s;cursor:text}
+.grade-cell-input:focus{background:var(--lime-bg)}
+.grade-cell-input.pass{color:var(--lime-dk)}
+.grade-cell-input.fail{color:var(--rose)}
+.grade-cell-readonly{width:100%;min-width:70px;border:none;outline:none;background:transparent;text-align:center;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink);padding:10px 8px;cursor:default;pointer-events:none}
+.grade-cell-readonly.pass{color:var(--lime-dk)}
+.grade-cell-readonly.fail{color:var(--rose)}
+.grade-cell.saving{background:var(--amber-bg)}
+.grade-cell.saved{background:var(--lime-bg);transition:background .5s}
+.grades-table td.avg-col{background:var(--paper);font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;padding:10px 14px;white-space:nowrap}
+.avg-pass{color:var(--lime-dk)}
+.avg-fail{color:var(--rose)}
+.add-eval-btn{background:rgba(255,255,255,.1);border:1.5px dashed rgba(255,255,255,.2);color:rgba(255,255,255,.5);border-radius:var(--r);padding:4px 10px;font-size:11px;font-family:var(--sans);cursor:pointer;transition:all .15s;white-space:nowrap}
+.add-eval-btn:hover{background:rgba(184,240,96,.15);border-color:var(--lime);color:var(--lime)}
+/* MESSAGES */
+.msg-item{display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:var(--r);cursor:pointer;transition:background .15s;border:1px solid transparent}
+.msg-item:hover{background:var(--paper2)}
+.msg-item.unread{background:#fff;border-color:var(--line)}
+.msg-item.unread .msg-subject{font-weight:700;color:var(--ink)}
+.msg-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;opacity:0}
+.msg-item.unread .msg-dot{opacity:1}
+.msg-from{font-size:13px;font-weight:600;color:var(--ink);min-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-subject{font-size:13px;color:var(--body);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-time{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap}
+.msg-detail{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);padding:24px}
+.msg-detail-from{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:4px}
+.msg-detail-subject{font-family:var(--serif);font-size:20px;font-weight:500;color:var(--ink);margin-bottom:16px}
+.msg-detail-body{font-size:14px;color:var(--body);line-height:1.7;white-space:pre-wrap}
+/* ATTENDANCE / REPORTS */
+.att-present{color:var(--lime-dk);font-weight:600}
+.att-absent{color:var(--rose);font-weight:600}
+.att-late{color:var(--amber);font-weight:600}
+.sev-merit{color:var(--lime-dk)}
+.sev-low{color:var(--amber)}
+.sev-medium{color:var(--rose)}
+.sev-high{color:#7c0000;font-weight:700}
+/* SUBMISSIONS */
+.sub-item{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);padding:16px 18px;margin-bottom:10px}
+.sub-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:12px;flex-wrap:wrap}
+.sub-student{font-weight:600;color:var(--ink);font-size:14px}
+.sub-content{font-size:13px;color:var(--body);margin-bottom:10px;line-height:1.6}
+.sub-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sub-score{display:flex;align-items:center;gap:6px;font-size:12px}
+.sub-score input{width:60px;padding:5px 8px;border:1.5px solid var(--line);border-radius:var(--r);font-family:var(--mono);font-size:12px;text-align:center;outline:none;background:var(--paper2)}
+.sub-score input:focus{border-color:var(--ink);background:#fff}
+/* FILTER ROW */
+.filter-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.filter-row .field{margin:0;flex:1;min-width:130px}
+/* CONFIG SECTION */
+.config-section{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);padding:20px;margin-bottom:16px}
+.config-section h3{font-family:var(--serif);font-size:15px;font-weight:500;color:var(--ink);margin-bottom:4px;letter-spacing:-.2px}
+.config-section p{font-size:12px;color:var(--muted);margin-bottom:14px}
+.config-uuid-display{font-family:var(--mono);font-size:12px;background:var(--paper2);border:1.5px solid var(--line);border-radius:var(--r);padding:8px 12px;color:var(--ink);word-break:break-all;margin-bottom:10px}
+/* MOBILE */
+#mob-overlay{display:none;position:fixed;inset:0;background:rgba(14,15,18,.45);z-index:99}
+#mob-overlay.open{display:block}
+@media(max-width:768px){
+  .auth-root{grid-template-columns:1fr}
+  .auth-left{display:none}
+  .auth-right{padding:40px 22px}
+  .dash{grid-template-columns:1fr}
+  .sidebar{display:none;position:fixed;inset:0;z-index:100;width:250px;height:100vh}
+  .sidebar.open{display:flex}
+  .page-body{padding:20px 16px}
+  .topbar{padding:13px 16px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .field-row{grid-template-columns:1fr}
+  #mob-btn{display:flex!important}
+  .subjects-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="view-login" class="view">
+  <div class="auth-root">
+    <div class="auth-left">
+      <div class="wmark"><div class="wmark-icon"><svg viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="2" fill="#0e0f12"/><rect x="11" y="2" width="7" height="7" rx="2" fill="#0e0f12"/><rect x="2" y="11" width="7" height="7" rx="2" fill="#0e0f12"/><rect x="11" y="11" width="7" height="7" rx="2" fill="#0e0f12" opacity=".35"/></svg></div><span class="wmark-text">Wobe Classes</span></div>
+      <div class="auth-hero"><h1>Aprende.<br/><em>Enseña.</em><br/>Crece.</h1>
+        <div class="auth-pills">
+          <div class="auth-pill"><span class="auth-pill-dot"></span>Materias, notas, asistencia.</div>
+          <div class="auth-pill"><span class="auth-pill-dot"></span>Feed por materia, mensajería interna</div>
+          <div class="auth-pill"><span class="auth-pill-dot"></span>Disponible todo el tiempo</div>
+        </div>
+      </div>
+    </div>
+    <div class="auth-right"><div class="auth-form-wrap">
+      <h2>Bienvenido de vuelta.</h2><p class="lead">Inicia sesión para continuar.</p>
+      <div class="school-config-bar">
+        <span class="sc-label">🏫 Colegio:</span>
+        <span class="sc-id" id="login-school-display">Peluchelandia School</span>
+        <button class="btn btn-outline btn-xs" onclick="openModal('modal-config')">Cambiar</button>
+      </div>
+      <div id="login-alert" class="hidden"></div>
+      <div class="field"><label>Usuario</label><input id="login-u" type="text" placeholder="tu_usuario" autocomplete="username"/></div>
+      <div class="field"><label>Contraseña</label><input id="login-p" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">Entrar</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="view-dashboard" class="view">
+  <div id="mob-overlay" onclick="closeSidebar()"></div>
+  <div class="dash">
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-logo">
+        <div class="wmark-icon" style="width:32px;height:32px;border-radius:7px"><svg viewBox="0 0 20 20" fill="none" style="width:16px;height:16px"><rect x="2" y="2" width="7" height="7" rx="2" fill="#0e0f12"/><rect x="11" y="2" width="7" height="7" rx="2" fill="#0e0f12"/><rect x="2" y="11" width="7" height="7" rx="2" fill="#0e0f12"/><rect x="11" y="11" width="7" height="7" rx="2" fill="#0e0f12" opacity=".35"/></svg></div>
+        <span class="wmark-text">Wobe Classes</span>
+      </div>
+      <div class="sb-section">
+        <span class="sb-label">General</span>
+        <div class="nav-item active" id="nav-home" onclick="navTo('home')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Inicio</div>
+        <div class="nav-item" id="nav-feed" onclick="navTo('feed')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>Feed Global<span class="nav-count" id="cnt-feed">—</span></div>
+        <span class="sb-label">Académico</span>
+        <div class="nav-item" id="nav-subjects" onclick="navTo('subjects')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>Materias<span class="nav-count" id="cnt-subjects">—</span></div>
+        <div class="nav-item" id="nav-grades" onclick="navTo('grades')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>Calificaciones</div>
+        <div class="nav-item" id="nav-attendance" onclick="navTo('attendance')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Asistencia</div>
+        <div class="nav-item" id="nav-reports" onclick="navTo('reports')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Observador</div>
+        <span class="sb-label" id="sb-label-gestion">Gestión</span>
+        <div class="nav-item" id="nav-students" onclick="navTo('students')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Estudiantes<span class="nav-count" id="cnt-students">—</span></div>
+        <div class="nav-item" id="nav-submissions" onclick="navTo('submissions')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Entregas<span class="nav-count" id="cnt-submissions">—</span></div>
+        <div class="nav-item" id="nav-users" onclick="navTo('users')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>Usuarios</div>
+        <div class="nav-item" id="nav-schools" onclick="navTo('schools')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>Colegios</div>
+        <div class="nav-item" id="nav-periods" onclick="navTo('periods')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>Períodos</div>
+        <span class="sb-label">Mensajes</span>
+        <div class="nav-item" id="nav-inbox" onclick="navTo('inbox')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>Entrada<span class="nav-count" id="cnt-inbox">—</span></div>
+        <div class="nav-item" id="nav-sent" onclick="navTo('sent')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>Enviados</div>
+        <span class="sb-label">Sistema</span>
+        <div class="nav-item" id="nav-config" onclick="navTo('config')"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Configuración</div>
+      </div>
+      <div class="sb-footer">
+        <div class="user-card"><div class="u-av" id="sb-av">?</div><div class="u-info"><div class="u-name" id="sb-uname">…</div><div class="u-role" id="sb-role">…</div></div></div>
+        <button class="btn btn-danger" style="width:100%;font-size:13px" onclick="doLogout()"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-ghost" id="mob-btn" onclick="toggleSidebar()" style="display:none;padding:7px"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+          <span class="topbar-crumb" id="topbar-crumb">Dashboard</span>
+        </div>
+        <div class="topbar-actions" id="topbar-actions"></div>
+      </div>
+      <div class="page-body">
+
+        <!-- HOME -->
+        <div id="page-home">
+          <div class="welcome-banner"><div><h3>Hola, <em id="welcome-name">…</em> 👋</h3><div class="welcome-meta" id="welcome-sub">Cargando…</div></div><div class="welcome-badge" id="welcome-badge">…</div></div>
+          <div class="stats-grid" id="home-stats">
+            <div class="stat-card"><div class="skeleton" style="height:10px;width:60%;margin-bottom:12px"></div><div class="skeleton" style="height:30px;width:40%"></div></div>
+            <div class="stat-card"><div class="skeleton" style="height:10px;width:60%;margin-bottom:12px"></div><div class="skeleton" style="height:30px;width:40%"></div></div>
+            <div class="stat-card"><div class="skeleton" style="height:10px;width:60%;margin-bottom:12px"></div><div class="skeleton" style="height:30px;width:40%"></div></div>
+            <div class="stat-card"><div class="skeleton" style="height:10px;width:60%;margin-bottom:12px"></div><div class="skeleton" style="height:30px;width:40%"></div></div>
+          </div>
+          <div id="home-alert" class="hidden"></div>
+        </div>
+
+        <!-- FEED GLOBAL -->
+        <div id="page-feed" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">global</div><h2>Feed Global</h2><p>Anuncios y publicaciones generales del colegio.</p></div></div>
+          <div id="feed-alert" class="hidden"></div>
+          <div id="feed-list"><div class="empty"><span class="spinner spinner-light"></span></div></div>
+        </div>
+
+        <!-- SUBJECTS LIST / DETAIL -->
+        <div id="page-subjects" class="hidden">
+          <div id="subjects-list-view">
+            <div class="page-head"><div class="page-head-left"><div class="eyebrow">académico</div><h2>Materias</h2><p>Selecciona una materia para ver su feed, tareas y notas.</p></div></div>
+            <div id="subjects-alert" class="hidden"></div>
+            <div class="subjects-grid" id="subjects-grid"><div class="empty"><span class="spinner spinner-light"></span></div></div>
+          </div>
+          <div id="subject-detail-view" class="hidden">
+            <button class="back-btn" onclick="backToSubjects()" style="margin-bottom:18px"><svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>Volver a materias</button>
+            <div class="subject-detail-header">
+              <div class="subject-detail-icon">📚</div>
+              <div><div class="subject-detail-name" id="sd-name">…</div><div class="subject-detail-meta" id="sd-meta">…</div></div>
+            </div>
+            <div class="subject-tabs">
+              <div class="subject-tab active" id="sdtab-feed" onclick="sdTab('feed')">📢 Anuncios & Tareas</div>
+              <div class="subject-tab" id="sdtab-grades" onclick="sdTab('grades')">📊 Calificaciones</div>
+              <div class="subject-tab" id="sdtab-attendance" onclick="sdTab('attendance')">📅 Asistencia</div>
+            </div>
+            <div id="sd-feed-panel">
+              <div id="sd-feed-alert" class="hidden"></div>
+              <div id="sd-feed-list"><div class="empty"><span class="spinner spinner-light"></span></div></div>
+            </div>
+            <div id="sd-grades-panel" class="hidden">
+              <div id="sd-grades-alert" class="hidden"></div>
+              <div id="sd-grades-wrap"></div>
+            </div>
+            <div id="sd-attendance-panel" class="hidden">
+              <div id="sd-att-alert" class="hidden"></div>
+              <div id="sd-att-wrap"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRADES OVERVIEW -->
+        <div id="page-grades" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">académico</div><h2>Calificaciones</h2><p>Selecciona materia y consulta notas.</p></div></div>
+          <div id="grades-alert" class="hidden"></div>
+          <div class="card" style="margin-bottom:16px"><div class="card-body">
+            <div class="filter-row">
+              <div class="field"><label>Materia</label><select id="gf-subject"><option value="">— Selecciona una materia —</option></select></div>
+              <div class="field"><label>Período (opcional)</label><select id="gf-period"><option value="">Todos los períodos</option></select></div>
+              <button class="btn btn-outline" style="align-self:flex-end" onclick="loadGradesExcel()">Ver notas</button>
+            </div>
+          </div></div>
+          <div id="grades-excel-wrap"></div>
+        </div>
+
+        <!-- ATTENDANCE -->
+        <div id="page-attendance" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">académico</div><h2>Asistencia</h2><p>Registra y consulta historial de asistencia.</p></div></div>
+          <div id="attendance-alert" class="hidden"></div>
+          <div class="card" style="margin-bottom:16px"><div class="card-body">
+            <div class="filter-row">
+              <div class="field" id="att-student-field"><label>Estudiante</label><select id="att-filter-student"><option value="">Todos</option></select></div>
+              <div class="field"><label>Materia</label><select id="att-filter-subject"><option value="">Todas</option></select></div>
+              <button class="btn btn-outline" style="align-self:flex-end" onclick="loadAttendance()">Filtrar</button>
+            </div>
+          </div></div>
+          <div class="card"><div class="table-scroll"><table>
+            <thead><tr><th>Estudiante</th><th>Materia</th><th>Fecha</th><th>Estado</th><th>Profesor</th></tr></thead>
+            <tbody id="attendance-tbody"><tr><td colspan="5"><div class="empty"><span class="empty-emoji">📅</span>Usa el filtro para consultar.</div></td></tr></tbody>
+          </table></div></div>
+        </div>
+
+        <!-- STUDENTS -->
+        <div id="page-students" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">gestión</div><h2>Estudiantes</h2><p>Estudiantes inscritos en el colegio.</p></div></div>
+          <div id="students-alert" class="hidden"></div>
+          <div class="card"><div class="table-scroll"><table>
+            <thead><tr><th>Usuario</th><th>Grado</th><th></th></tr></thead>
+            <tbody id="students-tbody"><tr><td colspan="3"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr></tbody>
+          </table></div></div>
+        </div>
+
+        <!-- SUBMISSIONS -->
+        <div id="page-submissions" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">gestión</div><h2>Entregas de tareas</h2><p>Revisa y califica las entregas.</p></div></div>
+          <div id="submissions-alert" class="hidden"></div>
+          <div style="display:flex;gap:8px;margin-bottom:16px">
+            <button class="btn btn-outline btn-sm" onclick="loadSubmissions('pending')" style="border-color:var(--amber);color:var(--amber)">⏳ Pendientes</button>
+            <button class="btn btn-outline btn-sm" onclick="loadSubmissions('all')">Todas</button>
+          </div>
+          <div id="submissions-list"><div class="empty"><span class="spinner spinner-light"></span></div></div>
+        </div>
+
+        <!-- REPORTS -->
+        <div id="page-reports" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">gestión</div><h2>Observador</h2><p>Hoja de vida y anotaciones de estudiantes.</p></div></div>
+          <div id="reports-alert" class="hidden"></div>
+          <div class="card" style="margin-bottom:16px"><div class="card-body">
+            <div class="filter-row">
+              <div class="field" id="rep-student-field"><label>Estudiante</label><select id="rep-filter-student"><option value="">— Selecciona —</option></select></div>
+              <button class="btn btn-outline" style="align-self:flex-end" id="rep-filter-btn" onclick="loadReports()">Consultar</button>
+            </div>
+          </div></div>
+          <div class="card" id="reports-result" style="display:none">
+            <div class="card-header"><span class="card-title" id="reports-result-title">Anotaciones</span></div>
+            <div class="table-scroll"><table>
+              <thead><tr><th>Tipo</th><th>Severidad</th><th>Descripción</th><th>Responsable</th><th>Fecha</th><th></th></tr></thead>
+              <tbody id="reports-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <!-- USERS (admin/director) -->
+        <div id="page-users" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">gestión</div><h2>Usuarios</h2><p>Administra todos los usuarios del sistema.</p></div></div>
+          <div id="users-alert" class="hidden"></div>
+          <div class="card"><div class="table-scroll"><table>
+            <thead><tr><th>Usuario</th><th>Rol</th><th>Colegio</th><th></th></tr></thead>
+            <tbody id="users-tbody"><tr><td colspan="4"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr></tbody>
+          </table></div></div>
+        </div>
+
+        <!-- SCHOOLS (admin only) -->
+        <div id="page-schools" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">administración</div><h2>Colegios</h2><p>Gestiona los colegios registrados en el sistema.</p></div></div>
+          <div id="schools-alert" class="hidden"></div>
+          <div class="card"><div class="table-scroll"><table>
+            <thead><tr><th>Nombre</th><th>Dirección</th><th>Director</th><th>ID</th><th></th></tr></thead>
+            <tbody id="schools-tbody"><tr><td colspan="5"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr></tbody>
+          </table></div></div>
+        </div>
+
+        <!-- PERIODS (admin/director) -->
+        <div id="page-periods" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">académico</div><h2>Períodos</h2><p>Gestiona los períodos académicos del colegio.</p></div></div>
+          <div id="periods-alert" class="hidden"></div>
+          <div class="card"><div class="table-scroll"><table>
+            <thead><tr><th>Nombre</th><th>Inicio</th><th>Fin</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="periods-tbody"><tr><td colspan="5"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr></tbody>
+          </table></div></div>
+        </div>
+
+        <!-- CONFIG -->
+        <div id="page-config" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">sistema</div><h2>Configuración</h2><p>Ajustes del cliente Wobe Classes.</p></div></div>
+          <div class="config-section">
+            <h3>🏫 Cambiar del Colegio</h3>
+            <p>Identifica a qué colegio se conecta este cliente. Todos los datos (materias, estudiantes, notas, etc.) están aislados por colegio.</p>
+            <div class="config-uuid-display" id="config-uuid-display">Peluchelandia School</div>
+            <div class="field" style="margin-bottom:10px"><label>Nuevo UUID</label><input id="config-uuid-input" type="text" placeholder="ej. a1b2c3d4-e5f6-7890-abcd-ef1234567890" style="font-family:var(--mono);font-size:13px"/></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="saveSchoolUUID()">Guardar UUID</button>
+              <button class="btn btn-outline" onclick="clearSchoolUUID()">Continuar en Peluchelandia School</button>
+            </div>
+            <div id="config-alert" class="hidden" style="margin-top:12px"></div>
+          </div>
+          <div class="config-section">
+            <h3>🔗 URL del API</h3>
+            <p>Endpoint base del backend FastAPI.</p>
+            <div class="config-uuid-display" id="config-api-display"></div>
+            <div class="field" style="margin-bottom:10px"><label>Nueva URL</label><input id="config-api-input" type="text" placeholder="https://classes-backend.vercel.app"/></div>
+            <button class="btn btn-primary" onclick="saveApiUrl()">Guardar URL</button>
+            <div id="config-api-alert" class="hidden" style="margin-top:12px"></div>
+          </div>
+          <div class="config-section">
+            <h3>👤 Registrar nuevo usuario</h3>
+            <p>Solo administradores y directores pueden crear usuarios.</p>
+            <div id="config-reg-alert" class="hidden"></div>
+            <div class="field-row">
+              <div class="field"><label>Usuario</label><input id="creg-u" type="text" placeholder="username"/></div>
+              <div class="field"><label>Contraseña</label><input id="creg-p" type="password" placeholder="mínimo 6 caracteres"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Rol</label>
+                <select id="creg-role">
+                  <option value="student">Estudiante</option>
+                  <option value="teacher">Docente</option>
+                  <option value="director">Director</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div class="field"><label>Colegio (UUID, vacío = este colegio)</label><input id="creg-school" type="text" placeholder="dejar vacío para usar el configurado"/></div>
+            </div>
+            <button class="btn btn-primary" id="creg-btn" onclick="registerUser()">Crear usuario</button>
+          </div>
+        </div>
+
+        <!-- INBOX -->
+        <div id="page-inbox" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">mensajes</div><h2>Bandeja de entrada</h2></div></div>
+          <div id="inbox-alert" class="hidden"></div>
+          <div class="msg-detail hidden" id="inbox-detail" style="margin-bottom:16px"></div>
+          <div class="card"><div class="msg-list" id="inbox-list"><div class="empty"><span class="spinner spinner-light"></span></div></div></div>
+        </div>
+
+        <!-- SENT -->
+        <div id="page-sent" class="hidden">
+          <div class="page-head"><div class="page-head-left"><div class="eyebrow">mensajes</div><h2>Enviados</h2></div></div>
+          <div id="sent-alert" class="hidden"></div>
+          <div class="card"><div class="msg-list" id="sent-list"><div class="empty"><span class="spinner spinner-light"></span></div></div></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Config School UUID (from login page) -->
+<div id="modal-config" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Configurar colegio</span><button class="modal-close" onclick="closeModal('modal-config')">×</button></div>
+  <div class="modal-body">
+    <div class="alert alert-info" style="margin-bottom:14px">El UUID del colegio identifica a qué institución pertenecen los datos. Solicítalo a tu administrador o entra al panel principal de Classes y elige tu colegio en classes.wobe.qzz.io</div>
+    <div class="field"><label>UUID del Colegio</label><input id="mc-uuid" type="text" placeholder="ej. a1b2c3d4-e5f6-7890-abcd-ef1234567890" style="font-family:var(--mono);font-size:13px"/></div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-outline" onclick="clearSchoolUUIDFromModal()">Continuar en Peluchelandia School</button>
+    <button class="btn btn-primary" onclick="saveSchoolUUIDFromModal()">Guardar</button>
+  </div></div>
+</div>
+
+<!-- New Subject -->
+<div id="modal-subject" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Nueva materia</span><button class="modal-close" onclick="closeModal('modal-subject')">×</button></div>
+  <div class="modal-body"><div id="ms-alert" class="hidden"></div>
+    <div class="field"><label>Nombre</label><input id="ms-name" type="text" placeholder="ej. Matemáticas"/></div>
+    <div class="field"><label>Nota mínima para aprobar</label><input id="ms-passing" type="number" value="3.0" step="0.1" min="0" max="10"/></div>
+    <div class="field"><label>Período (opcional)</label><select id="ms-period"><option value="">Sin período</option></select></div>
+    <div class="field" id="ms-teacher-field"><label>Docente (vacío = tú mismo)</label><input id="ms-teacher" type="text" placeholder="username del docente"/></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-subject')">Cancelar</button><button class="btn btn-primary" id="ms-btn" onclick="createSubject()">Crear materia</button></div></div>
+</div>
+
+<!-- Feed Post Global -->
+<div id="modal-feed" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="modal-feed-title">Nueva publicación</span><button class="modal-close" onclick="closeModal('modal-feed')">×</button></div>
+  <div class="modal-body"><div id="mf-alert" class="hidden"></div>
+    <div class="field"><label>Tipo</label><select id="mf-type"><option value="announcement">📢 Anuncio</option><option value="homework">📚 Tarea</option></select></div>
+    <div class="field"><label>Título</label><input id="mf-title" type="text" placeholder="Título"/></div>
+    <div class="field"><label>Contenido</label><textarea id="mf-content" placeholder="Escribe el contenido…"></textarea></div>
+    <div class="field hidden" id="mf-due-field"><label>Fecha límite</label><input id="mf-due" type="date"/></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-feed')">Cancelar</button><button class="btn btn-primary" id="mf-btn" onclick="createFeedPost()">Publicar</button></div></div>
+</div>
+
+<!-- Feed Post Materia -->
+<div id="modal-subject-feed" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="modal-sf-title">Publicar en materia</span><button class="modal-close" onclick="closeModal('modal-subject-feed')">×</button></div>
+  <div class="modal-body"><div id="msf-alert" class="hidden"></div>
+    <div class="field"><label>Tipo</label><select id="msf-type"><option value="announcement">📢 Anuncio</option><option value="homework">📚 Tarea</option></select></div>
+    <div class="field"><label>Título</label><input id="msf-title" type="text" placeholder="Título"/></div>
+    <div class="field"><label>Contenido</label><textarea id="msf-content" placeholder="Escribe el contenido…"></textarea></div>
+    <div class="field hidden" id="msf-due-field"><label>Fecha límite</label><input id="msf-due" type="date"/></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-subject-feed')">Cancelar</button><button class="btn btn-primary" id="msf-btn" onclick="createSubjectFeedPost()">Publicar</button></div></div>
+</div>
+
+<!-- Submit Homework -->
+<div id="modal-submit-hw" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Entregar tarea</span><button class="modal-close" onclick="closeModal('modal-submit-hw')">×</button></div>
+  <div class="modal-body"><div id="mshw-alert" class="hidden"></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px" id="mshw-desc"></p>
+    <div class="field"><label>Tu respuesta</label><textarea id="mshw-content" placeholder="Escribe tu respuesta aquí…" style="min-height:120px"></textarea></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-submit-hw')">Cancelar</button><button class="btn btn-accent" id="mshw-btn" onclick="submitHomework()">Entregar</button></div></div>
+</div>
+
+<!-- Add Evaluation Column -->
+<div id="modal-eval" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Nueva evaluación</span><button class="modal-close" onclick="closeModal('modal-eval')">×</button></div>
+  <div class="modal-body"><div id="me-alert" class="hidden"></div>
+    <div class="field"><label>Nombre</label><input id="me-name" type="text" placeholder="ej. Parcial 1, Quiz 3…"/></div>
+    <div class="field"><label>Peso (0-1)</label><input id="me-weight" type="number" step="0.05" min="0" max="1" value="0.25"/></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-eval')">Cancelar</button><button class="btn btn-primary" id="me-btn" onclick="addEvalColumn()">Agregar</button></div></div>
+</div>
+
+<!-- Attendance -->
+<div id="modal-attendance" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Registrar asistencia</span><button class="modal-close" onclick="closeModal('modal-attendance')">×</button></div>
+  <div class="modal-body"><div id="ma-alert" class="hidden"></div>
+    <div class="field-row">
+      <div class="field"><label>Estudiante</label><select id="ma-student"><option value="">— Selecciona —</option></select></div>
+      <div class="field"><label>Materia</label><select id="ma-subject"><option value="">— Selecciona —</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Fecha</label><input id="ma-date" type="date"/></div>
+      <div class="field"><label>Estado</label><select id="ma-status"><option value="present">✅ Presente</option><option value="absent">❌ Falla</option><option value="late">⏰ Retardo</option></select></div>
+    </div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-attendance')">Cancelar</button><button class="btn btn-primary" id="ma-btn" onclick="registerAttendance()">Registrar</button></div></div>
+</div>
+
+<!-- Report -->
+<div id="modal-report" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Nueva anotación</span><button class="modal-close" onclick="closeModal('modal-report')">×</button></div>
+  <div class="modal-body"><div id="mr-alert" class="hidden"></div>
+    <div class="field"><label>Estudiante</label><select id="mr-student"><option value="">— Selecciona —</option></select></div>
+    <div class="field-row">
+      <div class="field"><label>Tipo</label><select id="mr-type"><option value="disciplina">Disciplina</option><option value="academico">Académico</option><option value="convivencia">Convivencia</option></select></div>
+      <div class="field"><label>Severidad</label><select id="mr-severity"><option value="merit">⭐ Elogio</option><option value="low">⚠️ Llamado atención</option><option value="medium">🚨 Falta grave</option><option value="high">🔴 Rectoría</option></select></div>
+    </div>
+    <div class="field"><label>Descripción</label><textarea id="mr-desc" placeholder="Describe la anotación…"></textarea></div>
+    <div class="field"><label>Fecha</label><input id="mr-date" type="date"/></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-report')">Cancelar</button><button class="btn btn-primary" id="mr-btn" onclick="createReport()">Guardar</button></div></div>
+</div>
+
+<!-- Enroll Student -->
+<div id="modal-student" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Inscribir estudiante</span><button class="modal-close" onclick="closeModal('modal-student')">×</button></div>
+  <div class="modal-body"><div id="mst-alert" class="hidden"></div>
+    <div class="field-row">
+      <div class="field"><label>Username</label><input id="mst-u" type="text" placeholder="usuario"/></div>
+      <div class="field"><label>Grado</label><input id="mst-g" type="text" placeholder="ej. 10°"/></div>
+    </div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-student')">Cancelar</button><button class="btn btn-primary" id="mst-btn" onclick="enrollStudent()">Inscribir</button></div></div>
+</div>
+
+<!-- Set User Role -->
+<div id="modal-set-role" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Cambiar rol</span><button class="modal-close" onclick="closeModal('modal-set-role')">×</button></div>
+  <div class="modal-body"><div id="msr-alert" class="hidden"></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Usuario: <strong id="msr-username-label">—</strong></p>
+    <div class="field"><label>Nuevo rol</label>
+      <select id="msr-role">
+        <option value="student">Estudiante</option>
+        <option value="teacher">Docente</option>
+        <option value="director">Director</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="field"><label>Nuevo colegio (UUID, vacío = sin cambio)</label><input id="msr-school" type="text" placeholder="dejar vacío para no cambiar" style="font-family:var(--mono);font-size:12px"/></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-set-role')">Cancelar</button><button class="btn btn-primary" id="msr-btn" onclick="applySetRole()">Aplicar</button></div></div>
+</div>
+
+<!-- Create School -->
+<div id="modal-school" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title" id="modal-school-title">Nuevo colegio</span><button class="modal-close" onclick="closeModal('modal-school')">×</button></div>
+  <div class="modal-body"><div id="msch-alert" class="hidden"></div>
+    <div class="field"><label>Nombre</label><input id="msch-name" type="text" placeholder="ej. Colegio San José"/></div>
+    <div class="field"><label>Dirección</label><input id="msch-address" type="text" placeholder="Calle 123 # 45-67"/></div>
+    <div class="field"><label>Username del director (opcional)</label><input id="msch-director" type="text" placeholder="username"/></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-school')">Cancelar</button><button class="btn btn-primary" id="msch-btn" onclick="createSchool()">Crear colegio</button></div></div>
+</div>
+
+<!-- Create Period -->
+<div id="modal-period" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Nuevo período</span><button class="modal-close" onclick="closeModal('modal-period')">×</button></div>
+  <div class="modal-body"><div id="mp-alert" class="hidden"></div>
+    <div class="field"><label>Nombre</label><input id="mp-name" type="text" placeholder="ej. Primer bimestre 2025"/></div>
+    <div class="field-row">
+      <div class="field"><label>Fecha inicio</label><input id="mp-start" type="date"/></div>
+      <div class="field"><label>Fecha fin</label><input id="mp-end" type="date"/></div>
+    </div>
+    <div class="field"><label>Estado</label><select id="mp-active"><option value="true">✅ Activo</option><option value="false">⏸ Inactivo</option></select></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-period')">Cancelar</button><button class="btn btn-primary" id="mp-btn" onclick="createPeriod()">Crear período</button></div></div>
+</div>
+
+<!-- New Message -->
+<div id="modal-message" class="modal-overlay hidden">
+  <div class="modal"><div class="modal-header"><span class="modal-title">Nuevo mensaje</span><button class="modal-close" onclick="closeModal('modal-message')">×</button></div>
+  <div class="modal-body"><div id="mm-alert" class="hidden"></div>
+    <div class="field"><label>Para (username)</label><input id="mm-to" type="text" placeholder="destinatario"/></div>
+    <div class="field"><label>Asunto</label><input id="mm-subject" type="text" placeholder="Asunto del mensaje"/></div>
+    <div class="field"><label>Mensaje</label><textarea id="mm-content" placeholder="Escribe tu mensaje…" style="min-height:120px"></textarea></div>
+  </div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-message')">Cancelar</button><button class="btn btn-primary" id="mm-btn" onclick="sendMessage()">Enviar</button></div></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   ⚙️  CONFIGURACIÓN EDITABLE
+   ══════════════════════════════════════════════════
+   Cambia estos valores directamente en el código,
+   o usa la pantalla de Configuración en el dashboard.
+*/
+const DEFAULT_API_URL  = 'https://classes-backend.vercel.app';
+const DEFAULT_SCHOOL_ID = null; // null = admin global (sin colegio), o pon un UUID aquí
+/* ════════════════════════════════════════════════ */
+
+const TK = 'wobe_token';
+const UK = 'wobe_user';
+const SK = 'wobe_school_id';
+const AK = 'wobe_api_url';
+
+/* ── Getters de configuración ── */
+const getAPI    = ()  => localStorage.getItem(AK) || DEFAULT_API_URL;
+const getSchool = ()  => { const s=localStorage.getItem(SK); return s==='null'?null:(s||DEFAULT_SCHOOL_ID); };
+const getT      = ()  => localStorage.getItem(TK);
+const setT      = t   => localStorage.setItem(TK, t);
+const clearT    = ()  => localStorage.removeItem(TK);
+const getU      = ()  => { try{return JSON.parse(localStorage.getItem(UK))}catch{return null} };
+const setU      = u   => localStorage.setItem(UK, JSON.stringify(u));
+const clearU    = ()  => localStorage.removeItem(UK);
+
+/* ── Roles ── */
+const getRole   = () => getU()?.role || 'student';
+const isAdmin   = () => getRole() === 'admin';
+const isDirector= () => ['admin','director'].includes(getRole());
+const isTeacher = () => ['admin','director','teacher'].includes(getRole());
+const myUsername= () => getU()?.username || '';
+
+function authH(){ return {'Content-Type':'application/json','Authorization':`Bearer ${getT()}`} }
+
+/* ── UI Helpers ── */
+const $  = id => document.getElementById(id);
+function A(id,type,msg){ const el=$(id); if(!el)return; el.className=`alert alert-${type}`; el.textContent=msg; el.classList.remove('hidden') }
+function HA(id){ $(id)?.classList.add('hidden') }
+function busy(id,on,lbl=''){const el=$(id);if(!el)return;el.disabled=on;el.innerHTML=on?`<span class="spinner"></span> Guardando…`:lbl}
+function fmtDate(s){ if(!s)return'—'; try{return new Date(s).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}catch{return s} }
+function tsRel(ts){ const d=Math.floor(Date.now()/1000)-ts; if(d<60)return'ahora'; if(d<3600)return`${Math.floor(d/60)}m`; if(d<86400)return`${Math.floor(d/3600)}h`; return`${Math.floor(d/86400)}d` }
+function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+/* ── Safe Fetch: network errors treated as success ── */
+async function safeFetch(url, options){
+  try{
+    const r = await fetch(url, options);
+    return r;
+  }catch(e){
+    return new Response(JSON.stringify({success:true,_networkFallback:true}),{status:200,headers:{'Content-Type':'application/json'}});
+  }
+}
+
+/* ══ SCHOOL UUID CONFIG ══ */
+function updateLoginSchoolDisplay(){
+  const sid=getSchool();
+  const el=$('login-school-display');
+  if(el) el.textContent=sid?`${sid.substring(0,8)}…`:'Sin configurar (admin global)';
+}
+
+function saveSchoolUUIDFromModal(){
+  const val=$('mc-uuid').value.trim();
+  localStorage.setItem(SK, val||'null');
+  closeModal('modal-config');
+  updateLoginSchoolDisplay();
+}
+function clearSchoolUUIDFromModal(){
+  localStorage.setItem(SK,'null');
+  $('mc-uuid').value='';
+  closeModal('modal-config');
+  updateLoginSchoolDisplay();
+}
+function saveSchoolUUID(){
+  const val=$('config-uuid-input').value.trim();
+  localStorage.setItem(SK, val||'null');
+  updateConfigDisplay();
+  A('config-alert','success','Colegio cambiado con exito.');
+}
+function clearSchoolUUID(){
+  localStorage.setItem(SK,'null');
+  $('config-uuid-input').value='';
+  updateConfigDisplay();
+  A('config-alert','warn','Estas procediendo en el colegio Peluchelandia School.');
+}
+function saveApiUrl(){
+  const val=$('config-api-input').value.trim();
+  if(val) localStorage.setItem(AK,val); else localStorage.removeItem(AK);
+  updateConfigDisplay();
+  A('config-api-alert','success','URL guardada.');
+}
+function updateConfigDisplay(){
+  const el=$('config-uuid-display'); if(el) el.textContent=getSchool()||'null (admin global)';
+  const el2=$('config-api-display'); if(el2) el2.textContent=getAPI();
+  const inp=$('config-uuid-input'); if(inp&&!inp.value) inp.placeholder=getSchool()||'(vacío = admin global)';
+  const inp2=$('config-api-input'); if(inp2&&!inp2.value) inp2.placeholder=getAPI();
+}
+
+/* ══ CACHE ══ */
+let _subjects=[], _students=[], _periods=[];
+
+async function refreshCache(){
+  try{
+    const API=getAPI();
+    const [sr,str,pr]=await Promise.all([
+      fetch(`${API}/api/classes/subjects`,{headers:authH()}),
+      fetch(`${API}/api/classes/students`,{headers:authH()}),
+      fetch(`${API}/api/schools/periods?school_id=${encodeURIComponent(getSchool()||'')}`)
+    ]);
+    _subjects=await sr.json(); if(!Array.isArray(_subjects)) _subjects=[];
+    _students=await str.json(); if(!Array.isArray(_students)) _students=[];
+    _periods=await pr.json(); if(!Array.isArray(_periods)) _periods=[];
+    $('cnt-subjects').textContent=_subjects.length;
+    if(isDirector()) $('cnt-students').textContent=_students.length;
+    populateAllSelects();
+  }catch{}
+}
+
+function populateAllSelects(){
+  // Subject selects (by id)
+  ['gf-subject','att-filter-subject','ma-subject'].forEach(id=>{
+    const el=$(id); if(!el)return;
+    const cur=el.value; const base=el.options[0]?.text||'';
+    el.innerHTML=`<option value="">${base}</option>`+_subjects.map(s=>`<option value="${escH(s.id)}">${escH(s.name)}</option>`).join('');
+    if(cur) el.value=cur;
+  });
+  // Period selects
+  ['gf-period','ms-period'].forEach(id=>{
+    const el=$(id); if(!el)return;
+    const cur=el.value; const base=el.options[0]?.text||'';
+    el.innerHTML=`<option value="">${base}</option>`+_periods.map(p=>`<option value="${escH(p.id)}">${escH(p.name)}${p.active?'':' (inactivo)'}</option>`).join('');
+    if(cur) el.value=cur;
+  });
+  // Student selects (admin/director/teacher)
+  if(isTeacher()){
+    ['att-filter-student','ma-student','mr-student','rep-filter-student'].forEach(id=>{
+      const el=$(id); if(!el)return;
+      const cur=el.value; const base=el.options[0]?.text||'';
+      el.innerHTML=`<option value="">${base}</option>`+_students.map(s=>`<option value="${escH(s.username)}">${escH(s.username)} — ${escH(s.grade||'')}</option>`).join('');
+      if(cur) el.value=cur;
+    });
+  }
+}
+
+/* ══ VIEWS ══ */
+function showView(name){
+  ['login','dashboard'].forEach(v=>$(`view-${v}`)?.classList.remove('active'));
+  $(`view-${name}`)?.classList.add('active');
+  if(name==='dashboard') initDash();
+  if(name==='login'){ updateLoginSchoolDisplay(); }
+}
+
+/* ══ AUTH ══ */
+async function doLogin(){
+  HA('login-alert');
+  const u=$('login-u').value.trim(), p=$('login-p').value;
+  if(!u||!p){A('login-alert','error','Completa todos los campos.');return}
+  busy('login-btn',true,'Entrar');
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/login`,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:u,password:p,school_id:getSchool()})});
+    const d=await r.json();
+    if(!d.success){A('login-alert','error',d.error||'Credenciales inválidas.');return}
+    setT(d.token);setU(d.user);showView('dashboard');
+  }catch{A('login-alert','error','Error de conexión.')}
+  finally{busy('login-btn',false,'Entrar')}
+}
+
+function doLogout(){clearT();clearU();showView('login')}
+
+/* ══ DASH INIT ══ */
+async function initDash(){
+  const cached=getU(); if(cached) renderSidebar(cached);
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/me`,{headers:authH()});
+    const d=await r.json();
+    if(!d.success){clearT();clearU();showView('login');return}
+    setU(d.user);renderSidebar(d.user);
+  }catch{}
+  await refreshCache();
+  navTo('home');
+}
+
+function renderSidebar(user){
+  const uname=user.username||'Usuario', role=user.role||'student';
+  $('sb-av').textContent=uname.charAt(0).toUpperCase();
+  $('sb-uname').textContent=uname;
+  const roleLabels={admin:'⚡ Admin',director:'🏫 Director',teacher:'📖 Docente',student:'Estudiante'};
+  $('sb-role').textContent=roleLabels[role]||role;
+
+  // Nav visibility by role
+  const teacherItems=['nav-students','nav-submissions','nav-reports'];
+  const directorItems=['nav-users','nav-periods'];
+  const adminItems=['nav-schools'];
+  const allManaged=[...teacherItems,...directorItems,...adminItems,'sb-label-gestion'];
+
+  allManaged.forEach(id=>{const el=$(id);if(el)el.style.display='none'});
+
+  if(isTeacher()){
+    teacherItems.forEach(id=>{const el=$(id);if(el)el.style.display=''});
+    $('sb-label-gestion').style.display='';
+  }
+  if(isDirector()){
+    directorItems.forEach(id=>{const el=$(id);if(el)el.style.display=''});
+  }
+  if(isAdmin()){
+    adminItems.forEach(id=>{const el=$(id);if(el)el.style.display=''});
+  }
+}
+
+/* ══ NAVIGATION ══ */
+const PAGES=['home','feed','subjects','grades','attendance','students','submissions','reports','users','schools','periods','config','inbox','sent'];
+const TITLES={home:'Dashboard',feed:'Feed Global',subjects:'Materias',grades:'Calificaciones',attendance:'Asistencia',students:'Estudiantes',submissions:'Entregas',reports:'Observador',users:'Usuarios',schools:'Colegios',periods:'Períodos',config:'Configuración',inbox:'Bandeja de entrada',sent:'Enviados'};
+
+function navTo(page){
+  const teacherOnly=['students','submissions','reports'];
+  const directorOnly=['users','periods'];
+  const adminOnly=['schools'];
+  if(teacherOnly.includes(page)&&!isTeacher())return;
+  if(directorOnly.includes(page)&&!isDirector())return;
+  if(adminOnly.includes(page)&&!isAdmin())return;
+
+  PAGES.forEach(p=>{$(`page-${p}`)?.classList.add('hidden');$(`nav-${p}`)?.classList.remove('active')});
+  $(`page-${page}`)?.classList.remove('hidden');
+  $(`nav-${page}`)?.classList.add('active');
+  $('topbar-crumb').textContent=TITLES[page]||page;
+  closeSidebar();
+  const loaders={
+    home:loadHome, feed:loadFeedGlobal, subjects:loadSubjects,
+    grades:setupGradesPage, attendance:setupAttendancePage,
+    students:loadStudents, submissions:()=>loadSubmissions('pending'),
+    reports:setupReports, users:loadUsers, schools:loadSchools,
+    periods:loadPeriods, config:setupConfig, inbox:loadInbox, sent:loadSent
+  };
+  loaders[page]?.();
+}
+
+/* ══ HOME ══ */
+async function loadHome(){
+  $('topbar-actions').innerHTML='';
+  const user=getU();
+  if(user){
+    $('welcome-name').textContent=user.username;
+    $('welcome-sub').textContent=`Rol: ${user.role} · Colegio: ${user.school_id||'admin global'}`;
+    const roleLabels={admin:'⚡ Admin',director:'🏫 Director',teacher:'📖 Docente',student:'Estudiante'};
+    $('welcome-badge').textContent=roleLabels[user.role]||user.role;
+  }
+  try{
+    const API=getAPI();
+    const[sr,fr]=await Promise.all([
+      fetch(`${API}/api/classes/subjects`,{headers:authH()}),
+      fetch(`${API}/api/classes/feed`,{headers:authH()})
+    ]);
+    const[subs,feed]=await Promise.all([sr.json(),fr.json()]);
+    const safeSubjects=Array.isArray(subs)?subs:[];
+    const safeFeed=Array.isArray(feed)?feed:[];
+    $('cnt-subjects').textContent=safeSubjects.length;
+    $('cnt-feed').textContent=safeFeed.length;
+
+    if(isTeacher()){
+      const[str,subr]=await Promise.all([
+        fetch(`${API}/api/classes/students`,{headers:authH()}),
+        fetch(`${API}/api/classes/homework/pending`,{headers:authH()})
+      ]);
+      const[sts,pend]=await Promise.all([str.json(),subr.json()]);
+      const safeStudents=Array.isArray(sts)?sts:[];
+      const safePend=Array.isArray(pend)?pend:[];
+      $('cnt-students').textContent=safeStudents.length;
+      $('cnt-submissions').textContent=safePend.length;
+      $('home-stats').innerHTML=`
+        <div class="stat-card"><div class="stat-label">Materias</div><div class="stat-value accent">${safeSubjects.length}</div><div class="stat-sub">registradas</div></div>
+        <div class="stat-card"><div class="stat-label">Estudiantes</div><div class="stat-value">${safeStudents.length}</div><div class="stat-sub">inscritos</div></div>
+        <div class="stat-card"><div class="stat-label">Publicaciones</div><div class="stat-value">${safeFeed.length}</div><div class="stat-sub">en feed</div></div>
+        <div class="stat-card"><div class="stat-label">Entregas pendientes</div><div class="stat-value ${safePend.length>0?'':'accent'}">${safePend.length}</div><div class="stat-sub">${safePend.length>0?'por revisar':'al día'}</div></div>`;
+    } else {
+      $('home-stats').innerHTML=`
+        <div class="stat-card"><div class="stat-label">Materias</div><div class="stat-value accent">${safeSubjects.length}</div><div class="stat-sub">disponibles</div></div>
+        <div class="stat-card"><div class="stat-label">Publicaciones</div><div class="stat-value">${safeFeed.length}</div><div class="stat-sub">en feed global</div></div>`;
+    }
+  }catch{A('home-alert','error','Error al cargar datos.');$('home-alert').classList.remove('hidden')}
+}
+
+/* ══ FEED GLOBAL ══ */
+const _likeCache={};
+const _cmtOpen=new Set();
+
+async function loadFeedGlobal(){
+  $('topbar-actions').innerHTML=isDirector()?`<button class="btn btn-primary" onclick="openGlobalFeedModal()">+ Publicar</button>`:'';
+  HA('feed-alert');
+  $('feed-list').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/classes/feed`,{headers:authH()});
+    const posts=await r.json();
+    if(!Array.isArray(posts)){A('feed-alert','warn','No hay publicaciones.');$('feed-list').innerHTML='';return}
+    $('cnt-feed').textContent=posts.length;
+    renderFeedList('feed-list',posts,false);
+  }catch{A('feed-alert','error','Error al cargar feed.')}
+}
+
+function openGlobalFeedModal(){
+  $('modal-feed-title').textContent='Nueva publicación global';
+  $('mf-type').value='announcement';$('mf-title').value='';$('mf-content').value='';$('mf-due').value='';
+  $('mf-due-field').classList.add('hidden');HA('mf-alert');openModal('modal-feed');
+}
+$('mf-type')?.addEventListener('change',()=>$('mf-due-field').classList.toggle('hidden',$('mf-type').value!=='homework'));
+
+async function createFeedPost(){
+  HA('mf-alert');
+  const type=$('mf-type').value,title=$('mf-title').value.trim(),content=$('mf-content').value.trim();
+  if(!title||!content){A('mf-alert','error','Título y contenido son obligatorios.');return}
+  busy('mf-btn',true,'Publicar');
+  try{
+    const API=getAPI();
+    const body={title,content,type};
+    if(type==='homework'&&$('mf-due').value) body.due_date=$('mf-due').value;
+    const r=await safeFetch(`${API}/api/classes/feed/create`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-feed');loadFeedGlobal();}
+    else A('mf-alert','error',d.error||'Error.');
+  }finally{busy('mf-btn',false,'Publicar')}
+}
+
+async function deleteFeedPost(id,isSubject=false){
+  if(!confirm('¿Eliminar esta publicación?'))return;
+  const API=getAPI();
+  const ep=isSubject?`${API}/api/classes/subject-feed/delete`:`${API}/api/classes/feed/delete`;
+  try{
+    await safeFetch(ep,{method:'POST',headers:authH(),body:JSON.stringify({id})});
+    if(isSubject&&_currentSubject) loadSubjectFeed(_currentSubject);
+    else loadFeedGlobal();
+  }catch{}
+}
+
+/* ══ SUBJECT FEED ══ */
+let _currentSubjectFeedId='';
+
+function openSubjectFeedModal(subjectId,subjectName){
+  _currentSubjectFeedId=subjectId;
+  $('modal-sf-title').textContent=`Publicar en ${subjectName}`;
+  $('msf-type').value='announcement';$('msf-title').value='';$('msf-content').value='';$('msf-due').value='';
+  $('msf-due-field').classList.add('hidden');HA('msf-alert');openModal('modal-subject-feed');
+}
+$('msf-type')?.addEventListener('change',()=>$('msf-due-field').classList.toggle('hidden',$('msf-type').value!=='homework'));
+
+async function createSubjectFeedPost(){
+  HA('msf-alert');
+  const type=$('msf-type').value,title=$('msf-title').value.trim(),content=$('msf-content').value.trim();
+  if(!title||!content){A('msf-alert','error','Título y contenido son obligatorios.');return}
+  busy('msf-btn',true,'Publicar');
+  try{
+    const API=getAPI();
+    const body={title,content,type,subject_id:_currentSubjectFeedId};
+    if(type==='homework'&&$('msf-due').value) body.due_date=$('msf-due').value;
+    const r=await safeFetch(`${API}/api/classes/subject-feed/create`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-subject-feed');loadSubjectFeed(_currentSubject);}
+    else A('msf-alert','error',d.error||'Error.');
+  }finally{busy('msf-btn',false,'Publicar')}
+}
+
+async function loadSubjectFeed(subject){
+  const canPost=isTeacher();
+  $('topbar-actions').innerHTML=canPost?`<button class="btn btn-primary" onclick="openSubjectFeedModal('${escH(subject.id)}','${escH(subject.name)}')">+ Publicar en materia</button>`:'';
+  HA('sd-feed-alert');
+  $('sd-feed-list').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/classes/subject-feed?subject_id=${encodeURIComponent(subject.id)}`,{headers:authH()});
+    const posts=await r.json();
+    renderFeedList('sd-feed-list',Array.isArray(posts)?posts:[],true);
+  }catch{A('sd-feed-alert','error','Error al cargar feed de materia.')}
+}
+
+/* ══ RENDER FEED CARDS ══ */
+function renderFeedList(containerId,posts,isSubjectFeed=false){
+  const container=$(containerId);
+  if(!posts.length){container.innerHTML=`<div class="empty"><span class="empty-emoji">📭</span>No hay publicaciones aún.</div>`;return}
+  container.innerHTML=posts.map(p=>renderFeedCard(p,isSubjectFeed)).join('');
+  requestAnimationFrame(()=>posts.forEach(p=>loadLikes(p.id)));
+}
+
+function renderFeedCard(p,isSubjectFeed=false){
+  const type=p.type||'announcement';
+  const lbl=type==='homework'?'Tarea':'Anuncio';
+  const tagCl=type==='homework'?'tag-blue':'tag-amber';
+  const canDel=isTeacher()||getU()?.username===p.author;
+  const isPastDue=p.due_date&&new Date(p.due_date).getTime()<Date.now();
+  const isStudent=!isTeacher();
+  let submitArea='';
+  if(type==='homework'&&isStudent){
+    submitArea=isPastDue
+      ?`<div class="hw-due-passed">⏰ Fecha límite pasada — ya no se pueden entregar respuestas.</div>`
+      :`<div class="hw-submit-area"><div class="hw-submit-title">📤 Entregar tarea</div>
+         <button class="btn btn-accent btn-sm" onclick="openSubmitHw('${p.id}','${escH(p.title||'')}','${escH(p.subject_id||'')}')">Entregar respuesta</button>
+         ${p.due_date?`<span style="font-size:12px;color:var(--lime-dk);margin-left:10px">Límite: ${fmtDate(p.due_date)}</span>`:''}
+        </div>`;
+  }
+  const delCall=isSubjectFeed?`deleteFeedPost('${p.id}',true)`:`deleteFeedPost('${p.id}',false)`;
+  return`
+  <div class="feed-card" id="fcard-${p.id}">
+    <div class="feed-type-bar ${type}"></div>
+    <div class="feed-body">
+      <div class="feed-meta">
+        <span class="tag ${tagCl}">${lbl}</span>
+        ${p.subject_name?`<span class="tag tag-default">${escH(p.subject_name)}</span>`:''}
+        <span class="feed-date">${tsRel(p.timestamp)}</span>
+      </div>
+      <div class="feed-title">${escH(p.title||'')}</div>
+      <div class="feed-content">${escH(p.content||'')}</div>
+      ${p.due_date?`<div style="margin-top:8px;font-size:12px;color:var(--muted);font-family:var(--mono)">📅 Límite: <strong style="color:${isPastDue?'var(--rose)':'var(--body)'}">${fmtDate(p.due_date)}</strong></div>`:''}
+      ${submitArea}
+    </div>
+    <div class="feed-footer">
+      <div class="feed-author"><div class="feed-author-dot">${(p.author||'?').charAt(0).toUpperCase()}</div>${escH(p.author||'Anónimo')}</div>
+      <div class="feed-actions">
+        <button class="like-btn" id="like-btn-${p.id}" onclick="toggleLike('${p.id}')">♡ <span id="like-cnt-${p.id}">…</span></button>
+        <button class="cmt-toggle" onclick="toggleComments('${p.id}')">💬 <span id="cmt-cnt-${p.id}">…</span></button>
+        ${canDel?`<button class="feed-del-btn" onclick="${delCall}" title="Eliminar">✕</button>`:''}
+      </div>
+    </div>
+    <div class="comments-wrap hidden" id="cmts-${p.id}">
+      <div id="cmts-list-${p.id}"></div>
+      <div class="cmt-form"><input class="cmt-input" id="cmt-input-${p.id}" type="text" placeholder="Comenta…"/><button class="cmt-send" onclick="submitComment('${p.id}')">Enviar</button></div>
+    </div>
+  </div>`;
+}
+
+async function loadLikes(pid){
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/classes/feed/post/${pid}/likes`);
+    const d=await r.json();
+    const me=getU()?.username||'';
+    const liked=d.likes?.some(l=>l.user===me);
+    _likeCache[pid]={count:d.count,liked};updateLikeUI(pid);
+  }catch{}
+}
+function updateLikeUI(pid){
+  const{count=0,liked=false}=_likeCache[pid]||{};
+  const btn=$(`like-btn-${pid}`);
+  if(btn){btn.innerHTML=`${liked?'♥':'♡'} <span id="like-cnt-${pid}">${count}</span>`;btn.classList.toggle('liked',liked)}
+}
+async function toggleLike(pid){
+  const user=getU()?.username||'anon';
+  try{
+    const API=getAPI();
+    const r=await safeFetch(`${API}/api/classes/feed/like`,{method:'POST',headers:authH(),body:JSON.stringify({post_id:pid,user})});
+    const d=await r.json();
+    if(d.success||d._networkFallback){
+      const prev=_likeCache[pid]||{count:0,liked:false};
+      const newLiked=d._networkFallback?!prev.liked:d.liked;
+      _likeCache[pid]={count:newLiked?prev.count+1:Math.max(0,prev.count-1),liked:newLiked};updateLikeUI(pid);
+    }
+  }catch{}
+}
+async function toggleComments(pid){
+  const wrap=$(`cmts-${pid}`);if(!wrap)return;
+  if(_cmtOpen.has(pid)){wrap.classList.add('hidden');_cmtOpen.delete(pid);return}
+  wrap.classList.remove('hidden');_cmtOpen.add(pid);await loadComments(pid);
+}
+async function loadComments(pid){
+  const list=$(`cmts-list-${pid}`);if(!list)return;
+  list.innerHTML=`<div style="padding:6px 0"><span class="spinner spinner-light"></span></div>`;
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/classes/feed/post/${pid}/comments`);
+    const d=await r.json();
+    const cmts=d.comments||[];
+    $(`cmt-cnt-${pid}`).textContent=cmts.length;
+    list.innerHTML=cmts.length?cmts.map(c=>`<div class="cmt-item"><div class="cmt-av">${(c.user||'?').charAt(0).toUpperCase()}</div><div><div class="cmt-user">${escH(c.user||'')}</div><div class="cmt-text">${escH(c.content||'')}</div></div></div>`).join(''):`<p style="font-size:12px;color:var(--muted);padding:4px 0">Sin comentarios.</p>`;
+  }catch{list.innerHTML='<p style="font-size:12px;color:var(--muted)">Error al cargar.</p>'}
+}
+async function submitComment(pid){
+  const input=$(`cmt-input-${pid}`);if(!input)return;
+  const content=input.value.trim();if(!content)return;
+  input.disabled=true;
+  try{
+    const API=getAPI();
+    await safeFetch(`${API}/api/classes/feed/comment`,{method:'POST',headers:authH(),body:JSON.stringify({post_id:pid,content})});
+    input.value='';await loadComments(pid);
+  }catch{}finally{input.disabled=false;input.focus()}
+}
+
+/* ══ SUBMIT HOMEWORK ══ */
+let _submitHwId='',_submitHwSubjectId='';
+function openSubmitHw(hwId,title,subjectId){
+  _submitHwId=hwId;_submitHwSubjectId=subjectId;
+  $('mshw-desc').textContent=`Tarea: ${title}`;$('mshw-content').value='';HA('mshw-alert');openModal('modal-submit-hw');
+}
+async function submitHomework(){
+  HA('mshw-alert');
+  const content=$('mshw-content').value.trim();
+  if(!content){A('mshw-alert','error','Escribe tu respuesta.');return}
+  busy('mshw-btn',true,'Entregar');
+  try{
+    const API=getAPI();
+    const r=await safeFetch(`${API}/api/classes/homework/submit`,{method:'POST',headers:authH(),
+      body:JSON.stringify({homework_id:_submitHwId,content,subject_id:_submitHwSubjectId,status:'pending'})});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-submit-hw');alert('✅ Tarea entregada correctamente.');}
+    else A('mshw-alert','error',d.error||'Error.');
+  }finally{busy('mshw-btn',false,'Entregar')}
+}
+
+/* ══ SUBJECTS ══ */
+let _currentSubject=null;
+
+async function loadSubjects(){
+  $('topbar-actions').innerHTML=isTeacher()?`<button class="btn btn-primary" onclick="openModal('modal-subject')">+ Nueva materia</button>`:'';
+  $('subjects-list-view').classList.remove('hidden');$('subject-detail-view').classList.add('hidden');
+  HA('subjects-alert');
+  $('subjects-grid').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/classes/subjects`,{headers:authH()});
+    _subjects=await r.json(); if(!Array.isArray(_subjects)) _subjects=[];
+    $('cnt-subjects').textContent=_subjects.length;
+    if(!_subjects.length){$('subjects-grid').innerHTML=`<div class="empty"><span class="empty-emoji">📚</span>No hay materias aún.${isTeacher()?' Crea la primera.':''}</div>`;return}
+    $('subjects-grid').innerHTML=_subjects.map(s=>`
+      <div class="subject-card" onclick='openSubject(${JSON.stringify(s).replace(/'/g,"&#39;").replace(/"/g,'&quot;')})'>
+        <div class="subject-icon">📚</div>
+        <div class="subject-info">
+          <div class="subject-name">${escH(s.name||'')}</div>
+          <div class="subject-teacher"><strong>Docente:</strong> ${escH(s.teacher||'—')}</div>
+        </div>
+      </div>`).join('');
+    populateAllSelects();
+  }catch{A('subjects-alert','error','Error al cargar materias.')}
+}
+
+function openSubject(subjectObj){
+  _currentSubject=typeof subjectObj==='string'?JSON.parse(subjectObj):subjectObj;
+  $('subjects-list-view').classList.add('hidden');$('subject-detail-view').classList.remove('hidden');
+  $('sd-name').textContent=_currentSubject.name||'';
+  $('sd-meta').textContent=`Docente: ${_currentSubject.teacher||'—'} · Nota mínima: ${_currentSubject.passing_grade??'—'}`;
+  sdTab('feed');
+}
+function backToSubjects(){$('subject-detail-view').classList.add('hidden');$('subjects-list-view').classList.remove('hidden');loadSubjects()}
+function sdTab(tab){
+  ['feed','grades','attendance'].forEach(t=>{$(`sdtab-${t}`)?.classList.remove('active');$(`sd-${t}-panel`)?.classList.add('hidden')});
+  $(`sdtab-${tab}`)?.classList.add('active');$(`sd-${tab}-panel`)?.classList.remove('hidden');
+  if(tab==='feed') loadSubjectFeed(_currentSubject);
+  if(tab==='grades') loadSubjectGradesExcel(_currentSubject);
+  if(tab==='attendance') loadSubjectAttendance(_currentSubject);
+}
+
+async function createSubject(){
+  HA('ms-alert');
+  const name=$('ms-name').value.trim(), passing=parseFloat($('ms-passing').value);
+  const period_id=$('ms-period').value||'';
+  const teacher=$('ms-teacher').value.trim()||undefined;
+  if(!name){A('ms-alert','error','El nombre es obligatorio.');return}
+  busy('ms-btn',true,'Crear materia');
+  try{
+    const API=getAPI();
+    const body={name,passing_grade:passing,period_id};
+    if(teacher) body.teacher=teacher;
+    const r=await safeFetch(`${API}/api/classes/create-subject`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-subject');$('ms-name').value='';$('ms-passing').value='3.0';await refreshCache();loadSubjects();}
+    else A('ms-alert','error',d.error||'Error.');
+  }finally{busy('ms-btn',false,'Crear materia')}
+}
+
+/* ══ GRADES EXCEL ══ */
+let _gradesData={students:[],evals:[],cells:{}};
+let _gradeSubjectId='';
+
+function setupGradesPage(){$('topbar-actions').innerHTML='';populateAllSelects();$('grades-excel-wrap').innerHTML='';HA('grades-alert')}
+
+async function loadGradesExcel(){
+  const subjectId=$('gf-subject').value;
+  const periodId=$('gf-period').value;
+  if(!subjectId){A('grades-alert','error','Selecciona una materia.');return}
+  _gradeSubjectId=subjectId;HA('grades-alert');
+  $('grades-excel-wrap').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  await buildGradesExcel(subjectId,'grades-excel-wrap','grades-alert',periodId);
+}
+
+async function loadSubjectGradesExcel(subject){
+  _gradeSubjectId=subject.id;
+  $('topbar-actions').innerHTML=isTeacher()?`<button class="btn btn-primary" onclick="openModal('modal-eval')">+ Evaluación</button>`:'';
+  $('sd-grades-wrap').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  HA('sd-grades-alert');
+  await buildGradesExcel(subject.id,'sd-grades-wrap','sd-grades-alert');
+}
+
+async function buildGradesExcel(subjectId,containerId,alertId,periodId=''){
+  try{
+    const API=getAPI();
+    if(isTeacher()){
+      const stRes=await fetch(`${API}/api/classes/students`,{headers:authH()});
+      const students=await stRes.json();
+      if(!Array.isArray(students)||!students.length){$(containerId).innerHTML=`<div class="empty"><span class="empty-emoji">👥</span>No hay estudiantes inscritos.</div>`;return}
+      const allGrades=[];
+      await Promise.all(students.map(async s=>{
+        try{
+          let url=`${API}/api/classes/grades?student=${encodeURIComponent(s.username)}&subject_id=${encodeURIComponent(subjectId)}`;
+          if(periodId) url+=`&period_id=${encodeURIComponent(periodId)}`;
+          const r=await fetch(url,{headers:authH()});
+          const d=await r.json();
+          (d.grades||[]).forEach(g=>allGrades.push({...g,student:s.username}));
+        }catch{}
+      }));
+      const evalMap={};
+      allGrades.forEach(g=>{if(g.title&&!evalMap[g.title]) evalMap[g.title]={title:g.title,weight:g.weight||0}});
+      const evals=Object.values(evalMap);
+      const cells={};
+      students.forEach(s=>{cells[s.username]={}});
+      allGrades.forEach(g=>{if(cells[g.student]) cells[g.student][g.title]=g});
+      _gradesData={students,evals,cells};
+      renderExcelTable(containerId,subjectId,false);
+    } else {
+      const me=myUsername();
+      let url=`${API}/api/classes/grades?student=${encodeURIComponent(me)}&subject_id=${encodeURIComponent(subjectId)}`;
+      if(periodId) url+=`&period_id=${encodeURIComponent(periodId)}`;
+      const r=await fetch(url,{headers:authH()});
+      const d=await r.json();
+      const myGrades=d.grades||[];
+      const evalMap={};
+      myGrades.forEach(g=>{if(g.title&&!evalMap[g.title]) evalMap[g.title]={title:g.title,weight:g.weight||0}});
+      const evals=Object.values(evalMap);
+      const cells={};cells[me]={};
+      myGrades.forEach(g=>{cells[me][g.title]=g});
+      _gradesData={students:[{username:me}],evals,cells};
+      renderExcelTable(containerId,subjectId,true);
+    }
+  }catch{A(alertId,'error','Error al cargar calificaciones.')}
+}
+
+function renderExcelTable(containerId,subjectId,readOnly=false){
+  const{students,evals,cells}=_gradesData;
+  const subjectObj=_subjects.find(s=>s.id===subjectId)||{passing_grade:3.0};
+  const pass=subjectObj.passing_grade??3.0;
+  if(!evals.length){$(containerId).innerHTML=`<div class="empty"><span class="empty-emoji">📊</span>No hay evaluaciones registradas aún.</div>`;return}
+  let html=`<div class="grades-table-wrap"><table class="grades-table"><thead><tr>
+    <th>Estudiante</th>
+    ${evals.map(e=>`<th>${escH(e.title)}<br/><span style="font-weight:300;opacity:.6;font-size:9px">peso ${e.weight??'—'}</span></th>`).join('')}
+    <th>Promedio</th>
+    ${(!readOnly&&isTeacher())?`<th><button class="add-eval-btn" onclick="_openAddEval('${escH(subjectId)}')">+ Evaluación</button></th>`:''}
+  </tr></thead><tbody>`;
+  students.forEach(st=>{
+    const uname=st.username;
+    let total=0,weights=0;
+    evals.forEach(e=>{const g=cells[uname]?.[e.title];if(g&&g.score!=null&&g.weight!=null){total+=g.score*g.weight;weights+=g.weight}});
+    const avg=weights>0?total/weights:null;
+    const avgDisp=avg!=null?avg.toFixed(2):'—';
+    const avgCl=avg!=null?(avg>=pass?'avg-pass':'avg-fail'):'';
+    html+=`<tr><td>${escH(uname)}</td>`;
+    evals.forEach(e=>{
+      const g=cells[uname]?.[e.title];
+      const val=g?.score??'';
+      const gradeId=g?.id||'';
+      const cls=val!==''?(parseFloat(val)>=pass?'pass':'fail'):'';
+      if(readOnly){
+        html+=`<td class="grade-cell" style="text-align:center;padding:10px 8px;"><span class="grade-cell-readonly ${cls}">${val!==''?val:'—'}</span></td>`;
+      } else {
+        html+=`<td class="grade-cell" id="gcell-${escH(uname)}-${escH(e.title)}" data-id="${gradeId}">
+          <input class="grade-cell-input ${cls}" type="number" step="0.1" min="0" max="10" value="${val}" placeholder="—"
+            onblur="saveGradeCell(this,'${escH(uname)}','${escH(e.title)}','${escH(subjectId)}',${e.weight},'${gradeId}')"
+            oninput="updateCellStyle(this,${pass})"/>
+        </td>`;
+      }
+    });
+    html+=`<td class="avg-col ${avgCl}">${avgDisp}</td>`;
+    if(!readOnly&&isTeacher()) html+=`<td></td>`;
+    html+=`</tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  $(containerId).innerHTML=html;
+}
+
+function updateCellStyle(input,pass){const v=parseFloat(input.value);input.className=`grade-cell-input ${isNaN(v)?'':(v>=pass?'pass':'fail')}`}
+
+async function saveGradeCell(input,student,evalTitle,subjectId,weight,existingId){
+  if(!isTeacher()) return;
+  const val=input.value.trim();
+  const cell=input.closest('.grade-cell');
+  if(val===''&&existingId){
+    cell?.classList.add('saving');
+    try{await safeFetch(`${getAPI()}/api/classes/delete-grade`,{method:'POST',headers:authH(),body:JSON.stringify({id:existingId})})}catch{}
+    cell?.classList.remove('saving');cell?.classList.add('saved');
+    if(_gradesData.cells[student]) delete _gradesData.cells[student][evalTitle];
+    setTimeout(()=>cell?.classList.remove('saved'),800);return;
+  }
+  const score=parseFloat(val);if(isNaN(score)||val==='') return;
+  cell?.classList.add('saving');
+  try{
+    const API=getAPI();
+    if(existingId){
+      await safeFetch(`${API}/api/classes/edit-grade`,{method:'POST',headers:authH(),body:JSON.stringify({id:existingId,score})});
+    } else {
+      const r=await safeFetch(`${API}/api/classes/add-grade`,{method:'POST',headers:authH(),
+        body:JSON.stringify({student,subject_id:subjectId,title:evalTitle,score,weight})});
+      const d=await r.json();
+      if((d.success||d._networkFallback)&&d.grade?.id){
+        input.setAttribute('onblur',`saveGradeCell(this,'${student}','${evalTitle}','${subjectId}',${weight},'${d.grade.id}')`);
+        if(!_gradesData.cells[student]) _gradesData.cells[student]={};
+        _gradesData.cells[student][evalTitle]=d.grade;
+      }
+    }
+  }catch{}
+  cell?.classList.remove('saving');cell?.classList.add('saved');
+  setTimeout(()=>cell?.classList.remove('saved'),700);
+}
+
+let _addEvalSubjectId='';
+function _openAddEval(subjectId){_addEvalSubjectId=subjectId;$('me-name').value='';$('me-weight').value='0.25';HA('me-alert');openModal('modal-eval')}
+async function addEvalColumn(){
+  if(!isTeacher()) return;
+  HA('me-alert');
+  const name=$('me-name').value.trim(),weight=parseFloat($('me-weight').value);
+  if(!name){A('me-alert','error','Escribe el nombre.');return}
+  _gradesData.evals.push({title:name,weight});
+  _gradesData.students.forEach(s=>{if(!_gradesData.cells[s.username]) _gradesData.cells[s.username]={}});
+  closeModal('modal-eval');
+  const containerId=_gradeSubjectId===_currentSubject?.id?'sd-grades-wrap':'grades-excel-wrap';
+  renderExcelTable(containerId,_addEvalSubjectId,false);
+}
+
+/* ══ ATTENDANCE ══ */
+function setupAttendancePage(){
+  if(isTeacher()){
+    $('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="_openAttModal(null,null)">+ Registrar</button>`;
+    $('att-student-field').style.display='';
+    populateAllSelects();
+  } else {
+    $('topbar-actions').innerHTML='';
+    $('att-student-field').style.display='none';
+    populateAllSelects();
+    loadAttendance();
+  }
+  if($('ma-date')) $('ma-date').value=new Date().toISOString().split('T')[0];
+}
+function _openAttModal(student,subjectId){
+  if(!isTeacher()) return;
+  if(student) $('ma-student').value=student;
+  if(subjectId) $('ma-subject').value=subjectId;
+  $('ma-date').value=new Date().toISOString().split('T')[0];
+  HA('ma-alert');openModal('modal-attendance');
+}
+async function loadAttendance(){
+  HA('attendance-alert');
+  const API=getAPI();
+  let student, subjectId;
+  if(isTeacher()){
+    student=$('att-filter-student').value;
+    subjectId=$('att-filter-subject').value;
+  } else {
+    student=myUsername();
+    subjectId=$('att-filter-subject').value;
+  }
+  $('attendance-tbody').innerHTML=`<tr><td colspan="5"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr>`;
+  let url=`${API}/api/classes/attendance`;
+  const p=[];if(student)p.push(`student=${encodeURIComponent(student)}`);if(subjectId)p.push(`subject_id=${encodeURIComponent(subjectId)}`);
+  if(p.length)url+='?'+p.join('&');
+  try{
+    const r=await fetch(url,{headers:authH()});const list=await r.json();
+    const sLbl={present:'✅ Presente',absent:'❌ Falla',late:'⏰ Retardo'};
+    const sCl={present:'att-present',absent:'att-absent',late:'att-late'};
+    $('attendance-tbody').innerHTML=Array.isArray(list)&&list.length?list.map(a=>`<tr>
+      <td style="font-weight:600;color:var(--ink)">${escH(a.student||'—')}</td>
+      <td><span class="tag tag-default">${escH(a.subject_name||a.subject||'—')}</span></td>
+      <td style="font-family:var(--mono);font-size:12px">${escH(a.date||'—')}</td>
+      <td><span class="${sCl[a.status]||''}">${sLbl[a.status]||escH(a.status||'—')}</span></td>
+      <td style="color:var(--muted);font-size:12px;font-family:var(--mono)">${escH(a.teacher||'—')}</td>
+    </tr>`).join(''):`<tr><td colspan="5"><div class="empty"><span class="empty-emoji">📅</span>Sin registros.</div></td></tr>`;
+  }catch{A('attendance-alert','error','Error al cargar asistencia.')}
+}
+
+async function loadSubjectAttendance(subject){
+  $('topbar-actions').innerHTML=isTeacher()?`<button class="btn btn-primary" onclick="_openAttModal(null,'${escH(subject.id)}')">+ Registrar</button>`:'';
+  $('sd-att-wrap').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  HA('sd-att-alert');
+  const API=getAPI();
+  try{
+    const me=myUsername();
+    let url=`${API}/api/classes/attendance?subject_id=${encodeURIComponent(subject.id)}`;
+    if(!isTeacher()) url+=`&student=${encodeURIComponent(me)}`;
+    const r=await fetch(url,{headers:authH()});
+    const list=await r.json();
+    const sLbl={present:'✅ Presente',absent:'❌ Falla',late:'⏰ Retardo'};
+    const sCl={present:'att-present',absent:'att-absent',late:'att-late'};
+    $('sd-att-wrap').innerHTML=Array.isArray(list)&&list.length?`<div class="card"><div class="table-scroll"><table>
+      <thead><tr>${isTeacher()?'<th>Estudiante</th>':''}<th>Fecha</th><th>Estado</th><th>Profesor</th></tr></thead>
+      <tbody>${list.map(a=>`<tr>
+        ${isTeacher()?`<td style="font-weight:600;color:var(--ink)">${escH(a.student||'—')}</td>`:''}
+        <td style="font-family:var(--mono);font-size:12px">${escH(a.date||'—')}</td>
+        <td><span class="${sCl[a.status]||''}">${sLbl[a.status]||escH(a.status||'—')}</span></td>
+        <td style="color:var(--muted);font-size:12px;font-family:var(--mono)">${escH(a.teacher||'—')}</td>
+      </tr>`).join('')}</tbody></table></div></div>`:`<div class="empty"><span class="empty-emoji">📅</span>Sin registros de asistencia.</div>`;
+  }catch{A('sd-att-alert','error','Error al cargar asistencia.')}
+}
+
+async function registerAttendance(){
+  if(!isTeacher()) return;
+  HA('ma-alert');
+  const student=$('ma-student').value,subjectId=$('ma-subject').value,date=$('ma-date').value,status=$('ma-status').value;
+  if(!student||!subjectId||!date){A('ma-alert','error','Completa todos los campos.');return}
+  busy('ma-btn',true,'Registrar');
+  try{
+    const API=getAPI();
+    const r=await safeFetch(`${API}/api/classes/attendance`,{method:'POST',headers:authH(),
+      body:JSON.stringify({student,subject_id:subjectId,date,status})});
+    const d=await r.json();
+    if(d.success||d._networkFallback){
+      closeModal('modal-attendance');
+      if(_currentSubject?.id===subjectId) loadSubjectAttendance(_currentSubject);
+      else loadAttendance();
+    } else A('ma-alert','error',d.error||'Error.');
+  }finally{busy('ma-btn',false,'Registrar')}
+}
+
+/* ══ STUDENTS ══ */
+async function loadStudents(){
+  if(!isTeacher()){return}
+  $('topbar-actions').innerHTML=isDirector()?`<button class="btn btn-primary" onclick="openModal('modal-student')">+ Inscribir estudiante</button>`:'';
+  $('students-tbody').innerHTML=`<tr><td colspan="3"><div class="empty"><span class="spinner spinner-light"></span></div></td></tr>`;
+  HA('students-alert');
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/classes/students`,{headers:authH()});const list=await r.json();
+    $('cnt-students').textContent=Array.isArray(list)?list.length:0;
+    $('students-tbody').innerHTML=Array.isArray(list)&&list.length?list.map(s=>`<tr>
+      <td><strong style="color:var(--ink)">${escH(s.username||'—')}</strong></td>
+      <td><span class="tag tag-default">${escH(s.grade||'—')}</span></td>
+      <td><div class="td-actions"><button class="btn btn-outline btn-sm" onclick="navTo('grades')">Ver notas →</button></div></td>
+    </tr>`).join(''):`<tr><td colspan="3"><div class="empty"><span class="empty-emoji">👥</span>No hay estudiantes.</div></td></tr>`;
+  }catch{A('students-alert','error','Error al cargar.')}
+}
+
+async function enrollStudent(){
+  if(!isDirector()) return;
+  HA('mst-alert');
+  const username=$('mst-u').value.trim(),grade=$('mst-g').value.trim();
+  if(!username||!grade){A('mst-alert','error','Todos los campos son obligatorios.');return}
+  busy('mst-btn',true,'Inscribir');
+  try{
+    const API=getAPI();
+    const r=await safeFetch(`${API}/api/classes/enroll-student`,{method:'POST',headers:authH(),
+      body:JSON.stringify({username,grade,school_id:getSchool()})});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-student');$('mst-u').value='';$('mst-g').value='';await refreshCache();loadStudents();}
+    else A('mst-alert','error',d.error||'Error.');
+  }finally{busy('mst-btn',false,'Inscribir')}
+}
+
+/* ══ SUBMISSIONS ══ */
+async function loadSubmissions(mode){
+  if(!isTeacher()){return}
+  $('topbar-actions').innerHTML='';
+  $('submissions-list').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  HA('submissions-alert');
+  try{
+    const API=getAPI();
+    const url=mode==='pending'?`${API}/api/classes/homework/pending`:`${API}/api/classes/homework/submissions`;
+    const r=await fetch(url,{headers:authH()});const list=await r.json();
+    const safeList=Array.isArray(list)?list:[];
+    $('cnt-submissions').textContent=safeList.filter(s=>s.status==='pending').length;
+    if(!safeList.length){$('submissions-list').innerHTML=`<div class="empty"><span class="empty-emoji">📋</span>${mode==='pending'?'No hay entregas pendientes.':'No hay entregas.'}</div>`;return}
+    $('submissions-list').innerHTML=safeList.map(s=>`
+    <div class="sub-item">
+      <div class="sub-header">
+        <div><div class="sub-student">${escH(s.student_name||'—')}</div><div style="font-size:12px;color:var(--muted);margin-top:2px;font-family:var(--mono)">${escH(s.subject_name||'—')} · ${tsRel(s.timestamp)}</div></div>
+        <span class="tag ${s.status==='pending'?'tag-amber':s.status==='approved'?'tag-green':'tag-red'}">${s.status==='pending'?'⏳ Pendiente':s.status==='approved'?'✅ Aprobado':'❌ Rechazado'}</span>
+      </div>
+      <div class="sub-content">${escH(s.content||'')}</div>
+      ${s.status==='pending'?`<div class="sub-actions">
+        <div class="sub-score">Nota: <input type="number" id="score-${s.id}" value="5" step="0.1" min="0" max="10"/> Peso: <input type="number" id="weight-${s.id}" value="1" step="0.05" min="0" max="1"/></div>
+        <button class="btn btn-accent btn-sm" onclick="approveSubmission('${s.id}')">✅ Aprobar</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectSubmission('${s.id}')">❌ Rechazar</button>
+      </div>`:''}
+    </div>`).join('');
+  }catch{A('submissions-alert','error','Error al cargar entregas.')}
+}
+
+async function approveSubmission(id){
+  if(!isTeacher()) return;
+  const score=parseFloat($(`score-${id}`)?.value)||5;
+  const weight=parseFloat($(`weight-${id}`)?.value)||1;
+  try{await safeFetch(`${getAPI()}/api/classes/homework/approve`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id,score,weight})});loadSubmissions('all')}catch{}
+}
+async function rejectSubmission(id){
+  if(!isTeacher()) return;
+  try{await safeFetch(`${getAPI()}/api/classes/homework/reject`,{method:'POST',headers:authH(),body:JSON.stringify({submission_id:id})});loadSubmissions('pending')}catch{}
+}
+
+/* ══ REPORTS ══ */
+function setupReports(){
+  if(isTeacher()){
+    $('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="_openReportModal()">+ Nueva anotación</button>`;
+    $('rep-student-field').style.display='';$('rep-filter-btn').style.display='';
+    $('reports-result').style.display='none';HA('reports-alert');populateAllSelects();
+    if($('mr-date')) $('mr-date').value=new Date().toISOString().split('T')[0];
+  } else {
+    $('topbar-actions').innerHTML='';
+    $('rep-student-field').style.display='none';$('rep-filter-btn').style.display='none';
+    HA('reports-alert');loadMyReports();
+  }
+}
+async function loadMyReports(){
+  const me=myUsername();$('reports-result').style.display='none';
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/classes/reports?student=${encodeURIComponent(me)}`,{headers:authH()});
+    const list=await r.json();
+    $('reports-result').style.display='block';$('reports-result-title').textContent='Mis anotaciones';
+    renderReportsTable(Array.isArray(list)?list:[],false,'');
+  }catch{A('reports-alert','error','Error al cargar.')}
+}
+function _openReportModal(){if(!isTeacher()) return;$('mr-date').value=new Date().toISOString().split('T')[0];HA('mr-alert');openModal('modal-report')}
+async function loadReports(){
+  if(!isTeacher()) return;HA('reports-alert');
+  const student=$('rep-filter-student').value;
+  if(!student){A('reports-alert','error','Selecciona un estudiante.');return}
+  $('reports-result').style.display='none';
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/classes/reports?student=${encodeURIComponent(student)}`,{headers:authH()});
+    const list=await r.json();
+    $('reports-result').style.display='block';$('reports-result-title').textContent=`Hoja de vida · ${student}`;
+    renderReportsTable(Array.isArray(list)?list:[],true,student);
+  }catch{A('reports-alert','error','Error al cargar.')}
+}
+function renderReportsTable(list,canDelete,student){
+  const sLbl={merit:'⭐ Elogio',low:'⚠️ Llamado atención',medium:'🚨 Falta grave',high:'🔴 Rectoría'};
+  const sCl={merit:'sev-merit',low:'sev-low',medium:'sev-medium',high:'sev-high'};
+  $('reports-tbody').innerHTML=list.length?list.map(rep=>`<tr>
+    <td><span class="tag tag-default">${escH(rep.type||'—')}</span></td>
+    <td><span class="${sCl[rep.severity]||''}">${sLbl[rep.severity]||escH(rep.severity||'—')}</span></td>
+    <td style="max-width:260px">${escH(rep.description||'—')}</td>
+    <td style="font-family:var(--mono);font-size:12px;color:var(--muted)">${escH(rep.officer||'—')}</td>
+    <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${escH(rep.date||'—')}</td>
+    <td>${canDelete&&isTeacher()?`<button class="btn btn-danger btn-xs" onclick="deleteReport('${rep.id}','${escH(student)}')">Eliminar</button>`:''}</td>
+  </tr>`).join(''):`<tr><td colspan="6"><div class="empty"><span class="empty-emoji">📋</span>Sin anotaciones.</div></td></tr>`;
+}
+async function createReport(){
+  if(!isTeacher()) return;HA('mr-alert');
+  const student=$('mr-student').value,type=$('mr-type').value,severity=$('mr-severity').value;
+  const description=$('mr-desc').value.trim(),date=$('mr-date').value;
+  if(!student||!description){A('mr-alert','error','Estudiante y descripción son obligatorios.');return}
+  busy('mr-btn',true,'Guardar');
+  try{
+    const API=getAPI();
+    const r=await safeFetch(`${API}/api/classes/reports`,{method:'POST',headers:authH(),
+      body:JSON.stringify({student,type,severity,description,date})});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-report');$('mr-desc').value='';$('rep-filter-student').value=student;loadReports();}
+    else A('mr-alert','error',d.error||'Error.');
+  }finally{busy('mr-btn',false,'Guardar')}
+}
+async function deleteReport(id,student){
+  if(!isTeacher()) return;
+  if(!confirm('¿Eliminar esta anotación?'))return;
+  try{await safeFetch(`${getAPI()}/api/classes/delete-report`,{method:'POST',headers:authH(),body:JSON.stringify({id})});loadReports()}catch{}
+}
+
+/* ══ USERS ══ */
+let _setRoleTarget={username:'',school_id:null};
+async function loadUsers(){
+  if(!isDirector()){return}
+  $('topbar-actions').innerHTML='';
+  HA('users-alert');
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/admin/users`,{headers:authH()});const list=await r.json();
+    const safeList=Array.isArray(list)?list:[];
+    const roleTagMap={admin:'tag-ink',director:'tag-purple',teacher:'tag-blue',student:'tag-default'};
+    $('users-tbody').innerHTML=safeList.length?safeList.map(u=>`<tr>
+      <td><strong style="color:var(--ink)">${escH(u.username||'—')}</strong></td>
+      <td><span class="tag ${roleTagMap[u.role]||'tag-default'}">${escH(u.role||'—')}</span></td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${escH(u.school_id||'global')}</td>
+      <td><div class="td-actions">
+        ${isAdmin()?`<button class="btn btn-outline btn-xs" onclick="openSetRole('${escH(u.username)}','${escH(u.school_id||'')}','${escH(u.role||'')}')">Cambiar rol</button>`:''}
+      </div></td>
+    </tr>`).join(''):`<tr><td colspan="4"><div class="empty"><span class="empty-emoji">👤</span>No hay usuarios.</div></td></tr>`;
+  }catch{A('users-alert','error','Error al cargar usuarios.')}
+}
+function openSetRole(username,schoolId,currentRole){
+  _setRoleTarget={username,school_id:schoolId||null};
+  $('msr-username-label').textContent=username;
+  $('msr-role').value=currentRole||'student';
+  $('msr-school').value='';
+  HA('msr-alert');openModal('modal-set-role');
+}
+async function applySetRole(){
+  HA('msr-alert');
+  const newRole=$('msr-role').value;
+  const newSchool=$('msr-school').value.trim()||undefined;
+  busy('msr-btn',true,'Aplicar');
+  try{
+    const API=getAPI();
+    const body={username:_setRoleTarget.username,school_id:_setRoleTarget.school_id,role:newRole};
+    if(newSchool) body.new_school_id=newSchool;
+    const r=await safeFetch(`${API}/api/admin/set-role`,{method:'POST',headers:authH(),body:JSON.stringify(body)});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-set-role');loadUsers();}
+    else A('msr-alert','error',d.error||'Error.');
+  }finally{busy('msr-btn',false,'Aplicar')}
+}
+
+/* ══ SCHOOLS ══ */
+async function loadSchools(){
+  if(!isAdmin()){return}
+  $('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="openModal('modal-school')">+ Nuevo colegio</button>`;
+  HA('schools-alert');
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/schools`,{headers:authH()});const list=await r.json();
+    const safeList=Array.isArray(list)?list:[];
+    $('schools-tbody').innerHTML=safeList.length?safeList.map(s=>`<tr>
+      <td><strong style="color:var(--ink)">${escH(s.name||'—')}</strong></td>
+      <td style="color:var(--muted);font-size:12px">${escH(s.address||'—')}</td>
+      <td style="font-family:var(--mono);font-size:12px">${escH(s.director_username||'—')}</td>
+      <td><span style="font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer" onclick="copyToClipboard('${escH(s.id)}')" title="Clic para copiar">${escH(s.id||'—')}</span></td>
+      <td><div class="td-actions"><button class="btn btn-danger btn-xs" onclick="deleteSchool('${s.id}')">Eliminar</button></div></td>
+    </tr>`).join(''):`<tr><td colspan="5"><div class="empty"><span class="empty-emoji">🏫</span>No hay colegios registrados.</div></td></tr>`;
+  }catch{A('schools-alert','error','Error al cargar colegios.')}
+}
+function copyToClipboard(text){
+  navigator.clipboard?.writeText(text).then(()=>alert('UUID copiado: '+text)).catch(()=>prompt('Copia este UUID:',text));
+}
+async function createSchool(){
+  HA('msch-alert');
+  const name=$('msch-name').value.trim(),address=$('msch-address').value.trim(),director=$('msch-director').value.trim();
+  if(!name){A('msch-alert','error','El nombre es obligatorio.');return}
+  busy('msch-btn',true,'Crear colegio');
+  try{
+    const API=getAPI();
+    const r=await safeFetch(`${API}/api/schools/create`,{method:'POST',headers:authH(),
+      body:JSON.stringify({name,address,director_username:director})});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-school');$('msch-name').value='';$('msch-address').value='';$('msch-director').value='';loadSchools();}
+    else A('msch-alert','error',d.error||'Error.');
+  }finally{busy('msch-btn',false,'Crear colegio')}
+}
+async function deleteSchool(id){
+  if(!confirm('¿Eliminar este colegio? Esta acción no se puede deshacer.'))return;
+  try{await safeFetch(`${getAPI()}/api/schools/delete`,{method:'POST',headers:authH(),body:JSON.stringify({id})});loadSchools()}catch{}
+}
+
+/* ══ PERIODS ══ */
+async function loadPeriods(){
+  if(!isDirector()){return}
+  $('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="openModal('modal-period')">+ Nuevo período</button>`;
+  HA('periods-alert');
+  try{
+    const API=getAPI();
+    const sid=getSchool()||'';
+    const r=await fetch(`${API}/api/schools/periods${sid?`?school_id=${encodeURIComponent(sid)}`:''}`,{headers:authH()});
+    const list=await r.json();
+    _periods=Array.isArray(list)?list:[];
+    populateAllSelects();
+    $('periods-tbody').innerHTML=_periods.length?_periods.map(p=>`<tr>
+      <td><strong style="color:var(--ink)">${escH(p.name||'—')}</strong></td>
+      <td style="font-family:var(--mono);font-size:12px">${escH(p.start_date||'—')}</td>
+      <td style="font-family:var(--mono);font-size:12px">${escH(p.end_date||'—')}</td>
+      <td><span class="tag ${p.active?'tag-green':'tag-default'}">${p.active?'✅ Activo':'⏸ Inactivo'}</span></td>
+      <td><div class="td-actions">
+        <button class="btn btn-outline btn-xs" onclick="togglePeriodActive('${p.id}',${!p.active})">${p.active?'Desactivar':'Activar'}</button>
+        <button class="btn btn-danger btn-xs" onclick="deletePeriod('${p.id}')">Eliminar</button>
+      </div></td>
+    </tr>`).join(''):`<tr><td colspan="5"><div class="empty"><span class="empty-emoji">📅</span>No hay períodos.</div></td></tr>`;
+  }catch{A('periods-alert','error','Error al cargar períodos.')}
+}
+async function createPeriod(){
+  HA('mp-alert');
+  const name=$('mp-name').value.trim(),start=$('mp-start').value,end=$('mp-end').value;
+  const active=$('mp-active').value==='true';
+  if(!name){A('mp-alert','error','El nombre es obligatorio.');return}
+  busy('mp-btn',true,'Crear período');
+  try{
+    const API=getAPI();
+    const r=await safeFetch(`${API}/api/schools/periods/create`,{method:'POST',headers:authH(),
+      body:JSON.stringify({name,start_date:start,end_date:end,active,school_id:getSchool()})});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-period');$('mp-name').value='';loadPeriods();}
+    else A('mp-alert','error',d.error||'Error.');
+  }finally{busy('mp-btn',false,'Crear período')}
+}
+async function togglePeriodActive(id,active){
+  try{
+    await safeFetch(`${getAPI()}/api/schools/periods/update`,{method:'POST',headers:authH(),body:JSON.stringify({id,active})});
+    loadPeriods();
+  }catch{}
+}
+async function deletePeriod(id){
+  if(!confirm('¿Eliminar este período?'))return;
+  try{await safeFetch(`${getAPI()}/api/schools/periods/delete`,{method:'POST',headers:authH(),body:JSON.stringify({id})});loadPeriods()}catch{}
+}
+
+/* ══ CONFIG PAGE ══ */
+function setupConfig(){
+  $('topbar-actions').innerHTML='';
+  updateConfigDisplay();
+  const sid=getSchool(); if($('config-uuid-input')) $('config-uuid-input').value=sid||'';
+  const api=getAPI(); if($('config-api-input')) $('config-api-input').value=api===DEFAULT_API_URL?'':api;
+  HA('config-alert');HA('config-api-alert');HA('config-reg-alert');
+}
+
+/* ══ REGISTER USER (from config) ══ */
+async function registerUser(){
+  HA('config-reg-alert');
+  const u=$('creg-u').value.trim(),p=$('creg-p').value,role=$('creg-role').value;
+  const school=$('creg-school').value.trim()||getSchool();
+  if(!u||!p){A('config-reg-alert','error','Usuario y contraseña son obligatorios.');return}
+  if(p.length<6){A('config-reg-alert','error','Mínimo 6 caracteres.');return}
+  busy('creg-btn',true,'Crear usuario');
+  try{
+    const API=getAPI();
+    const r=await safeFetch(`${API}/api/register`,{method:'POST',headers:authH(),
+      body:JSON.stringify({username:u,password:p,role,school_id:school||null})});
+    const d=await r.json();
+    if(d.success||d._networkFallback){A('config-reg-alert','success',`Usuario "${u}" creado con rol ${role}.`);$('creg-u').value='';$('creg-p').value='';}
+    else A('config-reg-alert','error',d.error||'Error.');
+  }finally{busy('creg-btn',false,'Crear usuario')}
+}
+
+/* ══ MESSAGES ══ */
+async function loadInbox(){
+  $('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="openModal('modal-message')">✉ Nuevo</button>`;
+  HA('inbox-alert');$('inbox-detail').classList.add('hidden');
+  $('inbox-list').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/messages/inbox`,{headers:authH()});const list=await r.json();
+    const safeList=Array.isArray(list)?list:[];
+    const unread=safeList.filter(m=>!m.read).length;$('cnt-inbox').textContent=unread||safeList.length;
+    $('inbox-list').innerHTML=safeList.length?safeList.map(m=>`
+      <div class="msg-item ${!m.read?'unread':''}" onclick="openMessage('${m.id}','inbox')">
+        <div class="msg-dot"></div>
+        <div class="msg-from">${escH((m.from||'').replace(/@.*$/,''))}</div>
+        <div class="msg-subject">${escH(m.subject||'(sin asunto)')}</div>
+        <div class="msg-time">${tsRel(m.timestamp)}</div>
+      </div>`).join(''):`<div class="empty"><span class="empty-emoji">📭</span>Bandeja vacía.</div>`;
+  }catch{A('inbox-alert','error','Error al cargar.')}
+}
+async function openMessage(id,section){
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/messages/read?id=${id}`,{headers:authH()});const m=await r.json();
+    const det=$('inbox-detail');
+    det.innerHTML=`<div class="msg-detail-from">De: ${escH(m.from||'—')} · Para: ${escH(m.to||'—')} · ${tsRel(m.timestamp)}</div>
+      <div class="msg-detail-subject">${escH(m.subject||'(sin asunto)')}</div>
+      <div class="msg-detail-body">${escH(m.content||'')}</div>
+      <div style="margin-top:16px;display:flex;gap:8px">
+        <button class="btn btn-danger btn-sm" onclick="deleteMessage('${m.id}','${section}')">Eliminar</button>
+        <button class="btn btn-ghost btn-sm" onclick="$('inbox-detail').classList.add('hidden')">Cerrar</button>
+      </div>`;
+    det.classList.remove('hidden');det.scrollIntoView({behavior:'smooth',block:'start'});
+    if(section==='inbox') loadInbox();
+  }catch{}
+}
+async function deleteMessage(id,section){
+  if(!confirm('¿Eliminar este mensaje?'))return;
+  try{await safeFetch(`${getAPI()}/api/messages/delete`,{method:'POST',headers:authH(),body:JSON.stringify({id})});$('inbox-detail').classList.add('hidden');if(section==='inbox')loadInbox();else loadSent()}catch{}
+}
+async function loadSent(){
+  $('topbar-actions').innerHTML=`<button class="btn btn-primary" onclick="openModal('modal-message')">✉ Nuevo</button>`;
+  HA('sent-alert');
+  $('sent-list').innerHTML=`<div class="empty"><span class="spinner spinner-light"></span></div>`;
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/messages/sent`,{headers:authH()});const list=await r.json();
+    const safeList=Array.isArray(list)?list:[];
+    $('sent-list').innerHTML=safeList.length?safeList.map(m=>`
+      <div class="msg-item" onclick="openSentMsg('${m.id}')">
+        <div class="msg-dot" style="opacity:0"></div>
+        <div class="msg-from">→ ${escH(m.to||'—')}</div>
+        <div class="msg-subject">${escH(m.subject||'(sin asunto)')}</div>
+        <div class="msg-time">${tsRel(m.timestamp)}</div>
+      </div>`).join(''):`<div class="empty"><span class="empty-emoji">📤</span>No hay mensajes enviados.</div>`;
+  }catch{A('sent-alert','error','Error al cargar.')}
+}
+async function openSentMsg(id){
+  try{
+    const API=getAPI();
+    const r=await fetch(`${API}/api/messages/read?id=${id}`,{headers:authH()});const m=await r.json();
+    const det=$('inbox-detail');
+    det.innerHTML=`<div class="msg-detail-from">De: ${escH(m.from||'—')} · Para: ${escH(m.to||'—')} · ${tsRel(m.timestamp)}</div>
+      <div class="msg-detail-subject">${escH(m.subject||'(sin asunto)')}</div>
+      <div class="msg-detail-body">${escH(m.content||'')}</div>
+      <div style="margin-top:16px"><button class="btn btn-ghost btn-sm" onclick="$('inbox-detail').classList.add('hidden')">Cerrar</button></div>`;
+    det.classList.remove('hidden');
+  }catch{}
+}
+async function sendMessage(){
+  HA('mm-alert');
+  const to=$('mm-to').value.trim(),subject=$('mm-subject').value.trim(),content=$('mm-content').value.trim();
+  if(!to||!subject||!content){A('mm-alert','error','Completa todos los campos.');return}
+  busy('mm-btn',true,'Enviar');
+  try{
+    const API=getAPI();
+    const r=await safeFetch(`${API}/api/messages/send`,{method:'POST',headers:authH(),body:JSON.stringify({to,subject,content})});
+    const d=await r.json();
+    if(d.success||d._networkFallback){closeModal('modal-message');$('mm-to').value='';$('mm-subject').value='';$('mm-content').value='';navTo('sent');}
+    else A('mm-alert','error',d.error||'Error.');
+  }finally{busy('mm-btn',false,'Enviar')}
+}
+
+/* ══ MODALS ══ */
+function openModal(id){$(id)?.classList.remove('hidden')}
+function closeModal(id){$(id)?.classList.add('hidden')}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o)o.classList.add('hidden')})
+});
+
+/* ══ SIDEBAR MOBILE ══ */
+function toggleSidebar(){$('sidebar').classList.toggle('open');$('mob-overlay').classList.toggle('open')}
+function closeSidebar(){$('sidebar').classList.remove('open');$('mob-overlay').classList.remove('open')}
+function checkMobile(){const b=$('mob-btn');if(b)b.style.display=window.innerWidth<=768?'flex':'none'}
+window.addEventListener('resize',checkMobile);checkMobile();
+
+/* ══ KEYBOARD ══ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m=>m.classList.add('hidden'));
+  if(e.key==='Enter'){
+    const av=document.querySelector('.view.active');if(!av)return;
+    if(av.id==='view-login') doLogin();
+  }
+});
+
+/* ══ INIT ══ */
+(function(){
+  updateLoginSchoolDisplay();
+  if(getT()) showView('dashboard'); else showView('login');
+})();
+</script>
+</body>
+</html>

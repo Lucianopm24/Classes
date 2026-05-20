@@ -324,7 +324,7 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
       <h2>Bienvenido de vuelta.</h2><p class="lead">Inicia sesión para continuar.</p>
       <div class="school-config-bar">
         <span class="sc-label">🏫 Colegio:</span>
-        <span class="sc-id" id="login-school-display">Peluchelandia School</span>
+        <span class="sc-id" id="login-school-display">…</span>
         <button class="btn btn-outline btn-xs" onclick="openModal('modal-config')">Cambiar</button>
       </div>
       <div id="login-alert" class="hidden"></div>
@@ -538,13 +538,14 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
         <div id="page-config" class="hidden">
           <div class="page-head"><div class="page-head-left"><div class="eyebrow">sistema</div><h2>Configuración</h2><p>Ajustes del cliente Wobe Classes.</p></div></div>
           <div class="config-section">
-            <h3>🏫 Cambiar del Colegio</h3>
-            <p>Identifica a qué colegio se conecta este cliente. Todos los datos (materias, estudiantes, notas, etc.) están aislados por colegio.</p>
-            <div class="config-uuid-display" id="config-uuid-display">Peluchelandia School</div>
-            <div class="field" style="margin-bottom:10px"><label>Nuevo UUID</label><input id="config-uuid-input" type="text" placeholder="ej. a1b2c3d4-e5f6-7890-abcd-ef1234567890" style="font-family:var(--mono);font-size:13px"/></div>
+            <h3>🏫 Colegio</h3>
+            <p>Identifica a qué colegio se conecta este cliente. El nombre es solo visual; el UUID es el que el backend usa para aislar los datos.</p>
+            <div class="config-uuid-display" id="config-uuid-display">…</div>
+            <div class="field" style="margin-bottom:10px"><label>UUID del colegio</label><input id="config-uuid-input" type="text" placeholder="ej. a1b2c3d4-e5f6-7890-abcd-ef1234567890" style="font-family:var(--mono);font-size:13px"/></div>
+            <div class="field" style="margin-bottom:10px"><label>Nombre del colegio</label><input id="config-name-input" type="text" placeholder="ej. Peluchelandia School"/></div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn btn-primary" onclick="saveSchoolUUID()">Guardar UUID</button>
-              <button class="btn btn-outline" onclick="clearSchoolUUID()">Continuar en Peluchelandia School</button>
+              <button class="btn btn-primary" onclick="saveSchoolUUID()">Guardar</button>
+              <button class="btn btn-outline" onclick="clearSchoolUUID()">Usar nombre por defecto</button>
             </div>
             <div id="config-alert" class="hidden" style="margin-top:12px"></div>
           </div>
@@ -607,9 +608,10 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
   <div class="modal-body">
     <div class="alert alert-info" style="margin-bottom:14px">El UUID del colegio identifica a qué institución pertenecen los datos. Solicítalo a tu administrador o entra al panel principal de Classes y elige tu colegio en classes.wobe.qzz.io</div>
     <div class="field"><label>UUID del Colegio</label><input id="mc-uuid" type="text" placeholder="ej. a1b2c3d4-e5f6-7890-abcd-ef1234567890" style="font-family:var(--mono);font-size:13px"/></div>
+    <div class="field"><label>Nombre visible del colegio</label><input id="mc-name" type="text" placeholder="ej. Peluchelandia School"/></div>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-outline" onclick="clearSchoolUUIDFromModal()">Continuar en Peluchelandia School</button>
+    <button class="btn btn-outline" onclick="clearSchoolUUIDFromModal()">Usar nombre por defecto</button>
     <button class="btn btn-primary" onclick="saveSchoolUUIDFromModal()">Guardar</button>
   </div></div>
 </div>
@@ -774,31 +776,34 @@ tbody tr:hover td{background:rgba(14,15,18,.018)}
    Cambia estos valores directamente en el código,
    o usa la pantalla de Configuración en el dashboard.
 */
-const DEFAULT_API_URL  = 'https://classes-backend.vercel.app';
-const DEFAULT_SCHOOL_ID = null; // null = admin global (sin colegio), o pon un UUID aquí
+const DEFAULT_API_URL   = 'https://classes-backend.vercel.app';
+const DEFAULT_SCHOOL_ID = null;   // null = admin global, o pon un UUID aquí
+const DEFAULT_SCHOOL_NAME = 'Peluchelandia School'; // cambia esto o ajústalo desde Configuración
 /* ════════════════════════════════════════════════ */
 
 const TK = 'wobe_token';
 const UK = 'wobe_user';
 const SK = 'wobe_school_id';
 const AK = 'wobe_api_url';
+const NK = 'wobe_school_name'; // localStorage key for school name
 
 /* ── Getters de configuración ── */
-const getAPI    = ()  => localStorage.getItem(AK) || DEFAULT_API_URL;
-const getSchool = ()  => { const s=localStorage.getItem(SK); return s==='null'?null:(s||DEFAULT_SCHOOL_ID); };
-const getT      = ()  => localStorage.getItem(TK);
-const setT      = t   => localStorage.setItem(TK, t);
-const clearT    = ()  => localStorage.removeItem(TK);
-const getU      = ()  => { try{return JSON.parse(localStorage.getItem(UK))}catch{return null} };
-const setU      = u   => localStorage.setItem(UK, JSON.stringify(u));
-const clearU    = ()  => localStorage.removeItem(UK);
+const getAPI      = ()  => localStorage.getItem(AK) || DEFAULT_API_URL;
+const getSchool   = ()  => { const s=localStorage.getItem(SK); return s==='null'?null:(s||DEFAULT_SCHOOL_ID); };
+const getSchoolName = () => localStorage.getItem(NK) || DEFAULT_SCHOOL_NAME;
+const getT        = ()  => localStorage.getItem(TK);
+const setT        = t   => localStorage.setItem(TK, t);
+const clearT      = ()  => localStorage.removeItem(TK);
+const getU        = ()  => { try{return JSON.parse(localStorage.getItem(UK))}catch{return null} };
+const setU        = u   => localStorage.setItem(UK, JSON.stringify(u));
+const clearU      = ()  => localStorage.removeItem(UK);
 
 /* ── Roles ── */
-const getRole   = () => getU()?.role || 'student';
-const isAdmin   = () => getRole() === 'admin';
-const isDirector= () => ['admin','director'].includes(getRole());
-const isTeacher = () => ['admin','director','teacher'].includes(getRole());
-const myUsername= () => getU()?.username || '';
+const getRole    = () => getU()?.role || 'student';
+const isAdmin    = () => getRole() === 'admin';
+const isDirector = () => ['admin','director'].includes(getRole());
+const isTeacher  = () => ['admin','director','teacher'].includes(getRole());
+const myUsername = () => getU()?.username || '';
 
 function authH(){ return {'Content-Type':'application/json','Authorization':`Bearer ${getT()}`} }
 
@@ -821,36 +826,48 @@ async function safeFetch(url, options){
   }
 }
 
-/* ══ SCHOOL UUID CONFIG ══ */
+/* ══ SCHOOL CONFIG ══ */
 function updateLoginSchoolDisplay(){
   const sid=getSchool();
   const el=$('login-school-display');
-  if(el) el.textContent=sid?`${sid.substring(0,8)}…`:'Peluchelandia School';
+  if(el) el.textContent=sid?`${sid.substring(0,8)}… · ${getSchoolName()}`:getSchoolName();
 }
 
 function saveSchoolUUIDFromModal(){
   const val=$('mc-uuid').value.trim();
+  const name=$('mc-name').value.trim();
   localStorage.setItem(SK, val||'null');
+  if(name) localStorage.setItem(NK, name);
+  else localStorage.removeItem(NK);
   closeModal('modal-config');
   updateLoginSchoolDisplay();
 }
 function clearSchoolUUIDFromModal(){
   localStorage.setItem(SK,'null');
+  localStorage.removeItem(NK);
   $('mc-uuid').value='';
+  if($('mc-name')) $('mc-name').value='';
   closeModal('modal-config');
   updateLoginSchoolDisplay();
 }
 function saveSchoolUUID(){
   const val=$('config-uuid-input').value.trim();
+  const name=$('config-name-input').value.trim();
   localStorage.setItem(SK, val||'null');
+  if(name) localStorage.setItem(NK, name);
+  else localStorage.removeItem(NK);
   updateConfigDisplay();
-  A('config-alert','success','Colegio cambiado con exito.');
+  updateLoginSchoolDisplay();
+  A('config-alert','success',`Nombre guardado: ${getSchoolName()}.`);
 }
 function clearSchoolUUID(){
   localStorage.setItem(SK,'null');
+  localStorage.removeItem(NK);
   $('config-uuid-input').value='';
+  if($('config-name-input')) $('config-name-input').value='';
   updateConfigDisplay();
-  A('config-alert','warn','Estas procediendo en el colegio Peluchelandia School.');
+  updateLoginSchoolDisplay();
+  A('config-alert','warn',`Usando el nombre por defecto: ${getSchoolName()}.`);
 }
 function saveApiUrl(){
   const val=$('config-api-input').value.trim();
@@ -859,7 +876,8 @@ function saveApiUrl(){
   A('config-api-alert','success','URL guardada.');
 }
 function updateConfigDisplay(){
-  const el=$('config-uuid-display'); if(el) el.textContent=getSchool()||'null (admin global)';
+  const el=$('config-uuid-display');
+  if(el) el.textContent=`${getSchool()||'(sin UUID)'} · ${getSchoolName()}`;
   const el2=$('config-api-display'); if(el2) el2.textContent=getAPI();
   const inp=$('config-uuid-input'); if(inp&&!inp.value) inp.placeholder=getSchool()||'(vacío = admin global)';
   const inp2=$('config-api-input'); if(inp2&&!inp2.value) inp2.placeholder=getAPI();
@@ -886,21 +904,18 @@ async function refreshCache(){
 }
 
 function populateAllSelects(){
-  // Subject selects (by id)
   ['gf-subject','att-filter-subject','ma-subject'].forEach(id=>{
     const el=$(id); if(!el)return;
     const cur=el.value; const base=el.options[0]?.text||'';
     el.innerHTML=`<option value="">${base}</option>`+_subjects.map(s=>`<option value="${escH(s.id)}">${escH(s.name)}</option>`).join('');
     if(cur) el.value=cur;
   });
-  // Period selects
   ['gf-period','ms-period'].forEach(id=>{
     const el=$(id); if(!el)return;
     const cur=el.value; const base=el.options[0]?.text||'';
     el.innerHTML=`<option value="">${base}</option>`+_periods.map(p=>`<option value="${escH(p.id)}">${escH(p.name)}${p.active?'':' (inactivo)'}</option>`).join('');
     if(cur) el.value=cur;
   });
-  // Student selects (admin/director/teacher)
   if(isTeacher()){
     ['att-filter-student','ma-student','mr-student','rep-filter-student'].forEach(id=>{
       const el=$(id); if(!el)return;
@@ -959,7 +974,6 @@ function renderSidebar(user){
   const roleLabels={admin:'⚡ Admin',director:'🏫 Director',teacher:'📖 Docente',student:'Estudiante'};
   $('sb-role').textContent=roleLabels[role]||role;
 
-  // Nav visibility by role
   const teacherItems=['nav-students','nav-submissions','nav-reports'];
   const directorItems=['nav-users','nav-periods'];
   const adminItems=['nav-schools'];
@@ -1012,7 +1026,7 @@ async function loadHome(){
   const user=getU();
   if(user){
     $('welcome-name').textContent=user.username;
-    $('welcome-sub').textContent=`Rol: ${user.role} · Colegio: ${user.school_id||'admin global'}`;
+    $('welcome-sub').textContent=`Rol: ${user.role} · ${getSchoolName()}`;
     const roleLabels={admin:'⚡ Admin',director:'🏫 Director',teacher:'📖 Docente',student:'Estudiante'};
     $('welcome-badge').textContent=roleLabels[user.role]||user.role;
   }
@@ -1866,6 +1880,7 @@ function setupConfig(){
   $('topbar-actions').innerHTML='';
   updateConfigDisplay();
   const sid=getSchool(); if($('config-uuid-input')) $('config-uuid-input').value=sid||'';
+  const sname=localStorage.getItem(NK)||''; if($('config-name-input')) $('config-name-input').value=sname;
   const api=getAPI(); if($('config-api-input')) $('config-api-input').value=api===DEFAULT_API_URL?'':api;
   HA('config-alert');HA('config-api-alert');HA('config-reg-alert');
 }

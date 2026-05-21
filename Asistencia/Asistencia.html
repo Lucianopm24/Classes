@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academia | Control de Asistencia</title>
+    <title>Wobe Classes | Asistencia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -110,11 +110,10 @@
             subjects: [],
             records: {}, // studentUsername: status
             selectedDate: "",
-            selectedSubject: ""
+            selectedSubjectId: "" // Actualizado para usar ID
         };
 
         async function init() {
-            // Establecer fecha de hoy por defecto
             document.getElementById('attendance-date').valueAsDate = new Date();
             
             if (!state.token) {
@@ -143,9 +142,10 @@
 
         async function fetchBaseData() {
             try {
+                const headers = { 'Authorization': `Bearer ${state.token}` };
                 const [studentsRes, subjectsRes] = await Promise.all([
-                    fetch(`${API_BASE}/api/classes/students`),
-                    fetch(`${API_BASE}/api/classes/subjects`)
+                    fetch(`${API_BASE}/api/classes/students`, { headers }),
+                    fetch(`${API_BASE}/api/classes/subjects`, { headers })
                 ]);
                 
                 state.students = await studentsRes.json();
@@ -154,7 +154,7 @@
                 const subSelect = document.getElementById('subject-select');
                 subSelect.innerHTML = '<option value="">Selecciona materia...</option>';
                 state.subjects.forEach(s => {
-                    subSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+                    subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`; // Usando s.id
                 });
 
             } catch (e) {
@@ -163,16 +163,16 @@
         }
 
         function loadAttendanceSession() {
-            const sub = document.getElementById('subject-select').value;
+            const subId = document.getElementById('subject-select').value;
             const date = document.getElementById('attendance-date').value;
 
-            if (!sub || !date) {
+            if (!subId || !date) {
                 return notify("Selecciona materia y fecha", true);
             }
 
-            state.selectedSubject = sub;
+            state.selectedSubjectId = subId;
             state.selectedDate = date;
-            state.records = {}; // Reset records for new session
+            state.records = {}; 
 
             document.getElementById('empty-state').classList.add('hidden');
             document.getElementById('attendance-area').classList.remove('hidden');
@@ -185,7 +185,6 @@
             container.innerHTML = "";
 
             state.students.forEach(student => {
-                // Por defecto, todos están presentes (valor inicial sugerido)
                 if (!state.records[student.username]) {
                     state.records[student.username] = 'present';
                 }
@@ -221,7 +220,6 @@
         function setStatus(username, status) {
             state.records[username] = status;
             
-            // Actualizar UI del card específico
             const buttons = ['present', 'late', 'absent'];
             buttons.forEach(b => {
                 const btn = document.getElementById(`btn-${username}-${b}`);
@@ -247,7 +245,7 @@
                         },
                         body: JSON.stringify({
                             student: student,
-                            subject: state.selectedSubject,
+                            subject_id: state.selectedSubjectId, // Actualizado a subject_id
                             date: state.selectedDate,
                             status: status
                         })
@@ -257,7 +255,6 @@
                 await Promise.all(promises);
                 notify("Asistencia guardada exitosamente");
                 
-                // Efecto visual de éxito
                 btn.className = "px-10 py-5 bg-emerald-500 text-white rounded-3xl font-black text-lg shadow-2xl flex items-center gap-3";
                 btn.innerHTML = '<i class="fas fa-check-circle"></i> ¡Datos Registrados!';
                 

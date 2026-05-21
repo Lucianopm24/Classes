@@ -170,12 +170,11 @@
         let state = {
             token: localStorage.getItem('gm_token'),
             user: null,
-            currentSubject: "",
+            currentSubjectId: "", // Cambiado a ID
             currentStudent: "",
             gradesList: []
         };
 
-        // UI Helpers
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
             const msg = document.getElementById('toast-message');
@@ -202,7 +201,7 @@
                 const response = await fetch(`${API_BASE}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: user, password: pass })
+                    body: JSON.stringify({ username: user, password: pass, school_id: null }) // Enviando school_id null
                 });
                 const data = await response.json();
 
@@ -243,19 +242,23 @@
 
         async function fetchSubjects() {
             try {
-                const res = await fetch(`${API_BASE}/api/classes/subjects`);
+                const res = await fetch(`${API_BASE}/api/classes/subjects`, {
+                    headers: { 'Authorization': `Bearer ${state.token}` } // Añadido Auth
+                });
                 const data = await res.json();
                 const sel = document.getElementById('subject-filter');
                 sel.innerHTML = '<option value="">Elige Materia</option>';
                 data.forEach(s => {
-                    sel.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+                    sel.innerHTML += `<option value="${s.id}">${s.name}</option>`; // Usando s.id
                 });
             } catch (e) { showToast("Error cargando materias", true); }
         }
 
         async function fetchStudents() {
             try {
-                const res = await fetch(`${API_BASE}/api/classes/students`);
+                const res = await fetch(`${API_BASE}/api/classes/students`, {
+                    headers: { 'Authorization': `Bearer ${state.token}` } // Añadido Auth
+                });
                 const data = await res.json();
                 const sel = document.getElementById('student-filter');
                 sel.innerHTML = '<option value="">Elige Estudiante</option>';
@@ -266,19 +269,22 @@
         }
 
         async function fetchGrades() {
-            const subject = document.getElementById('subject-filter').value;
+            const subjectId = document.getElementById('subject-filter').value;
             const student = document.getElementById('student-filter').value;
 
-            if (!subject || !student) {
+            if (!subjectId || !student) {
                 document.getElementById('stats-panel').classList.add('hidden');
                 return;
             }
 
-            state.currentSubject = subject;
+            state.currentSubjectId = subjectId;
             state.currentStudent = student;
 
             try {
-                const res = await fetch(`${API_BASE}/api/classes/grades?student=${student}&subject=${subject}`);
+                // Usando subject_id en vez de subject y añadiendo Auth
+                const res = await fetch(`${API_BASE}/api/classes/grades?student=${student}&subject_id=${subjectId}`, {
+                    headers: { 'Authorization': `Bearer ${state.token}` } 
+                });
                 const data = await res.json();
                 renderGrades(data);
             } catch (e) { showToast("Error al obtener notas", true); }
@@ -291,7 +297,6 @@
             list.innerHTML = "";
             stats.classList.remove('hidden');
 
-            // Actualizar Stats
             document.getElementById('stat-avg').innerText = data.average;
             const statusCard = document.getElementById('stat-status-card');
             const statusText = document.getElementById('stat-status');
@@ -334,7 +339,7 @@
         }
 
         function openModal(mode, grade = null) {
-            if (!state.currentSubject || !state.currentStudent) {
+            if (!state.currentSubjectId || !state.currentStudent) {
                 return showToast("Selecciona primero Materia y Estudiante", true);
             }
 
@@ -342,7 +347,6 @@
             const label = document.getElementById('modal-label');
             const submitBtn = document.getElementById('modal-submit');
             
-            // Reset fields
             document.getElementById('grade-id').value = grade ? grade.id : "";
             document.getElementById('field-title').value = grade ? grade.title : "";
             document.getElementById('field-score').value = grade ? grade.score : "";
@@ -365,7 +369,7 @@
                 score: parseFloat(document.getElementById('field-score').value),
                 weight: parseFloat(document.getElementById('field-weight').value),
                 student: state.currentStudent,
-                subject: state.currentSubject
+                subject_id: state.currentSubjectId // Usando subject_id
             };
 
             if (!payload.title || isNaN(payload.score) || isNaN(payload.weight)) {
@@ -380,7 +384,7 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${state.token}` // Importante para edit-grade
+                        'Authorization': `Bearer ${state.token}`
                     },
                     body: JSON.stringify(payload)
                 });
@@ -402,7 +406,10 @@
             try {
                 const res = await fetch(`${API_BASE}/api/classes/delete-grade`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.token}` // Añadido Auth
+                    },
                     body: JSON.stringify({ id })
                 });
                 const data = await res.json();
@@ -418,7 +425,6 @@
 
         window.onload = () => {
             if (state.token) {
-                // En una app real verificaríamos con /api/me
                 initDashboard();
             }
         };

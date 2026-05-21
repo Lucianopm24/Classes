@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academia | Historial de Asistencia</title>
+    <title>Wobe Classes Asistencias</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -149,9 +149,10 @@
 
         async function fetchFiltersData() {
             try {
+                const headers = { 'Authorization': `Bearer ${state.token}` };
                 const [studs, subs] = await Promise.all([
-                    fetch(`${API_BASE}/api/classes/students`),
-                    fetch(`${API_BASE}/api/classes/subjects`)
+                    fetch(`${API_BASE}/api/classes/students`, { headers }),
+                    fetch(`${API_BASE}/api/classes/subjects`, { headers })
                 ]);
                 const students = await studs.json();
                 const subjects = await subs.json();
@@ -160,13 +161,13 @@
                 const subSelect = document.getElementById('filter-subject');
 
                 students.forEach(s => studSelect.innerHTML += `<option value="${s.username}">${s.username}</option>`);
-                subjects.forEach(s => subSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`);
+                subjects.forEach(s => subSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`); // Usando s.id
             } catch (e) { console.error(e); }
         }
 
         async function fetchAttendanceRecords() {
             const student = document.getElementById('filter-student').value;
-            const subject = document.getElementById('filter-subject').value;
+            const subjectId = document.getElementById('filter-subject').value;
             const spinner = document.getElementById('loading-spinner');
             
             spinner.classList.remove('hidden');
@@ -174,9 +175,11 @@
             try {
                 let url = `${API_BASE}/api/classes/attendance?`;
                 if (student) url += `student=${student}&`;
-                if (subject) url += `subject=${subject}`;
+                if (subjectId) url += `subject_id=${subjectId}`; // Actualizado a subject_id
 
-                const res = await fetch(url);
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${state.token}` }
+                });
                 state.allRecords = await res.json();
                 
                 renderTable();
@@ -238,7 +241,6 @@
             const lates = state.allRecords.filter(r => r.status === 'late').length;
             const absents = state.allRecords.filter(r => r.status === 'absent').length;
 
-            // La asistencia efectiva se cuenta como Presente + Tarde
             const effectivePresence = presents + lates;
             const percent = ((effectivePresence / total) * 100).toFixed(0);
 
